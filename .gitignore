@@ -1,0 +1,32 @@
+# OS files
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.venv/
+.env
+.env.*
+
+# Local data & caches
+chroma_db/
+.cache/
+.huggingface/
+.nltk_data/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Secrets
+api_keys.py
+
+# Streamlit
+.streamlit/
+
+# VSCode/IDE
+.vscode/
+.idea/
+
