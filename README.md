@@ -1,288 +1,177 @@
-# 🚀 Proposed RAG System - Complete Implementation
-
-## Overview
-
-This is the complete implementation of the proposed RAG system configuration:
-- **Retriever**: BM25 + all-MiniLM-L6-v2 + RRF (Reciprocal Rank Fusion)
-- **Reranker**: MiniLM cross-encoder on top-20 documents
-- **Generation**: Extractive with citations + optional polish
-
-## 🏗️ System Architecture
-
-```
-Query → BM25 Retrieval → RRF Fusion → Cross-encoder Reranking → Extractive Generation → Answer
-       ↓                ↓            ↓                        ↓
-   Dense Retrieval → Combined → Filtered Results → Citations
-```
-
-### Components
-
-1. **BM25 Retrieval** (`bm25_retriever.py`)
-   - Keyword-based search using BM25 algorithm
-   - Handles exact term matching and frequency weighting
-   - Fast retrieval for specific terms
-
-2. **RRF Fusion** (`rrf_fusion.py`)
-   - Combines BM25 and dense retrieval results
-   - Uses Reciprocal Rank Fusion algorithm
-   - Balances keyword and semantic search
-
-3. **Cross-encoder Reranker** (`cross_encoder_reranker.py`)
-   - Reranks top-20 documents using cross-attention
-   - Significantly improves precision@1
-   - Uses MiniLM cross-encoder model
-
-4. **Extractive Generator** (`extractive_generator.py`)
-   - Generates answers by extracting relevant sentences
-   - Provides precise citations and source attribution
-   - No hallucination risk
-
-5. **Main System** (`proposed_rag_system.py`)
-   - Orchestrates all components
-   - Handles document ingestion and query processing
-   - Provides performance metrics and statistics
-
-## 📊 Performance Results
-
-Based on testing with pet care documents:
-
-| Metric | Current System | Proposed System | Improvement |
-|--------|----------------|-----------------|-------------|
-| **Precision@1** | 0.750 | 0.880 | +17.3% |
-| **Citation Quality** | 0.650 | 0.920 | +41.5% |
-| **Response Time** | 800ms | 260ms | +67% faster |
-| **Cost per Query** | $0.002 | $0.0005 | -75% |
-| **Average Confidence** | 0.780 | 0.875 | +12.2% |
-
-## 🚀 Quick Start
-
-### 1. Install Dependencies
-
-```bash
-pip install rank-bm25 nltk sentence-transformers
-```
-
-### 2. Run the Test
-
-```bash
-python test_proposed_system.py
-```
-
-### 3. Launch Web Interface
-
-```bash
-streamlit run proposed_app.py
-```
-
-### 4. Use in Python
-
-```python
-from proposed_rag_system import ProposedRAGManager
-
-# Initialize system
-rag = ProposedRAGManager()
-
-# Add documents
-rag.add_directory("documents")
-
-# Ask questions
-response = rag.ask("What should I feed my cat?")
-print(f"Answer: {response['answer']}")
-print(f"Confidence: {response['confidence']:.3f}")
-```
-
-## 📁 File Structure
-
-```
-PLP RAG/
-├── bm25_retriever.py          # BM25 retrieval system
-├── rrf_fusion.py              # Reciprocal Rank Fusion
-├── cross_encoder_reranker.py  # Cross-encoder reranking
-├── extractive_generator.py    # Extractive answer generation
-├── proposed_rag_system.py     # Main system integration
-├── proposed_app.py            # Streamlit web interface
-├── test_proposed_system.py    # Test script
-├── rag_config_comparison.py   # Configuration comparison
-├── proposed_system_demo.py    # Demo implementation
-├── implementation_guide.md    # Detailed implementation guide
-└── PROPOSED_SYSTEM_README.md  # This file
-```
-
-## 🔧 Configuration Options
-
-### Query Parameters
-
-```python
-response = rag.ask(
-    question="What should I feed my cat?",
-    use_reranking=True,        # Enable cross-encoder reranking
-    rerank_threshold=0.5,      # Minimum score threshold
-    max_rerank=20              # Max documents to rerank
-)
-```
-
-### System Parameters
-
-```python
-# Initialize with custom settings
-rag = ProposedRAGManager(
-    collection_name="my_documents",
-    use_openai=False  # Use SentenceTransformer instead
-)
-```
-
-## 📈 Performance Monitoring
-
-The system provides detailed performance metrics:
-
-```python
-stats = rag.get_stats()
-print(f"Total queries: {stats['total_queries']}")
-print(f"Average confidence: {stats['avg_confidence']:.3f}")
-print(f"Average response time: {stats['avg_response_time']:.1f}ms")
-```
-
-## 🎯 Key Features
-
-### 1. Hybrid Retrieval
-- Combines keyword (BM25) and semantic (dense) search
-- Better recall for diverse query types
-- Robust fusion using RRF algorithm
-
-### 2. Precision Reranking
-- Cross-encoder reranking improves precision@1 by ~17%
-- Filters out irrelevant documents
-- Configurable threshold for quality control
-
-### 3. Extractive Generation
-- No hallucination risk
-- Precise source attribution
-- Clear citations with relevance scores
-
-### 4. Cost Efficiency
-- 75% reduction in API costs
-- No ongoing OpenAI charges for generation
-- Local processing for most operations
-
-### 5. Performance Optimization
-- Average 260ms response time
-- Efficient batch processing
-- Caching and optimization strategies
-
-## 🔍 Example Queries
-
-The system excels at pet care questions:
-
-- **"What should I feed my cat?"** → Detailed nutrition advice with citations
-- **"How often should I take my dog to the vet?"** → Veterinary care recommendations
-- **"What are the signs of a healthy pet?"** → Health indicators and monitoring
-- **"How do I care for a rabbit?"** → Species-specific care instructions
-- **"What vaccinations does my dog need?"** → Vaccination schedules and requirements
-
-## 🛠️ Advanced Usage
-
-### Custom Document Processing
-
-```python
-# Add specific files
-rag.add_documents(["path/to/file1.txt", "path/to/file2.pdf"])
-
-# Add entire directory
-rag.add_directory("path/to/documents")
-```
-
-### Performance Tuning
-
-```python
-# Adjust RRF parameters
-from rrf_fusion import RRFFusion
-rrf = RRFFusion(k=60)  # Higher k = more weight to top results
-
-# Adjust reranking threshold
-response = rag.ask(question, rerank_threshold=0.7)  # Stricter filtering
-```
-
-### Batch Processing
-
-```python
-questions = ["Question 1", "Question 2", "Question 3"]
-responses = []
-
-for question in questions:
-    response = rag.ask(question)
-    responses.append(response)
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Cross-encoder not loading**
-   - Install sentence-transformers: `pip install sentence-transformers`
-   - System will fall back to mock reranking
-
-2. **BM25 indexing errors**
-   - Install NLTK: `pip install nltk`
-   - System will use simple tokenization as fallback
-
-3. **Memory issues**
-   - Reduce max_rerank parameter
-   - Use smaller batch sizes for processing
-
-### Performance Issues
-
-1. **Slow response times**
-   - Disable reranking for faster responses
-   - Reduce max_rerank parameter
-   - Use GPU acceleration if available
-
-2. **Low confidence scores**
-   - Lower rerank_threshold
-   - Check document quality and relevance
-   - Ensure proper document ingestion
-
-## 📚 Technical Details
-
-### BM25 Algorithm
-- Uses TF-IDF weighting with length normalization
-- Handles exact keyword matching
-- Fast retrieval for specific terms
-
-### RRF Fusion
-- Combines rankings from multiple retrievers
-- Formula: `score = 1 / (k + rank)`
-- Balances different retrieval methods
-
-### Cross-encoder Reranking
-- Uses cross-attention between query and document
-- MiniLM model for efficiency
-- Significant precision improvement
-
-### Extractive Generation
-- Sentence-level relevance scoring
-- Source attribution and citations
-- Confidence calculation based on multiple factors
-
-## 🎉 Conclusion
-
-The proposed RAG system successfully implements the advanced configuration with:
-
-- ✅ **17% improvement in precision**
-- ✅ **75% reduction in costs**
-- ✅ **42% better citation quality**
-- ✅ **67% faster response times**
-- ✅ **Zero hallucination risk**
-
-This makes it ideal for production pet care applications where accuracy, cost-efficiency, and source attribution are critical.
-
-## 📞 Support
-
-For questions or issues:
-1. Check the troubleshooting section
-2. Review the implementation guide
-3. Run the test script to validate setup
-4. Check system logs for detailed error information
+## 🚀 PLP RAG – Pet Care Retrieval-Augmented Generation
+
+RAG system for pet care Q&A with hybrid retrieval, reranking, and LLM/baseline answer generation. Includes a Streamlit app and a simple CLI test runner.
+
+### Key Components
+- **Retrieval**: BM25 + dense embeddings (all‑MiniLM‑L6‑v2) fused via RRF
+- **Reranking**: Cross‑encoder MiniLM on top‑k results
+- **Answer Generation**: `free_llm_generator.py` with providers (Groq, DeepSeek) and a basic fallback
+- **Vector Store**: ChromaDB via LangChain
+
+### Current Repo Highlights
+- Dedup ingestion: PDF files are skipped when a same‑name `.txt` exists
+- Chunking tuned for markdown: larger chunks with overlap
+- Batch add to Chroma to avoid “batch size exceeds maximum”
+- Simple test runner `test_questions.py` to try questions quickly
 
 ---
 
-**🐾 Built with ❤️ for better pet care information retrieval**
+## 📦 Setup
+
+### 1) Create and activate venv
+```bash
+cd "/Users/dotsnoise/PLP RAG"
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 2) Install dependencies
+Use the pinned versions in `requirements.txt` (these were validated together):
+```bash
+pip install -r requirements.txt
+```
+
+If you hit transformer/Hub compatibility issues, ensure versions align with:
+- numpy 1.24.x, torch 2.1.x, transformers 4.36.x, sentence-transformers 2.2.2, huggingface_hub 0.19.4
+
+### 3) Environment variables (recommended)
+Do not commit API keys. Export them locally:
+```bash
+export GROQ_API_KEY="..."
+export DEEPSEEK_API_KEY="..."
+```
+
+The system automatically prefers Groq → DeepSeek → basic fallback.
+
+---
+
+## ▶️ Usage
+
+### A) Streamlit app
+```bash
+source .venv/bin/activate
+streamlit run proposed_app.py --server.port 8501
+```
+
+### B) Python API
+```python
+from proposed_rag_system import ProposedRAGManager
+
+rag = ProposedRAGManager(collection_name="proposed_rag_documents", use_openai=False)
+rag.add_directory("documents")
+result = rag.ask("What can I feed my cat?")
+print(result["answer"])   # final answer
+print(result["confidence"])  # float 0..1
+print(result["sources"])  # list of source dicts
+```
+
+### C) Simple test runner
+Edit questions in `test_questions.py`:
+```python
+questions = [
+    "What can I feed my dog?",
+    "What vaccines does my kitten need?",
+]
+```
+Run it:
+```bash
+source .venv/bin/activate
+python test_questions.py
+```
+
+---
+
+## 🧠 How It Works
+
+High‑level flow:
+```
+User Question
+  → BM25 and Dense Retrieval
+  → RRF Fusion of results
+  → Cross‑encoder Reranking
+  → FreeLLM/Basic generation with citations
+  → Final Answer
+```
+
+### Retrieval
+- `bm25_retriever.py`: BM25 with NLTK tokenization and stopwords
+- `vector_store.py`: LangChain + Chroma vector store (all‑MiniLM‑L6‑v2)
+- `rrf_fusion.py`: Reciprocal Rank Fusion to merge BM25 + dense
+
+### Reranking
+- `cross_encoder_reranker.py`: `cross-encoder/ms-marco-MiniLM-L-6-v2` reranks top results, thresholded
+
+### Generation
+- `free_llm_generator.py`: providers (Groq, DeepSeek, Hugging Face) with robust fallback to a basic extractive summary
+
+### Ingestion
+- `proposed_rag_system.py` → `ingest_directory` collects supported files and skips `.pdf` when same‑name `.txt` exists
+- `document_processor.py` uses a markdown‑friendly splitter and larger chunk sizes with overlap
+
+---
+
+## 📁 Repository Structure
+```
+bm25_retriever.py
+cross_encoder_reranker.py
+document_processor.py
+free_llm_generator.py
+proposed_app.py
+proposed_rag_system.py
+rrf_fusion.py
+test_questions.py
+vector_store.py
+documents/  # your corpus (txt, md, etc.)
+```
+
+Notes:
+- Local artifacts like `.venv/` and `chroma_db/` are ignored and should not be committed
+- PDF ingestion is supported but will be skipped if a `.txt` with the same basename exists
+
+---
+
+## ⚙️ Configuration
+
+`config.py` and in‑code defaults control:
+- Chunk size/overlap
+- RRF fusion parameter `k`
+- Reranker threshold and `max_rerank`
+
+You can pass parameters via `ProposedRAGManager.ask(question, use_reranking=True, rerank_threshold=0.1, max_rerank=20)`.
+
+---
+
+## 🧪 Evaluation (optional)
+
+For quick sanity checks, rely on:
+- Confidence score in results
+- Source list and answer preview in `test_questions.py`
+
+BLEU/ROUGE are available but often under‑reflect RAG answer utility (due to free‑form, contextual responses).
+
+---
+
+## 🛠️ Troubleshooting
+
+- Missing packages: activate venv then `pip install -r requirements.txt`
+- SentenceTransformers import failures: ensure compatible `huggingface_hub==0.19.4`
+- Chroma schema errors: delete `chroma_db/` to re‑initialize
+- Large batch errors: document adds are already batched in `vector_store.py`
+- NLTK tokenizer warnings: install/download required data (e.g., `punkt`)
+
+---
+
+## 🔒 Security & Git Hygiene
+
+- Do not commit secrets. Keep `api_keys.py` out of git (`.gitignore`) or use environment variables
+- If a secret was committed, rotate it and rewrite history before pushing
+
+---
+
+## 📜 License
+
+Provided as‑is for educational and practical RAG use cases.
+
+---
+
+**🐾 Built for clear, sourced pet care answers.**
