@@ -37,7 +37,7 @@ class DocumentProcessor:
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             length_function=len,
-            separators=["\n\n", "\n", " ", ""]
+            separators=["\n\n\n", "\n\n", "\n", ". ", " ", ""]  # Better separators for markdown
         )
     
     def load_document(self, file_path: str) -> str:
@@ -91,13 +91,31 @@ class DocumentProcessor:
             return file.read()
     
     def _load_markdown(self, file_path: Path) -> str:
-        """Load markdown document"""
+        """Load markdown document with better formatting"""
         with open(file_path, 'r', encoding='utf-8') as file:
             md_content = file.read()
-            # Convert markdown to HTML then extract text
-            html = markdown.markdown(md_content)
-            soup = BeautifulSoup(html, 'html.parser')
-            return soup.get_text()
+            
+        # Process markdown to keep headers with content
+        lines = md_content.split('\n')
+        processed_lines = []
+        
+        for i, line in enumerate(lines):
+            # If this is a header (starts with #), keep it with the next few lines
+            if line.strip().startswith('#'):
+                processed_lines.append(line)
+                # Add the next few lines that aren't headers
+                j = i + 1
+                while j < len(lines) and j < i + 10:  # Look ahead up to 10 lines
+                    next_line = lines[j].strip()
+                    if next_line and not next_line.startswith('#'):
+                        processed_lines.append(lines[j])
+                    elif next_line.startswith('#'):
+                        break
+                    j += 1
+            else:
+                processed_lines.append(line)
+        
+        return '\n'.join(processed_lines)
     
     def _load_html(self, file_path: Path) -> str:
         """Load HTML document"""

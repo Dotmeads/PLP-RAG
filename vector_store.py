@@ -90,14 +90,21 @@ class VectorStore:
                 logger.warning("No documents to add")
                 return []
             
-            # Add documents to vector store
-            ids = self.vectorstore.add_documents(documents)
+            # Add documents in smaller batches to avoid batch size limits
+            batch_size = 100
+            all_ids = []
+            
+            for i in range(0, len(documents), batch_size):
+                batch = documents[i:i + batch_size]
+                batch_ids = self.vectorstore.add_documents(batch)
+                all_ids.extend(batch_ids)
+                logger.info(f"Added batch {i//batch_size + 1}: {len(batch)} documents")
             
             # Persist the changes
             self.vectorstore.persist()
             
-            logger.info(f"Added {len(documents)} documents to vector store")
-            return ids
+            logger.info(f"Added {len(documents)} documents to vector store in {len(all_ids)} batches")
+            return all_ids
             
         except Exception as e:
             logger.error(f"Error adding documents: {str(e)}")

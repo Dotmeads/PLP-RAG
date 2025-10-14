@@ -16,8 +16,8 @@ HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 CHROMA_PERSIST_DIRECTORY = os.getenv("CHROMA_PERSIST_DIRECTORY", "./chroma_db")
 
 # Document Processing Settings
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
+CHUNK_SIZE = 2000  # Increased to keep related content together
+CHUNK_OVERLAP = 300  # Increased overlap for better context
 MAX_CHUNKS = 5
 
 # LLM Settings

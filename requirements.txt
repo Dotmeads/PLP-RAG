@@ -1,12 +1,6 @@
-# Core RAG dependencies
-langchain==0.1.0
-langchain-community==0.0.10
-langchain-openai==0.0.2
-langchain-text-splitters==0.3.11
-langchain-core==0.1.10
 openai==1.6.1
 
-# Vector database and embeddings
+# Vector DB & embeddings
 chromadb==0.4.22
 sentence-transformers==2.2.2
 faiss-cpu==1.7.4
@@ -29,7 +23,7 @@ tiktoken==0.5.2
 numpy==1.24.3
 pandas==2.0.3
 
-# Optional: For advanced features
+# Optional: for advanced features
 transformers==4.36.2
 torch==2.1.1
 accelerate==0.25.0

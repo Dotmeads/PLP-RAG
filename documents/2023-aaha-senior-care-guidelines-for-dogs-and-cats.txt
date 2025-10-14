@@ -1,0 +1,2734 @@
+VETERINARY PRACTICE GUIDELINES
+
+2023 AAHA Senior Care Guidelines for Dogs
+and Cats
+Ravinder Dhaliwal, DVM, MS, DACVIM (Oncology), DABVP (Canine and Feline)†, Elizabeth Boynton, DVM,
+Sheila Carrera-Justiz, DVM, DACVIM (Neurology), Nicole Cruise, CVT, Mary Gardner, DVM,
+Janice Huntingford, DVM, DACVSMR, MS, CVPP, CVA, Heidi Lobprise, DVM, DAVDC,
+Elizabeth Rozanski, DVM, DACVECC, DACVIM (Small Animal Internal Medicine)
+
+ABSTRACT
+Veterinary professionals are taught to recognize that “old age is not a disease.” However, clients may have the perception that
+older dogs and cats undergo an unavoidable physical, mental, and behavioral decline attributable simply to old age. The veterinary team’s role includes providing medical care and support to senior pets to maintain their quality of life, as well as supporting
+and educating clients on proper senior animal care and addressing any misconceptions about the aging process. These Guidelines describe a systematic approach to the healthcare of the senior pet that is based on an evidence-guided assessment of
+both healthy and unhealthy canine and feline patients. By using evidence-guided medicine, which may include conventional
+and integrative approaches as well as environmental management for the senior pet, the patient’s quality of life can be
+enhanced and potentially extended during this vulnerable life stage. Developing a senior program for the veterinary practice
+requires appropriate training of the entire healthcare team and includes a robust client education program that focuses on the
+wellbeing of the senior pet. Palliative and hospice care should be included in the education and information provided for both
+the veterinary team and the families of senior pets. (J Am Anim Hosp Assoc 2023; 59:1–21. DOI 10.5326/JAAHA-MS-7343)
+
+AFFILIATIONS
+MedVet Silicon Valley Veterinary Specialists, San Jose, California (R.D.);
+
+setting. Evidence-guided support for speciﬁc recommendations has
+
+Western University of Health Sciences, Pomona, California (E.B.); University
+of Florida, Gainesville, Florida (S.C.-J.); Northcentral Technical College,
+
+tions are based on practical clinical experience and a consensus of
+
+Wausau, Wisconsin (N.C.); Lap of Love, Jupiter, Florida (M.G.); Essex Animal
+
+recommendations. Drug approvals and labeling are current at the time
+
+Hospital, Essex, Ontario, Canada (J.H.); Cibolo Creek Veterinary Hospital,
+
+of writing but may change over time. Because each case is different,
+
+Kerrville, Texas (H.L.); Department of Clinical Sciences, Tufts Cummings
+School of Veterinary Medicine, North Grafton, Massachusetts (E.R.)
+
+veterinarians must base their decisions on the best available scientiﬁc
+evidence in conjunction with their own knowledge and experience.
+
+CONTRIBUTING REVIEWERS
+
+The 2023 AAHA Senior Care Guidelines are generously supported by
+
+Kathleen Cooney, DVM, CHPV, CCFP (Caring Pathways, Berthoud,
+
+Boehringer Ingelheim Animal Health, CareCredit, IDEXX, and Zoetis.
+
+Colorado); Lynn Hendrix, DVM, CHPV (Beloved Pet Mobile Vet, World
+Veterinary Palliative Medicine Organization, Davis, California)
+Correspondence: ravinder.dhaliwal@medvet.com (R.D.)
+† R. Dhaliwal is the chair of the AAHA Senior Care Guidelines Task Force.
+
+been cited whenever possible and appropriate. Other recommendaexpert opinion. Further research is needed to document some of these
+
+AAHA would like to gratefully acknowledge Dr. Lynn Hendrix’s additional contribution of developmental editing of this guideline.
+The authors declare no conﬂicts of interest.
+BCS (body condition score); CADES (CAnine DEmentia Scale); CCD
+
+These guidelines were prepared by a task force of experts convened
+by the American Animal Hospital Association. This document is
+
+(canine cognitive dysfunction); DISHAA (Disorientation, alterations in
+
+intended as a guideline only, not an AAHA standard of care. These
+
+ing and other learned behaviors, altered Activity levels, and increased
+
+guidelines and recommendations should not be construed as dictating
+
+Anxiety); FCD (feline cognitive dysfunction); GOLPP (geriatric onset
+
+an exclusive protocol, course of treatment, or procedure. Variations in
+
+laryngeal paralysis polyneuropathy); IRIS (International Renal Interest
+
+practice may be warranted based on the needs of the individual
+
+Society); LBM (lean body mass); MER (maintenance energy require-
+
+patient, resources, and limitations unique to each individual practice
+
+ments); QOL (quality of life)
+
+© 2023 by American Animal Hospital Association
+
+social Interactions, changes in Sleep-wake cycles, loss of House train-
+
+JAAHA.ORG
+
+1
+
+Introduction
+
+senior pet healthcare. The text cites various previously published
+
+For both canine and feline patients, veterinarians should view the
+
+clinical guidelines on speciﬁc topics such as dentistry, pain manage-
+
+pet’s senior years as distinct from other life stages. The senior dog or
+
+ment, anesthesia, nutrition, and end-of-life care that practitioners
+
+cat requires a tailored healthcare plan including preventive, diagnos-
+
+can refer to for in-depth recommendations appropriate for the senior
+
+tic, and treatment protocols that are speciﬁc to the aging animal’s
+
+dog or cat.
+
+physiologic needs. In addition, families with older pets may have a
+
+A focus on senior pet care has many beneﬁts for veterinary
+
+strong bond of affection and interdependence that may not be mea-
+
+practices and their clients. These include strengthening the human-
+
+sured in monetary terms and should be considered in the overall
+
+animal bond, enhancing and extending the patient’s quality and
+
+healthcare plan. A useful perspective for the veterinary team may
+
+duration of life, and deepening the veterinary/client/patient
+
+include the following considerations:
+
+relationship.
+
+ For many clients, their pets’ senior years are as important and meaningful as the sum of all the preceding life stages.
+ Managing the health and wellbeing of the aging pet is an important
+aspect of clinical practice.
+
+Defining the Senior Patient
+The term “senior” is used to describe the older, aging pet. Because of
+
+Healthcare decisions affecting the older pet may be clinically
+
+the variability in aging based on species and breed, there is no spe-
+
+challenging for the veterinarian and may be affected by the physical,
+
+ciﬁc age for senior status. Moreover, the criteria for senior age status
+
+psychosocial, emotional, or spiritual needs of the pet’s family. Optimal
+
+differ for dogs and cats. The 2019 AAHA Canine Life Stage Guide-
+
+care of the senior pet involves a multifaceted approach, including
+
+lines deﬁne senior as “the last 25% of estimated lifespan through end
+
+diagnostics, medical and interventional therapies, pain management,
+
+of life.”1 The 2021 AAHA/AAFP Feline Life Stage Guidelines and the
+
+nutrition, dentistry, anesthesia, modifying the environmental setting,
+
+2021 AAFP Feline Senior Care Guidelines deﬁne senior as cats greater
+
+managing behavioral problems, and recognizing and managing
+
+than 10 yr of age.2,3
+
+comorbidities. Senior care also includes educating and planning for
+
+Additional descriptive terms may be used to describe a senior
+
+end-of-life care for the patient and supporting the caregivers and fam-
+
+pet’s condition, such as “frailty,” “immunosenescence,” and
+
+ily in this process. The Guidelines include a comprehensive table,
+
+“inﬂammaging.” Frailty is a syndrome seen with advancing age ini-
+
+organized by body system, which presents diagnostic approaches for
+
+tially described in people, in which the patient has a decreased func-
+
+commonly encountered diseases of senior dogs and cats. The Guide-
+
+tional reserve that leads to a decline in physiological and cognitive
+
+lines also include a table of common diagnostic tests and recom-
+
+performance and a greater vulnerability to adverse medical out-
+
+mended frequencies for senior patients and home care tips for clients.
+
+comes.4 Scoring systems exist for assessment of frailty in dogs, and
+
+These Guidelines represent the recommendations of a task force
+
+increased frailty scores may be a risk factor for death, although more
+
+of experts with decades of collective experience in caring for aging
+
+studies are needed.4,5 Feline phenotype and index-based frailty scales
+
+canine and feline patients. The authors have organized the Guide-
+
+are also available.3
+
+lines into three principal sections:
+ Evaluating and managing the healthy senior pet.
+ Evaluating and managing the unhealthy senior pet, which includes
+an end-of-life section.
+ Developing education for both veterinary teams and clients that
+emphasizes the care and wellbeing of the senior pet.
+
+These Guidelines offer recommendations that can assist practices in developing additional education resources that highlight personalized senior pet care. This approach can promote:
+ Expertise and consistent messaging in senior care among the veterinary team.
+ Client education that creates awareness of “best practices in senior
+pet care” for maintaining the health of older dogs and cats.
+ Involvement of the entire veterinary team in educating clients on
+the health and quality of life (QOL) of senior pets.
+
+Aging may have multiple biochemical changes that are noticeable only in the later stages of the age-related change. Earlier identiﬁcation of age-related changes may improve the quality and quantity
+of life, but additional research is needed to detect those early biochemical changes and be able to use them as screening tests. Immunosenescence is the process of immune dysfunction that occurs with
+age. Immunosenescence involves the remodeling of lymphoid organs,
+leading to changes in the immune function of the elderly, which is
+closely related to the development of infections, autoimmune diseases, and malignant tumors.6 Evidence for this phenomenon has
+been reported in human medicine, but there is limited evidence in
+veterinary medicine. Inﬂammaging is another concept reported in
+human medicine, which posits that the rate of aging and age-related
+disease may be due to a chronic progressive proinﬂammatory pheno-
+
+The Guidelines are not intended to be all-inclusive in their rec-
+
+type.7 The occurrence of immunosenescence and inﬂammaging in
+
+ommendations, but to present an evidence-guided framework for
+
+dogs and cats has yet to be validated and should be considered as
+
+2
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+hypothetical concepts in veterinary medicine until further evidence
+
+this information unless they have built a trusted relationship with
+
+emerges.
+
+the clinician. Clients may believe that some products are safe simply
+
+Evaluating the Healthy Senior Pet
+
+ents about the challenges and risks of using herbal, nutraceutical, or
+
+because they are labeled as “natural.” Veterinarians must educate cliThe initial intake at an ofﬁce visit is essential for setting a welcoming
+
+other therapies that may include lack of purity and potency certiﬁca-
+
+and senior-friendly tone. Starting with an open-ended question like
+
+tions as well as potential toxicity, drug interactions, and potential
+
+“What brings you and Harvey here today?” is a good way to initiate a
+
+injury.
+
+conversation about the pet’s health and wellbeing. Eliciting a thor-
+
+A thorough physical examination can elicit more information
+
+ough history and gaining an understanding of the senior pet’s envi-
+
+as the next step in a senior pet appointment. A relaxed animal in a
+
+ronment and background are crucial to establishing a relationship
+
+comfortable environment allows for a more accurate examination
+
+with the client and pet. Often there are issues not mentioned when
+
+including detailed attention to the eyes and mouth, as well as palpa-
+
+the appointment was made that are best brought forward early in the
+
+tion of the spine, neck, joints, musculature, digits, abdomen, and
+
+visit. Older animals often come with a substantial list of concerns,
+
+thoracic auscultation. When assessing musculoskeletal pain, mobility,
+
+which the client and veterinarian can mutually discuss and prioritize.8
+
+and movement, checklists can be used as a screening tool and may
+
+The client may share additional crucial information about their
+
+provide additional information for both client and veterinarian.
+
+senior pet if they are supported with empathy. A thorough history
+
+Chronic pain scales are a useful tool to assess musculoskeletal pain.11
+
+can provide important information to assess the pet’s health and
+
+For additional information on assessing chronic pain, see the 2022
+
+may include exploring the patient’s eating and drinking habits, exer-
+
+AAHA Pain Management Guidelines for Dogs and Cats.12 Client vid-
+
+cise, movement, play behavior, eliminations, attitude, grooming,
+
+eos of their animal moving in their environment are additional use-
+
+vision, and hearing. Inquiring about any changes or disruptions in
+
+ful tools to assess musculoskeletal pain, mobility, and movement.
+
+the household may also elicit crucial information.
+
+Videos of the pet ambulating or jumping can help detect early neu-
+
+A critical aspect of a patient’s history is establishing what phar-
+
+ropathic or musculoskeletal disease.
+
+maceuticals, supplements, nutraceuticals, creams, oils, or other ther-
+
+A senior pet appointment may address issues such as decreased
+
+apeutics are currently being given to the pet. This is important to
+
+mobility from osteoarthritis, metabolic issues such as kidney or liver
+
+evaluate the need for additional therapeutics and minimize drug
+
+disease, and functional issues such as heart disease or neoplasia. For
+
+interactions, and it is part of building a trusted relationship between
+
+mobility issues, older animals may beneﬁt from the use of pet-
+
+client and veterinarian. Drug interactions may result in serious tox-
+
+friendly techniques (low-stress handling, softened table examination
+
+icities, negate the effect of medications, or create a physical change
+
+surfaces or examining the pet off the table), as pain and distress may
+
+that would be detrimental to the animal (e.g., a nonsteroidal anti-
+
+be more common for senior animals.13,14 Mobility may be reduced
+
+inﬂammatory drug given to an animal currently taking steroids,
+
+owing to arthritic changes, and care must be taken to gently manipu-
+
+resulting in gastrointestinal bleeding). Practitioners may need to
+
+late limbs, joints, musculature, neck, and spine to explore underlying
+
+evaluate any nutraceuticals the pet is currently on for potential inter-
+
+discomfort. Unlike dogs, cats rarely have crepitus in affected joints.
+
+actions (e.g., turmeric, which is touted as an anti-inﬂammatory aid,
+
+However, studies have indicated that more than 60% of cats have
+
+yet has been shown to cause gastrointestinal ulceration in humans
+
+osteoarthritis in at least one joint despite absence of this physical
+
+9,10
+
+and mice).
+
+Additional examples include melatonin products
+
+examination ﬁnding.11–13,15
+
+made with xylitol and nutraceuticals like St. John’s Wort, turmeric
+
+Neoplasia is more commonly found with senior pets and may
+
+(major component curcumin), ginseng, s-adenosyl-methionine, mel-
+
+be indicated from a thorough physical examination. Cutaneous
+
+atonin, and tryptophan that increase 5-hydroxytryptophan and can
+
+masses noted on physical examination should be measured in all
+
+contribute to serotonin syndrome. Serotonin syndrome may occur
+
+three dimensions, aspirated, and cytologically examined. Clinically,
+
+with these nutraceuticals if the animal is also medicated with drugs
+
+neoplasms such as mast cell tumors may be indistinguishable from
+
+commonly used in senior patients, including selective serotonin
+
+benign growths (e.g., ubiquitous lipomas) and they may coexist,
+
+reuptake inhibitors such as ﬂuoxetine, tricyclic antidepressants such
+
+making the “watch and see” approach risky. A thorough, gentle
+
+as clomipramine and amitriptyline, monoamine oxidase inhibitors
+
+abdominal and rectal palpation may also provide an early indication
+
+such as selegiline or L-deprenyl, azapirones such as buspirone, anti-
+
+of abnormalities. Special attention should be given to the oral cavity,
+
+depressants such as trazadone, and phenylpiperidine opioids such as
+
+eye, and digits as sites of potential neoplasia.
+
+fentanyl and tramadol. Clients using cannabis products or other
+
+A medical workup is also recommended for senior pets once or
+
+nontraditional therapies for their pets may be reluctant to disclose
+
+twice a year and may include a complete blood count, chemistry, and
+
+JAAHA.ORG
+
+3
+
+urinalysis, as well as diagrams or photographs to better track changes
+
+induction. Other considerations for anesthesia with a senior pet may
+
+and screening biomarkers such as symmetric dimethylarginine assay,
+
+include titrating doses of anesthetic agents as lower doses may be
+
+N-terminal pro B-type natriuretic peptide, and C-reactive protein. It
+
+needed. Postprocedural analgesics should be prescribed as indicated
+
+may also include other tests listed in Table 1, Diagnostic Tests and
+
+by the procedure; consider that the dose needed for opioids and other
+
+Recommended Frequencies for Senior Dogs and Cats.
+
+analgesics may be different for senior pets. Validated pain scales can
+be very useful for postoperative analgesia care.12
+
+Anesthetic and Surgical Considerations
+Practitioners will ﬁnd the 2020 AAHA Anesthesia and Monitoring
+Guidelines for Dogs and Cats to be a useful, comprehensive supplement to this section of the Senior Care Guidelines.16
+Senior pets may require general anesthesia for surgical and nonsurgical procedures, such as dental care, to treat ailments and/or
+improve their QOL. Advanced age alone is not a contraindication to
+general anesthesia. Senior pets can safely undergo multiple anesthetic
+events if necessary. Medication choices and other precautions should
+be considered to minimize the risk for the pet. Because clients may
+have additional anxiety about anesthesia for their senior pet, the role
+of the veterinarian and technician includes reassuring the client of
+the indication for and safety of the procedure.
+An anesthetic evaluation should include a preoperative physical
+examination, focusing on diseases that may increase risk. In addition
+to the physical examination, preoperative laboratory tests should be
+performed, with a speciﬁc focus on renal (creatinine) and cardiac
+function (N-terminal pro B-type natriuretic peptide). Imaging,
+including radiographs and ultrasonography, may also be indicated.
+
+From a surgical standpoint, the beneﬁt to quality or quantity of
+life should be established with the client before surgery is performed.
+Many surgeries, including dental procedures, can result in substantial
+improvement in QOL. However, perhaps the biggest predictor of
+postsurgical QOL is preprocedure function; for example, a healthy,
+robust 15 yr old terrier would be expected to recover quickly from a
+mass removal, whereas a 13 yr old Labrador mixed-breed dog with
+geriatric onset laryngeal paralysis polyneuropathy (GOLPP), severe
+osteoarthritis, and International Renal Interest Society (IRIS) stage 3
+renal disease may require a longer recovery time.68
+The surgeon should be experienced with the procedure and/or
+have adequate training in similar techniques. All necessary equipment should be prepared and potential surgical needs anticipated
+(e.g., implant, speciﬁc instrument). For senior pets, recovery times
+are improved with speed of the procedure and meticulous focus by
+the surgeon. Perioperative antibiotics and pain management should
+be provided if indicated. Postprocedural return to function is
+enhanced with appropriate analgesics, and physical therapy/rehabilitation may also lead to a more rapid return to function.
+
+Preoperative care may include preprocedural IV ﬂuids in a patient
+with compromised renal function, where fasting or anxiety associated
+
+Dentistry
+
+with hospitalization may decrease normal water consumption. Preox-
+
+The 2019 AAHA Dental Care Guidelines for Dogs and Cats provide a
+
+ygenation may be recommended for patients with cardiovascular or
+
+comprehensive supplement to this section of the Senior Care Guide-
+
+pulmonary illnesses.
+
+lines.17 Senior pets may have an increased risk for oral cavity issues,
+
+Induction, maintenance, and monitoring anesthesia are also sig-
+
+such as periodontal disease and oral neoplasia. They should be
+
+niﬁcant, and checklists and anesthetic forms may be used to mini-
+
+assessed with a good oral examination, especially if the patient has
+
+mize risk and complications. A dedicated, trained technician with a
+
+trouble prehending or chewing or swallowing food or shows discom-
+
+checklist can focus on monitoring anesthesia and be prepared for
+
+fort during the process. The oral cavity and pharynx should be thor-
+
+any potential complications associated with either the individual
+
+oughly examined for the presence of periodontal disease, oral
+
+patient or speciﬁc risks associated with the procedure. Checklists can
+
+tumors, or dental disease (including broken or resorbing teeth).
+
+be comprehensive and may include handling of the pet, padding for
+
+Examination of the oral cavity should be done at every veterinary
+
+the animal, monitoring tools, surgical needs such as blood product
+
+visit. Videos taken by the client of unusual eating practices by the pet
+
+availability if hemorrhage is a potential complication, preoperative
+
+can help assess the problem.
+
+and postoperative analgesia and other indicated medications, a vali-
+
+The incidence of periodontal disease is increased in smaller and
+
+dated pain scale that is species speciﬁc, and a postoperative plan
+
+older dogs.18 Tiny and small senior dogs may have signiﬁcant peri-
+
+and patient discharge instructions. To lessen mobility complications,
+
+odontal bone loss, which may result in pathologic fractures. Small
+
+senior pets should be kept warm, handled gently, placed in a com-
+
+senior pets may have a higher incidence of pathologic fracture in the
+
+fortable position, and kept on a well-padded surgical or treatment
+
+mandibles, due to increased bone loss and less dense bone. The gen-
+
+table. To minimize the time of anesthesia for the pet, it is recom-
+
+eral systemic health of a senior may also be affected by the presence
+
+mended that the surgeon be readily available at the time of anesthesia
+
+of a chronic inﬂammatory process such as periodontitis.19
+
+4
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+TABLE 1
+Diagnostic Tests and Recommended Frequencies for Senior Dogs and Cats
+
+Diagnostic Test
+
+Recommended Frequency
+Canine
+
+Feline
+
+Fecal testing for parasites
+
+1–4 times/yr, depending on use of
+preventive products and lifestyle.
+
+1–2 times/yr, depending on health and
+lifestyle factors.
+
+Tick-borne disease
+
+Annually
+
+N/A
+
+Heartworm
+
+Annually
+
+Detailed information on heartworm
+testing is available in the American
+Heartworm Society guidelines.1
+
+Comprehensive CBC (including
+
+Every 6–12 mo.
+
+pathologist review if necessary)
+Chemistry (TP, albumin, ALT, glucose,
+BUN, creatinine, sodium, potassium,
+calcium, SDMA if available)
+
+Every 6–12 mo.
+
+Urinalysis (USG, sediment, glucose,
+ketones, bilirubin, protein, occult
+blood)
+
+Every 6–12 mo.
+
+Imaging
+
+Imaging of a region of interest should be
+performed if clinically indicated. Breedspecific screening may be appropriate.
+
+Electrocardiogram
+
+Perform an electrocardiogram annually in breeds with high risk of cardiac disease
+(e.g., boxers, Dobermans), or in other patients when clinically indicated or if an
+arrhythmic condition is suspected.
+
+Urine protein:creatinine ratio
+
+If proteinuria is identified or persistent microalbuminuria is present.
+
+Thyroxine (T4)
+
+Recommended annually.
+
+Strongly recommended annually.
+
+Blood pressure
+
+Recommended annually.
+
+Strongly recommended annually.
+Recommended every 6–12 mo in
+healthy geriatric cats.
+
+Retroviral testing
+
+N/A
+
+Consider based on individual
+patient’s risk.
+
+NT-proBNP
+
+Annually and to be strongly considered before an anesthetic event.
+
+Imaging of a region of interest should be
+performed if clinically indicated.
+
+1 American Heartworm Society. Prevention, Diagnosis, and Management of Heartworm (Dirofilaria immitis) Infection in Cats. American Heartworm
+
+Society, 2020. Available at https://d3ft8sckhnqim2.cloudfront.net/images/pdf/2020_AHS_Feline_Guidelines_Summary_11_12.pdf?1605556516
+ALT: alanine aminotransferase
+BUN: blood urea nitrogen
+CBC: complete blood count
+N/A: not applicable
+NT-proBNP: N-terminal pro B-type natriuretic peptide
+SDMA: symmetric dimethylarginine assay
+TP: total protein
+USG: urine specific gravity
+
+JAAHA.ORG
+
+5
+
+Anesthesia is necessary to provide adequate oral and dental care
+
+(MER) generally decrease over a dog’s lifetime. MER decrease in cats
+
+for any canine or feline patient. Because of their advanced age and
+
+up to age 10, after which they start to increase.25–27 However, pub-
+
+possible physiologic deﬁcits, senior pets undergoing anesthesia
+
+lished data on the effects of age on energy requirements are
+
+should receive special attention as discussed in the preceding section
+
+extremely variable in cats. Calorie-restrictive diets have been shown
+
+on anesthesia.
+
+to increase dogs’ longevity,28 with an ideal body condition score
+
+Dental radiographs are recommended to assess the extent and
+
+(BCS) of 4.5 to 5 out of 9. A cat’s ideal BCS, up to 6 out of 9, can be
+
+pattern of bone loss and conﬁrm appropriate extractions. Radio-
+
+associated with increased longevity, with underweight cats having
+
+graphs may uncover unanticipated dental or periodontal disease
+
+greater morbidity and mortality risks.29
+
+requiring additional treatment,20,21 but these procedures may need
+
+Senior cats may be less able to digest and utilize nutrients.
+
+to be staged to avoid excessive length of procedures and time under
+
+Decreased food digestibility may contribute to weight and muscle
+
+anesthesia.
+
+loss. Proteins are less digestible in 20% of cats older than 11 yr, and
+
+Periodontal disease incidence is lower in cats than in dogs.
+
+fats are less digestible in up to 33% of cats.30 Food digestibility may
+
+Senior cats are less likely to develop conditions such as feline chronic
+
+be less of an issue with dogs.31,32 In a recent study, adding moisture
+
+gingivostomatitis, more often seen in younger pets, but the presence
+
+to foods increased the digestibility of nutrients in senior dogs.33
+
+of tooth resorption can cause discomfort and may require
+22
+
+intervention.
+
+Reduced protein synthesis and increased turnover of proteins
+may contribute to the loss of lean body mass (LBM) in senior pets.34
+
+Oral tumors are more common in older dogs and cats and may
+
+Sarcopenia is the anticipated loss of LBM with age, with up to 33%
+
+be large at the time of diagnosis because of the occult nature of can-
+
+loss in cats from 10 to 15 yr of age.30 Dogs tend to lose LBM and
+
+cer. Early detection is key to better outcomes. Diagnosis of the tumor
+
+gain fat as seniors and incur overall weight loss with advanced age.35
+
+type will help formulate a treatment plan, which may include, but is
+
+Senior pets, particularly cats, may need up to 50% more protein to
+
+not limited to, en bloc excision, aggressive resection, radiation ther-
+
+improve or slow muscle loss.34 Cachexia may also be present and
+
+apy, and adjuvant cytotoxic or immunotherapy. Cats tend to develop
+
+refers to weight loss with excessive LBM loss due to severe or chronic
+
+oral squamous cell carcinomas that may be located in the gingiva,
+
+disease, such as chronic kidney disease, heart disease, and neoplasia.
+
+tongue, or tonsils. Although locally very aggressive, these tumors
+
+Senior pets may also develop obesity, which is more common
+
+tend to be slow to metastasize to the lymph nodes or other loca-
+
+in dogs. Increased BCS and obesity are known to affect mobility and
+
+tions.23 Dogs more commonly develop oral melanocytic tumors that
+
+contribute to inﬂammatory processes and diseases. Poor mobility
+
+behave aggressively locally and show higher rates of distant
+
+and decreased activity are assessed in frailty scores and are associated
+
+metastasis.23
+
+with a shorter time to death.36
+
+For more advanced or complex oral disease, consider a referral
+to a board-certiﬁed veterinary dentist. If referring a patient with
+
+Healthy Senior Nutrition
+
+complex disease is not possible, consider staging procedures to mini-
+
+The Association of American Feed Control Ofﬁcials does not cur-
+
+mize anesthetic risk. Often, resolution of oral and dental issues in
+
+rently have guidelines for senior nutrition. However, senior dogs
+
+our senior dogs and cats can greatly improve their QOL, making the
+
+have decreased MER and need less caloric density and more ﬁber to
+
+risks worth the beneﬁts.
+
+optimize BCS. A senior diet may include mild increases in protein
+content and quality to compensate for LBM loss.37 Healthy senior
+cats may require higher-caloric-density, higher-protein diets with
+
+Nutrition
+Diet and Body Condition
+The 2021 AAHA Nutrition and Weight Management Guidelines for
+Dogs and Cats provide comprehensive recommendations for canine
+
+increased digestibility and enhanced palatability fed in smaller
+amounts more frequently to help them maintain adequate muscle
+and body weight.34
+
+and feline nutritional management.24 Senior pets may have changing
+energy and nutrition requirements and may experience muscle or
+
+Evaluating the Unhealthy Senior Pet
+
+overall weight loss due to changes in the senior body such as immu-
+
+Senior pets are at greater risk for illness to occur in their ﬁnal years,
+
+nosenescence, inﬂammaging, or a disease process. Evaluation of
+
+although the incidence and mortality for all diseases combined have
+
+muscle and body condition scores can help monitor normal aging
+
+shifted over time primarily due to improved preventive medicine
+
+and age-related disease changes and determine when nutritional
+
+measures, diagnostic advances, better nutrition, and greater access to
+
+adjustment may be needed. Maintenance energy requirements
+
+veterinary health care.
+
+6
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+Prevention and screening for chronic diseases are discussed in
+
+by clients in the earlier stages. Early recognition of this condition is
+
+the section “Evaluating the Healthy Senior Pet” and can establish a
+
+crucial as treatment is more effective in the earlier stages of CCD,
+
+baseline for healthy senior pet care. When disease does occur in
+
+and this condition may signiﬁcantly affect the quality of the human-
+
+senior pets, the history, physical examination, and diagnostic tools
+
+animal bond.40
+
+can help establish a diagnosis and determine a course for care. Inter-
+
+The pathophysiology of CCD is similar to Alzheimer disease in
+
+preting diagnostic tests and reaching a clinical diagnosis should be
+
+people. Beta amyloid plaques are seen in both, most commonly as
+
+congruent with clinical presentation, laboratory values, imaging, his-
+
+insoluble beta amyloid, but there are also soluble forms. In addition,
+
+topathology, and epidemiology.
+
+Tau neuroﬁbrillary tangles may play a role in FCD but do not appear
+
+Common clinical signs of chronic disease may include malaise,
+
+to play a role in CCD. There are other structural abnormalities, such
+
+progressive lethargy, behavior changes, hyporexia, anorexia, altered
+
+as blood vessel ﬁbrosis, ventricular enlargement, cerebral atrophy,
+
+thirst pattern, weight loss over time, mobility alterations, and nonheal-
+
+astroglia hypertrophy and hyperplasia, microhemorrhages, and intra-
+
+ing wounds. A suspected chronic disease can often be presumptively
+
+neuronal accumulation of several substances, including lipofuscin
+
+diagnosed based on the client’s account of the pet’s history and physical
+
+and ubiquitin. Mitochondrial dysfunction also plays a role.39
+
+examination, although it is recommended to perform appropriate clini-
+
+The clinical signs for CCD may resemble other intracranial
+
+copathological evaluations. The minimum database for a senior pet
+
+diseases. The acronym DISHAA has been historically used for the
+
+should include a detailed blood proﬁle including thyroid panel and uri-
+
+categories of clinical signs seen with cognitive dysfunction: Disorien-
+
+nalysis. Additional screening or diagnostic tests may be used depending
+
+tation, alterations in social Interactions, changes in Sleep-wake
+
+on the minimum database and may include thoracic, abdominal, and
+
+cycles, loss of House training and other learned behaviors, altered
+
+other imaging. Diagnostic approaches for senior dogs and cats based
+
+Activity levels, and increased Anxiety. In dogs, the most common
+
+on body system are summarized in Table 2, Diagnostic Approaches
+
+clinical signs include daytime sleeping and nighttime restlessness,
+
+by Body System for Senior Dogs and Cats. This list is not exhaus-
+
+decreased interaction, disorientation at home, and anxiety. In a more
+
+tive and additional diagnostic approaches may be warranted.
+
+recent study, it was found that visual impairment, smell disturbance,
+
+38
+
+tremors, and falling down are associated with the diagnosis of CCD
+and may help clients and veterinarians recognize early CCD.41 Other
+
+Unknown Diagnosis or Comorbidities
+Senior pets may have several concurrent medical issues and associated clinical signs. These complex cases may be referred to an appropriate specialist. Alternatively, the client may opt for palliative care,
+and it may be helpful to have a trained palliative care veterinarian to
+consult with on the case.
+There may be clients who do not wish to pursue diagnostics for
+a number of reasons, including the age of the pet, concern and fear
+of certain test procedures or outcomes, and ﬁnancial constraints. If
+the client chooses to not pursue diagnostics or treatment, veterinarians should discuss the beneﬁt of symptomatic treatment and how it
+can improve the pet’s QOL. This may encourage the client to access
+and continue palliative care. If the client chooses to seek additional
+diagnostics, then either performing them or seeking referral to a specialist may be indicated for complex comorbidities.
+
+clinical signs of note include lack of recognition of and interaction
+with familiar people and objects, loss of house training, losses in
+behavioral training, appetite changes, and compulsion or pacing.41
+Clinical signs in cats are similar, although cats tend to have an
+increase in interaction and vocalization compared with dogs.42 Anxiety has been recognized as a signiﬁcant component of this disorder
+that should not be overlooked.43
+Cognitive dysfunction may be a diagnosis of exclusion. A thorough history, physical examination, neurological examination,
+biochemical evaluation, and urinalysis are integral to ensure these
+animals do not have other underlying disease causing similar clinical
+signs. Neurological examination may be consistent with forebrain
+dysfunction, with evidence of dementia and compulsion. An MRI
+of the brain is recommended to rule out structural disease. Other
+differentials for similar behavior changes may include intracranial
+neoplasia, pain, and organ dysfunction.39 Certain MRI changes are
+
+Managing Cognitive Dysfunction and
+Behavioral Anxiety
+
+suggestive of cognitive dysfunction, such as reduction in mass of the
+
+Canine and feline cognitive dysfunction (CCD/FCD) is an age-
+
+ings should be correlated with clinical signs.44
+
+interthalamic adhesion and cerebrocortical atrophy, although ﬁnd-
+
+related neurodegenerative condition well described in dogs but less
+
+To mitigate the underdiagnosis of cognitive dysfunction, speciﬁc
+
+so in cats. Approximately 14–22.5% of dogs older than 8 yr suffer
+
+and directed questions can be used as markers.40,42 Multiple ques-
+
+39
+
+from age-related cognitive impairment.
+
+Clinical signs of cognitive
+
+tionnaires exist that can be used as both diagnostic and monitoring
+
+dysfunction vary between dogs and cats and may not be recognized
+
+tools.45,46 These canine cognitive dysfunction/QOL questionnaires
+
+JAAHA.ORG
+
+7
+
+TABLE 2
+Diagnostic Approaches by Body System for Senior Dogs and Cats
+
+Body System
+Integument
+
+Diagnostic Approach
+PE focus: Identify, describe, and map skin lesions, i.e., pruritus,
+alopecia. Do not forget nails, nail beds, and interdigital spaces.
+Baseline dermatology diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+• Skin scraping/impression cytology of any lesions
+• Dermatophyte testing if concerned about fungal disease
+• Measuring, mapping and aspiration of any growths
+• Other integument issues regarding nails, nail beds; ears may
+• Evaluate for pain
+• For malignant conditions, consider thoracic and abdominal
+
+Therapeutic Tip
+
+• Avoid steroid use if
+
+possible until a microscopic
+diagnosis is established.
+
+• Recognize that dermatologic
+issues may also have a pain
+component and should be
+treated for pain.
+
+• Use validated scales
+
+to monitor progression of
+treatment as appropriate.1
+
+imaging as part of the clinical staging
+
+The Guidelines task force encourages skin biopsy in senior pets
+presented with chronic dermatopathy if the baseline diagnostics
+are negative.
+Recommend referral to a specialist for chronic, progressive, or
+neoplastic cases.
+Oral
+
+PE focus: Oral cavity, with particular focus on fractured, loose
+teeth, foreign bodies, oral ulcers, inflammation, masses. Make
+note of degree of dental disease and ability to prehend and
+swallow. Head and neck palpation.
+
+• Staging procedures is a
+viable plan.
+
+Baseline diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+
+Additional diagnostic tests:
+
+• Complete visual examination of the entire oral cavity with
+general anesthesia
+• Head and neck radiographs
+• Skull CT may be useful
+
+Hemolymphatic
+
+PE focus: Mucous membrane color, capillary refill time, abdominal
+palpation, lymph node palpation.
+Baseline diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+• Lymph node aspiration if indicated
+Additional diagnostic tests:
+
+• CBC with pathology evaluation for cell morphology
+• Imaging to rule out secondary etiology for hematologic abnormality
+• Coagulation profile
+• Flow cytometry in select cases
+• Bone marrow aspirate
+(continued)
+
+8
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+TABLE 2
+Continued
+
+Body System
+GI/Hepatic/
+Biliary
+
+Diagnostic Approach
+PE focus: Abdominal palpation, noting enlargement of organs,
+thickening, masses. Color of mucous membranes, skin (inner ear
+pinnae), conjunctiva, noting if jaundice present.
+Baseline diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+• Thoracic radiographs
+• Abdominal radiographs
+
+Therapeutic Tip
+
+• Enzymes or probiotics may
+be useful based on the
+individual patient.
+
+• Appetite stimulants and
+
+meat puree treats can
+be used for cats who are
+hyporexic or anorexic.
+
+• Recommend medication for
+nausea, as well as appetite
+stimulants as indicated.
+
+Additional diagnostic considerations:
+
+• Abdominal ultrasound
+
+• Tip: If ultrasound shows thickened muscularis layer, then
+laparoscopic or surgical biopsies appear to be more
+diagnostic.
+
+• Fecal sample examination
+• Rectal examination
+• Gastrointestinal panel
+• Bile acids
+• Endoscopy/colonoscopy
+Renal/
+Urogenital
+
+PE focus: Evaluate muscle condition score, body condition
+score, size and shape of kidneys, propensity for crystal or stone
+formation, indications of neoplasia.
+
+• Maintaining hydration is
+imperative.
+• Provide daily fluid therapy
+
+for patients when indicated,
+recognizing this may be
+earlier for senior patients,
+and may include parenteral,
+subcutaneous, or
+intravenous fluid therapy.
+
+Baseline renal diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+
+• Tip: Monitor and record early trends in SDMA, creatinine, and
+USG (making a chart of these indicators may be helpful)
+• If proteinuria present, UP:UC ratio
+
+• Blood pressure
+• Urine culture if indicated
+
+• Distinguish bacteriuria/pyuria from infection
+
+For patients with renal disease identified with screening tests:
+
+• Abdominal imaging (radiographs and ultrasound may both be
+useful; however, ultrasound may be preferred for a solitary test)
+• Monitor blood pressure more frequently in patients with chronic
+kidney disease
+• Continued monitoring of bloodwork, SDMA, BUN, creatinine
+• Continued monitoring for proteinuria
+
+• Adopt an antimicrobial
+•
+
+approach to urinary tract
+infections.2
+Recognize renal failure
+may create pain and/or
+pruritus (this is recognized
+in humans).3
+
+For patients identified with uroliths:
+
+• Surgery may be indicated
+• Diet change may be indicated
+
+For patients identified with neoplasia:
+
+• Additional staging recommended
+• Referral to a veterinary oncologist should be considered
+(continued)
+
+JAAHA.ORG
+
+9
+
+TABLE 2
+Continued
+
+Body System
+Neurologic
+
+Diagnostic Approach
+PE focus: Full neurologic examination with checklist.4,5
+
+Therapeutic Tip
+
+• Use multimodal therapy.
+
+Baseline diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+• Full neurologic examination
+
+Additional diagnostic tests to consider:
+
+• SOD-1 testing for degenerative myelopathy
+• MRI
+• DISHAA or other questionnaires for cognitive dysfunction
+syndrome
+• Ultrasound, chest radiograph
+6
+
+Diagnostic tips:
+
+• Rule out syncope vs. seizure
+• Palpate axillae for pain from a nerve sheath tumor
+• Evaluate client video for all conditions
+• Evaluate toenail wear
+Consider referral to a neurologist for further workup/MRI:
+
+• Include any client video with referral materials
+Endocrine
+
+PE focus: General body appearance, palpation of thyroid,
+abdominal palpation, concern for hair loss, distended abdomen,
+redistribution of fat, and eye changes, including corneal, anterior
+chamber, lens, pressures, tear production, retina.
+Baseline diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+
+Additional diagnostic tests to consider:
+
+• The FreeStyle Libre sensor
+can provide continuous
+monitoring for diabetic
+animals for up to 14 days
+(see the 2018 AAHA
+Diabetes Management
+Guidelines for Dogs and
+Cats).7
+
+• Special hormonal assays depending on suspected disease
+• Regional imaging and advanced imaging with CT is often
+necessary
+
+Additional testing for chronic disease:
+
+• Hyperthyroid/Hypothyroid: Monitor T4, calcium levels
+• Hyperadrenocorticism:
+• ACTH stimulation test or low-dose dexamethasone
+suppression test
+
+• Monitor adrenal size with ultrasound
+
+• Hypoadrenocorticism: ACTH stimulation test
+• Diabetes: periodic or continuous glucose monitoring,
+
+fructosamine, urinalysis to monitor for ketones, urinary tract
+infection, hematuria
+
+• Hyperparathyroidism: Monitor calcium, phosphorus levels,
+urinalysis for urinary tract infection
+• Hypoparathyroidism: Monitor calcium levels
+
+(continued)
+
+10
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+TABLE 2
+Continued
+
+Body System
+Cardiac/
+Respiratory
+
+Diagnostic Approach
+PE focus: Auscultation of heart and lungs, identify normal and
+abnormality.
+Baseline cardiac/respiratory diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+• Thoracic radiographs
+• Echocardiogram
+• Blood pressure
+• NT-proBNP
+
+Therapeutic Tip
+
+• Dogs with pacemakers often
+do well.
+• Consider working with a
+rehabilitation specialist for
+therapy options.
+
+• Owner education is key to
+therapeutic management.
+
+Additional diagnostic considerations:
+
+• Abdominal imaging if necessary
+• Respiratory: Infectious disease evaluation (PCR methods preferred)
+Musculoskeletal
+
+PE focus: General body palpation with focus on spine, limbs, joints,
+muscular condition score, movement examination, full orthopedic
+examination, evaluation of pain level.
+Baseline diagnostic evaluation should include:
+
+• Senior blood profile with urinalysis
+Additional diagnostic tests:
+
+• Regional radiographs
+• Arthrocentesis
+
+• Consider a diagnostic round
+of pain control.
+• Use multimodal pain
+management when
+possible.
+
+• Make recommendations
+
+for clients interested in
+using harnesses, slings, etc.
+
+• Encourage clients to video
+
+their pets when they are
+monitoring pain and mobility
+as this can provide valuable
+insight to guide treatment.
+
+1
+
+Olivry T, Saridomichelakis M, Nuttall T, et al. Validation of the Canine Atopic Dermatitis Extent and Severity Index (CADESI)-4, a simplified severity scale
+for assessing skin lesions of atopic dermatitis in dogs. Vet Dermatol. 2014;25(2):77-e25. doi:10.1111/vde.12107
+
+2 See Frey E, Costin M, Granick J, Kornya M, Weese JS. 2022 AAFP/AAHA Antimicrobial Stewardship Guidelines. J Am Anim Hosp Assoc. 2022;58(4):1–5.
+doi:10.5326/1547-3317-58.4.1. Available at aaha.org/antimicrobials.
+3 O'Connor NR, Corcoran AM. End-stage renal disease: symptom management and advance care planning [published correction appears in Am Fam
+Physician. 2012 May 15;85(10):950. Dosage error in article text]. Am Fam Physician. 2012;85(7):705–710.
+4 Averill DR Jr. The neurologic examination. Vet Clin North Am Small Anim Pract. 1981;11(3):511–521. doi:10.1016/s0195-5616(81)50056-8
+5 Chrisman C. Step-by-step: the neurologic examination. Clinician's Brief. May 2018. Available at https://www.cliniciansbrief.com/article/step-step-
+
+neurologic-examination.
+6
+
+progression of signs of cognitive dysfunction syndrome. J Am Vet Med Assoc. 2021;259(6):637–643. doi:10.2460/javma.259.6.637
+7 Behrend E, Holford A, Lathan P, Rucinsky R, Schulman R. 2018 AAHA Diabetes Management Guidelines for Dogs and Cats. J Am Anim Hosp Assoc.
+
+2018;54(1):1–21. doi:10.5326/JAAHA-MS-6822/
+ACTH: adrenocorticotropic hormone
+BUN: blood urea nitrogen
+CBC: complete blood count
+CT: computed tomography scan
+NT-proBNP: N-terminal pro B-type natriuretic peptide
+PCR: polymerase chain reaction
+PE: physical examination
+SDMA: symmetric dimethylarginine assay
+SOD-1: superoxide dismutase
+T4: thyroxine
+UP:UC ratio: urine protein to creatinine ratio
+USG: urine specific gravity
+
+JAAHA.ORG
+
+11
+
+are to be completed by clients at set intervals. One scale, CADES
+
+outline speciﬁc, comprehensive recommendations for pain assess-
+
+(CAnine DEmentia Scale), is predictive of the progression of cogni-
+
+ment and management.3,12
+
+tive impairment.47 Serial scores provided by clients and documented
+
+Clients often perceive changes in their geriatric pets as normal
+
+in the medical record can also be used as a tool for client education
+
+aging when it may be the result of clinical chronic pain. Clients may
+
+and to guide treatment.
+
+not perceive that changes in behavior or in vital signs can indicate
+
+Evidence suggests that management and treatment of cogni-
+
+pain, especially when chronic pain behavior changes may be subtle.
+
+tive dysfunction are most effective when started early, highlighting
+
+Educating clients about how to recognize and monitor acute and
+
+the importance of early recognition of cognitive impairment by the
+
+chronic pain should be paramount for the veterinary team. Clients
+
+veterinary team. Although many therapies have been studied for
+
+can take videos of their animal moving and interacting with their
+
+the treatment of cognitive dysfunction, selegiline, a selective irre-
+
+environment. Videos are useful for the client and the practitioner to
+
+versible monoamine oxidase B inhibitor, is the only drug labeled
+
+evaluate changes in movement and can be used to monitor responses
+
+for use for canine cognitive dysfunction. Selegiline is dosed at 0.5–1
+
+to medications and therapies. This may help large-breed dogs with
+
+mg/kg once a day OR every 24 hr. in the morning for 30 days, at
+
+degenerative joint disease and cats who, owing to subtle changes in
+
+which point the dose can be adjusted up to the next tablet size if
+
+behavior, may not have their chronic pain recognized.55
+
+there is no improvement at the lower dose. Selegiline is effective in
+48
+
+Treatment options for managing pain and mobility must be
+
+Toxicity can occur
+
+integrative and multimodal. Addressing these issues early in the
+
+if selegiline is used in conjunction with other antidepressants, nar-
+
+course of the disease improves outcome. Pain management may
+
+cotics, phenylpropanolamine, or monoamine oxidase inhibitors.
+
+include the use of pharmaceuticals, nutraceuticals, herbals, weight
+
+Newer treatments are being investigated and may be available in
+
+management, acupuncture, physical modalities, and environmental
+
+up to 70% of dogs with cognitive dysfunction.
+
+49
+
+the future, such as a butyrylcholinesterase inhibitor.
+
+modiﬁcations. Senior pets with chronic musculoskeletal disease may
+
+Certain diets, especially those high in antioxidants and medium
+
+also beneﬁt from physical rehabilitation. Rehabilitation is an excellent
+
+chain triglycerides, have also been posited for the treatment of this
+
+option for assisting with pain management and increasing mobility
+
+condition. These diets showed the most positive effect when com-
+
+and balance. Rehabilitation may use different therapies to reduce
+
+bined with environmental enrichment (exercise, new toys, cognitive
+
+pain and increase the QOL, including exercise therapy, hydrother-
+
+games, tasks, agility). The quality and rigor of the research associated
+
+apy, acupuncture, manual therapy, and modalities such as photobio-
+
+with other various supplements, nutraceuticals, acupuncture, and
+
+modulation therapy, extracorporeal shock wave therapy, and pulsed
+electromagnetic ﬁeld therapy.55
+
+39,50,51
+
+diets is limited.
+
+Anxiety is a clinical sign associated with CCD that may be
+
+Counseling clients on home modiﬁcation and pet accessories to
+
+directly treated. Anxiety has been recognized to signiﬁcantly compro-
+
+increase the mobility and QOL of the pet may include appropriate
+
+mise the QOL of both the pet and family.43 It is a complex syndrome
+
+use of ramps, suitable placement and design of litter boxes, elevation
+
+and can also be related to chronic pain. Chronic pain–related anxiety
+
+of food and water bowls, use of rugs or yoga mats to provide better
+
+is recognized in human cognitive dysfunction.52 The treatment of
+
+footing, ﬁtted and padded harnesses to aid with lifting larger pets,
+
+pain, along with anxiolytics and antidepressants for anxiety, should
+
+toe grips, boots, and socks for foot stability, medical pet shirts for
+
+be considered in the cognitively impaired patient. Various anxiolytics
+
+anxiety, and the use of appropriate beds. As senior pets may have
+
+53
+
+and antidepressants can be considered. Diazepam has been reported
+
+limited vision or hearing, identifying potential hazards in the home
+
+to exacerbate dementia signs in humans.54 There are FDA-approved
+
+and yard such as stairs or pools should be included when discussing
+
+drugs licensed for dogs for noise phobia and separation anxiety (e.g.,
+
+senior care with clients.
+
+clomipramine) but not speciﬁcally for anxiety associated with CCD.
+Shorter-acting drugs such as trazodone and alprazolam are preferred
+by the task force because of their rapid onset and clearance from the
+body, as well as their very limited side-effect proﬁle.
+
+Special Disease Consideration: GOLPP Complex
+Environmental changes may be helpful for dogs who have developed
+GOLPP complex, which has been increasingly recognized in geriatric
+large-breed dogs (Labrador retrievers and associated breeds). This
+
+Pain Management
+
+condition causes degeneration of long nerves in the body, particu-
+
+Identifying, preventing, and minimizing pain are essential in the
+
+larly the laryngeal and sciatic nerves, causing laryngeal paralysis and
+
+senior patient. The 2022 AAHA Pain Management Guidelines for
+
+weakness of the pelvic limbs with conscious proprioception deﬁcits.
+
+Dogs and Cats and the 2021 AAFP Feline Senior Care Guidelines
+
+Clinical signs include exercise intolerance, upper airway stridor,
+
+12
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+weakness, and sarcopenia. Comorbidities may include osteoarthritis
+
+for hyporexic or anorexic patients.70 Resumption of favorite foods,
+
+and secondary musculoskeletal pain. Treatment may include main-
+
+even if not medically balanced, may provide some nutrition with a
+
+taining QOL with laryngeal tie-back surgery and physical therapy to
+
+more positive experience for both the caregiver and patient.
+
+preserve muscle mass. Pain management should be included in the
+treatment plan.56 Clients should be counseled that heat stroke may
+be a complication in this subgroup of patients.57
+Disease Management: Nutritional
+Changes to nutrition may be useful in the management of disease
+for the senior dog or cat and have been used for conditions such as
+hyperthyroidism, chronic kidney disease, osteoarthritis, and diabetes
+mellitus. Different ingredients in a balanced diet may be used to treat
+or manage a chronic disease; for example, adding antioxidants to the
+
+End of Life and Euthanasia
+The 2016 AAHA/IAAHPC End-of-Life Care Guidelines provide
+detailed recommendations for maximizing patient comfort and minimizing suffering while providing a collaborative and supportive partnership with the caregiver client.71 For many clients, as their senior
+pet develops chronic progressive disease or a terminal illness, the
+events and veterinary care surrounding their pet’s ﬁnal life stage are
+signiﬁcant.
+
+diet of dogs and cats may help manage conditions such as cognitive
+
+Palliative Care or Hospice?
+
+dysfunction syndrome, immunosenescence, osteoarthritis, and heart
+
+The option of palliative care should be offered to the client when there
+
+disease.58–60 Long-chain omega-3 polyunsaturated fatty acids have
+been shown to have synovial anti-inﬂammatory effects in osteoarthritis,61–64 and medium-chain triglycerides have been recommended
+for cognitive dysfunction syndrome.65 For cats with diabetes mellitus,
+treating for issues such as obesity and inactivity is known to be beneﬁcial to managing the disease. A dietary change to a high-protein
+
+is a chronic, progressive, or terminal diagnosis. Palliative care consists
+of symptom and pain management that can be provided along with
+curative treatment. Palliative care develops a plan and provides guidance for the family in symptom and disease management, pain management, and physical or rehabilitation therapy, which helps minimize
+the suffering of patients regardless of life stage.
+
+(.45% on dry-weight basis) and low-carbohydrate (,15%) diet
+
+If a client is facing an end-of-life decision for their pet, hospice,
+
+given in small frequent meals may help minimize postprandial glu-
+
+which is the end stage of palliative care, can be considered.72 Hospice
+
+cose inﬂux.66
+
+provides services in addition to palliative care to later-stage, termi-
+
+For patients with renal disease, studies have shown that a renal
+
+nally ill patients and their families, such as planning for the decline
+
+diet with restrictive protein provides longer survival times with fewer
+
+of the pet with their particular disease, dealing with a crisis that may
+
+uremic crises for patients.67 IRIS currently recommends phosphorus
+control with a reduction in intake and addition of binders.68 At IRIS
+
+arise, and how the family would like the animal to die, such as by
+euthanasia or a palliated death from their disease. Regardless of the
+
+stage 2, the addition of long-chain omega-3 polyunsaturated fatty
+
+disease stage, the clients are empowered to care for their pet, spend
+
+acids is suggested. Healthy pets and early renal cases should not
+
+quality time with their pet, and deal with anticipatory grief.
+
+require protein restriction, and quality and quantity should be care-
+
+For palliative or hospice pets and their families, discussing disease
+
+fully managed in later IRIS stages. Protein restriction is to be consid-
+
+trajectories and the clinical signs of approaching and imminent death
+
+ered at IRIS stage 2 and recommended at IRIS stage 3.
+
+is important. A daily and crisis plan should be developed with the goals
+
+For cats with hyperthyroidism, clinical concerns include weight
+
+of providing ongoing care for the patient and support for the family.
+
+loss and LBM loss, and a high-protein (.40%), limited-carbohydrate
+
+Finally, a discussion of the plan for death, whether it be euthanasia or
+
+(,25%) diet while restricting iodine is recommended.66,69 Fishbased diets should be avoided. Dogs that have developed hypothyroidism may require a diet that has restricted calories.
+Palliative care patients may be hyporexic or anorexic. Focus
+may need to be shifted from a balanced diet to just getting the ani-
+
+palliated death, is needed. If a palliated death is chosen, the use of palliative sedation should be discussed. If euthanasia is the choice, the
+options could be presented at the initial consultation and further discussed in future follow-up appointments. Clients may opt for a home
+euthanasia service as these have become more readily available.
+
+mal to eat something. For palliative patients that are anorexic, enteral
+or parenteral feeding (e.g., esophagostomy or percutaneous endo-
+
+The Initial Appointment
+
+scopic gastrostomy tubes to reduce food aversion) should be dis-
+
+The initial palliative appointment should occur early in the course of
+
+cussed with the client. Feeding tubes can also be beneﬁcial for giving
+
+the disease. There is research on the human side of palliative care
+
+parenteral medication, the amount of which may be substantial in
+
+that indicates starting early increases the quality and the quantity of
+
+the end-of-life patient. Appetite stimulants, medication for nausea
+
+life.73 Palliative care may be basic, such as symptom management, to
+
+and vomiting, and careful ﬂuid administration should be provided
+
+advanced level care, including multiple comorbidities and more
+
+JAAHA.ORG
+
+13
+
+advanced pain and symptom management. The introductory end-of-
+
+Limitations on Palliative Care
+
+life appointments may be longer than the average appointment, with
+
+The veterinarian should also recognize the limitations of the client in
+
+some palliative practitioners using up to 3 hr for a single appoint-
+
+providing nursing care for their pet. In addition, having a frank dis-
+
+ment. Listening to clients about their goals, fears, and worries and
+
+cussion about the ﬁnancial, physical, emotional, and time implica-
+
+then educating them about end-of-life care takes time. It is key to
+
+tions of different end-of-life care options may help the client come
+
+deﬁning the client’s goals of care and maximizing the QOL of the
+
+to a collaborative decision regarding end of life and their choice
+
+patient. Compassionate, advanced serious disease communication
+
+regarding euthanasia. Advanced age is not the only criterion for
+
+may reduce the likelihood of premature or difﬁcult euthanasia
+
+making medical decisions and does not preclude surgeries or other
+
+events.
+
+signiﬁcant medical interventions depending on the goals of the client
+
+The palliative appointment may begin with an in-depth conver-
+
+and the condition of the patient. Clinical scenarios that may affect
+
+sation around the client’s understanding of the history, diagnosis,
+
+QOL and inﬂuence decision making for the client may include
+
+and current medications of their pet and then develop a plan based
+
+anorexia, symptom progression, severe or unrelenting chronic pain,
+
+on the client’s goals of care. After a thorough discussion regarding
+
+deterioration of a condition during active treatment, persistent cough
+
+history, a complete physical examination with pain assessment would
+
+even at rest, cognitive dysfunction progression, and mobility issues.
+
+be the next step. After that, the diagnosis, prognosis, and clinical outcomes of chronic disease or end-stage organ dysfunction can be discussed. A plan can then be developed based on the client’s goals of
+care and may proceed to a discussion of palliative care, hospice, or
+humane euthanasia options. Veterinarians may explore a client’s
+fears, beliefs, and physical abilities necessary to be an effective caregiver. The clinician and client may use different tools to determine
+goals of care, and what the pet will or can tolerate may inﬂuence
+end-of-life decisions.
+
+The Veterinary Team in End-of-Life Care
+The veterinary team can guide clients to decisions by advocating for
+both the senior pet and client. The veterinary team includes the veterinarian, credentialed technicians, veterinary assistants, and client service
+representatives. Additional team members that may help with end-oflife care can include mental health professionals and grief counselors,
+pharmacies, compounding pharmacies, groomers, pet sitters, respite
+workers, spiritual leaders, and end-of-life care specialists. Although the
+client is generally the best advocate for the pet, veterinary teams may
+help guide them toward the best decision for both the pet and family.
+
+Tools for End-of-Life Care
+
+Making a decision for a beloved pet is complex, and empathy and
+
+Equipping clients with tools to use to evaluate their pet, such as vali-
+
+understanding on the part of the veterinary team to support the client’s
+
+dated pain scales, validated QOL scales, advanced directives, and
+
+psychological, spiritual, and emotional beliefs is optimal.
+
+clinical signs of imminent death, may help the client with their goals
+
+Veterinarians and other clinical staff may experience physical or
+
+of care. QOL is a subjective perception and may be unique to the cli-
+
+compassion fatigue when dealing with patients with multiple medical
+
+ent and inﬂuenced by the bond they share with the pet. However,
+
+concerns or undiagnosed diseases. Maintaining a positive outlook,
+
+using a validated QOL scale may help the client have a more objec-
+
+such as a combination of celebrating senior pets and sharing suc-
+
+tive view of their pet’s condition. As of this writing, there are very
+
+cesses with clients and team members, may help boost morale for
+
+few validated QOL scales for the animal patient. Most QOL scales
+
+everyone involved in the care of the pet.
+
+found online are not currently validated.74 Clients may also track
+
+Clients can also experience fatigue, which can be minimized or
+
+good versus bad days on a calendar or journal to get a more objective
+
+prevented with activities such as creating a joy-of-living list, creating
+
+and accurate view of changes. There are now apps that may also be
+
+a bucket list, setting up pet dates, and maintaining the sacred
+
+useful in tracking changes like respiratory rate.
+
+human-animal bond that emphasizes QOL for the pet and their
+families.
+
+Checking In
+Clients may need additional time to process the initial conversation,
+
+Making Senior Patients a Practice Priority
+
+and further discussion may need to occur at a different time. If a cli-
+
+Senior pets make up 44% of the pet population. This demographic
+
+ent seems overwhelmed with information, schedule another time to
+
+should encourage veterinary practices to expand their focus on the
+
+continue the discussion. Veterinarians that have an open approach
+
+senior pet and their family. There are several ways practices can
+
+to the conversation, acknowledge the client’s goals or ideas, and bal-
+
+encourage families to bring their senior pets into the clinic and a vast
+
+ance the discussion with QOL may develop a deeper connection
+
+number of tools that can be implemented in the clinic to make sure it
+
+with the client, improving client compliance.
+
+is a safe and enjoyable visit for all involved. Creating a senior-friendly
+
+14
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+hospital may include changing or adding senior-friendly ﬂooring,
+
+seen at home. In addition, images of the pet’s food and water area
+
+using pheromones, developing questionnaires and checklists speciﬁ-
+
+and sleeping environment may also be helpful.
+
+cally for senior pets, scheduling longer appointment times, developing
+Senior Care Kits, and expanding end-of-life care tools and practices.
+
+When booking the appointment, enough time must be allocated
+for the veterinarian to properly give a thorough examination and
+assessment of the pet. Extra time will be needed to discuss disease
+
+Creating a Senior-Friendly Hospital
+Creating a Senior Pet Champions team that develops senior care
+standard operating procedures and is proactive in identifying areas
+for improving the senior care experience can create a practice culture
+that emphasizes optimum care for older pets. This approach will
+not only inspire more families to bring their senior pets to your
+practice but also ensure these patients are treated with the best
+care possible.
+
+conditions, environmental adjustment suggestions, medical therapies,
+and family goals for the patient. It is helpful to also include a discussion about the progression of the ailments and diseases the family is
+managing. This will help establish expectations early in the senior
+care process and assist with decision making later.
+At the conclusion of the appointment, the client should be
+given handouts with detailed information that may include
+diagnosed disease(s), details on medications dispensed (or recom-
+
+Evaluating the Physical Space for Senior Patients
+
+mended), and speciﬁc product recommendations and recommenda-
+
+When developing a plan for a senior-friendly hospital, consider the
+
+tions for follow-up care. The veterinary team should actively educate
+
+physical components of the clinic that may be a challenge to the
+
+the client to avoid dismissing certain age-related changes as merely
+
+aging pet. Is the pet able to walk up to and into the building easily?
+
+“old age,” a catch-all phrase that inadequately addresses the speciﬁc
+
+Do the ﬂoors support senior pets? Are the senior cats kept in a calm
+
+and often treatable conditions affecting the senior dog or cat.
+
+area away from dogs, and are they able to be comfortable during
+
+Avoid just discussing the need for biannual diagnostics to
+
+their visit? What is the noise level in the lobby, examination rooms,
+
+uncover hidden diseases with clients. Instead, focus on all the expert
+
+and treatment area?
+
+care, ideas, and support the hospital will provide to ensure their
+
+The exterior of the veterinary practice should be examined,
+
+senior pet’s quality and quantity of life. After each healthcare visit,
+
+including the parking lot, for obstacles the senior pet may need to
+
+provide the client with patient-speciﬁc written information and
+
+overcome. For example, are there a few steps (or a curb) to climb to
+
+instructions because appointments can sometimes involve informa-
+
+get to the entrance? Even one step up may be a struggle for an older
+
+tion overload.
+
+dog, and installing appropriate ramps can increase ease of access to
+the front door of the practice. Flooring in the lobby, examination
+
+Senior Care Kits
+
+rooms, and treatment area should also be assessed, and, if necessary,
+
+Many clinics have puppy or kitten kits available for new pet families
+
+bathmats or yoga mats can be used to accommodate the senior pet.
+
+but do not offer a Senior Care Kit for families of the senior patient.
+
+Consider covering scales and tables with similar mats so that the
+
+A client with a senior pet may have as many issues and questions as
+
+older dog or cat will have better grip and feel more comfortable.
+
+someone with a new puppy or kitten. To create a Senior Care Kit for
+
+Senior pets may have noise and light sensitivities, and adjusting light-
+
+both dogs and cats, consider the following contents:
+
+ing and installing noise dampening tiles for walls could help. Phero-
+
+ Customized healthcare and product recommendations
+ Information on common senior pet diseases, such as chronic kidney
+disease, congestive heart failure, neoplasia, cognitive dysfunction,
+mobility changes, and chronic pain
+ Medication information for their pet’s prescriptions, including dispensing instructions, pill-giving tips, and side effects to watch for
+ Information on chronic versus acute pain recognition and detection
+(include visual aid of the practice’s preferred validated chronic and
+acute pain scales)
+ Speciﬁc nutritional recommendations for their pet, including visual
+information about body condition score and muscle condition score
+ Cognitive dysfunction questionnaire
+ Tumor/skin maps
+ Changes that clients could make in their home, which may include
+elevating food bowls, keeping pets safe with barriers and gates, alerts
+or alarms in areas where they can get into trouble (e.g., pools and
+stairs), yoga mats and carpet runners, ramps, and bedding in accessible areas
+
+mone sprays in the examination rooms and the lobby may also help
+to relax anxious animals.
+Senior pets who require treatment or hospitalization require
+good traction in the kennels and cages, additional padding in the
+recovery areas, decreased stress handling, sufﬁcient warmth, and
+minimal noise in treatment and surgical recovery areas.
+Planning for the Senior Pet’s Appointment
+Providing a senior pet owner a questionnaire to ﬁll out before a visit
+can help clients focus on behavior and note changes they may be seeing with their senior pet. When a family schedules an appointment,
+provide a species-speciﬁc senior pet questionnaire. Instructions on
+taking video of pets can be included, and clients can be asked to take
+pictures and videos displaying mobility and any abnormal behavior
+
+JAAHA.ORG
+
+15
+
+ Changes that can help with mobility: toe grips and boots, harnesses
+for mobility, relocating a dog’s play or resting area closer to the
+door, and lower litter boxes for cats
+ Changes to decrease stress in the home: use of pheromone sprays,
+temperature control, access to sunlight, nightlights, sound machines,
+and front door signs to ask guests not to ring the doorbell
+ Bucket and joys-of-living lists
+ Checklist of local senior-friendly/recommended pet sitters, gentle
+groomers, daycare and boarding facilities, and local and online support groups
+ Validated QOL assessments and scale
+ Information about caregiver burden and caregiver support resources
+ Anticipatory grief, pet loss, and grief information, including a crisis
+phone number and website
+ Veterinary palliative care and hospice information
+
+A Senior Care Kit will help clients support their senior pet and
+improve QOL. Other useful tools could include encouraging clients
+to take pictures and videos of their pets within a speciﬁed time (i.e.,
+daily, weekly, or monthly) to help the client and the veterinarian
+track body condition changes, mobility, joyful activities, and other
+behaviors associated with the senior life stage. Having clients see
+these changes over time will help them better assess QOL as the pet’s
+disease progresses.
+It is helpful to provide families of older pets with a checklist of
+what to look for (and what to avoid) regarding appropriate pet sitters,
+
+ﬂooring, and assistance with getting the pet in and out of the car are
+all valued services the practice can add to the senior care experience.
+Videos of the changes the hospital has made to become senior
+friendly may also be a good addition to the website. An end-of-life
+care section can be developed that may include a QOL assessment,
+pain management with validated tools, information about caregiver
+burden, and pet loss and grief resources. Clinic websites often focus
+on puppy and kitten pictures—a practice can stand out as senior
+friendly by ensuring that senior pets make up at least 30% of the
+visual content of the hospital’s website.
+Managing the Caregiver Burden
+Caring for a senior pet takes time, patience, money, and emotional
+and often physical stamina. It can take an emotional and physical
+toll on the caregivers and lead to caregiver burden. Practices can support clients by developing an education program on caregiver burden. The hospital may alleviate some of the load by helping the client
+in several ways—for example, providing a Senior Care Kit with lists
+of people who may be able to provide pet sitting or respite care,
+offering options for medications that are easier to administer (e.g.,
+using compounding pharmacies to create palatable medications),
+providing a veterinary technician or assistant to help with the daily
+
+pet loss support groups, gentle groomers, senior hotels, and boarding
+
+care of the pet, and, in some cases, limiting medical treatment to
+
+facilities (e.g., in-home boarding staff who can administer medications
+
+what is essential.
+
+to the pet). If the primary caregiver is going to be out of town or
+
+Conﬂicts in the home regarding the pet’s behavioral changes,
+
+unavailable, the client should have a letter given to the pet sitter that
+
+ﬁnancial constraints, emotional guilt, stress, or disputes with partners
+
+includes a phone number for the client; the time zone they will be in;
+
+or family regarding care of the pet may add to the caregiver burden.
+
+who the pet sitter is and an authorization for them to make decisions;
+
+Providing information on coping mechanisms to caregivers, includ-
+
+how the client is going to pay for any services rendered in case of
+
+ing resources for accessing mental health professionals, social work-
+
+emergency; and a designated family member, friend, or other repre-
+
+ers, counselors, and psychologists, in Senior Care Kits can be helpful.
+
+sentative who is authorized to make healthcare decisions for the pet.
+
+Honesty and openness about the care that may be required for the
+
+Keep in mind that not all clients are able to come into the
+
+senior patient currently and in the future is paramount. Developing
+
+clinic. It may be a good idea to have the essential senior care resour-
+
+a plan together with the client that recognizes and works within their
+
+ces, tools, and information readily available on your website.
+
+limitations is the best course of action for limiting caregiver burden.
+For example, if the dog is panting and pacing all night, suggesting a
+
+Promoting Senior Care in the Veterinary Practice
+
+dental cleaning may not be the best thing to focus on—even if it is
+
+Practices with a focus on senior care can promote their expertise
+
+the most medically relevant issue to treat. Alleviating sleep disturban-
+
+through their practice website and social media. Topics can include
+
+ces ﬁrst may relieve caregiver stress and then allow the client to focus
+
+mobility issues, cognition changes, chronic pain, elimination behav-
+
+on other medical concerns.
+
+ior and incontinence, and changes in hearing and vision. Information on common diseases that clients may see in their senior pet,
+
+Communicating with Families of Senior Pets
+
+along with the common clinical signs, could be provided on the web-
+
+Families with senior pets may come into the examination visit with
+
+site or social media. Home tips, product recommendations, videos,
+
+differing goals and beliefs. Getting people on the same path may take
+
+and pictures of what the chronic or terminal disease might look like
+
+some work. Interactions with each individual in the family may
+
+and when to visit the veterinarian may also be added.
+
+mean longer appointment times to hear out different perspectives
+
+The hospital website should promote what the practice does dif-
+
+and work on empathizing with and validating their feelings. Senior
+
+ferently for senior pets. For example, longer appointments, special
+
+pets may have a long list of issues that can complicate the visit.
+
+16
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+2023 AAHA Senior Care Guidelines
+
+Developing tools to start a conversation among the family members
+
+Work with the client to prioritize medications by importance
+
+that centers the needs of the pet and takes their concerns into
+
+and anticipate dosing challenges or missed doses. Involve the client
+
+account is a good place to start.
+
+in problem solving and developing a mutually acceptable plan. This
+
+News of a declining condition or serious illness is common in
+
+is another opportunity to identify what medications or nutraceuticals
+
+geriatric medicine, so careful use of communication is essential. How
+
+are being given and to call attention to possible adverse effects if
+
+the patient’s condition is explained and the goals of care are estab-
+
+administered concurrently with prescribed medications. When dis-
+
+lished with the client may have a great impact on the animal’s care
+
+pensing medications, make sure the names of the medications are
+
+and the client’s experience. Listening to the client’s understanding of
+
+discussed along with the beneﬁts, expected outcomes, and potential
+
+the condition and eliciting how much detail they prefer can be estab-
+
+side effects. Repeat and summarize the medical recommendations,
+
+lished before continuing the conversation. Be aware of unintended
+
+and then check to conﬁrm that the caregiver agrees with the plan
+
+bias in these discussions.
+
+and questions have been addressed. Finally, schedule a follow-up
+
+Clients may have many questions. For example, they may want
+to know if there was a cause of the illness, how serious it is, and
+
+time to check in and re-evaluate how the medications are working
+and how the client and pet are adjusting to the new plan.
+
+what are the expected outcomes in the short and long term. Studies
+have shown that truth is important, delivered clearly with compas75
+
+Using Telehealth and Telemedicine Technologies
+
+Use a comfortable area in the
+
+Veterinary practices are increasingly using online technologies to
+
+practice free from distractions to maintain focus on the interaction.
+
+gather and disseminate patient information. These developments
+
+sion and without judgment.
+
+Information should be given in bits with pauses to assess the client’s
+
+have encouraged innovations that can enhance care, increase efﬁ-
+
+understanding before moving on to the next topic. Visuals or links
+
+ciency, and expand access. Familiarization with the deﬁnitions and
+
+to written materials may be offered to the client for them to refer to
+
+types of technological medicine and adherence to state, province,
+
+later, especially in situations in which emotions may hinder informa-
+
+and national practice, licensure, and pharmacy law is essential. Many
+
+tion processing. Providing them with a plan for follow-up questions
+
+states require an in-person veterinarian-client-patient relationship to
+
+and resources may be necessary.75
+
+be established ﬁrst. The practice should ascertain security issues, pro-
+
+When there is a large amount of information to convey to a cli-
+
+tect client privacy, and allow for secure transactions. Notes and
+
+ent, grouping it into categories aids recall. For example, “The four
+
+record keeping must be maintained as required by law. Check with
+
+main goals of our therapy are to (1) reduce pain, (2) increase mobil-
+
+your liability carrier to ensure coverage on planned activities.
+
+ity, (3) get to a healthy weight, and (4) help you two enjoy those
+
+The 2021 AAHA-AVMA Telehealth Guidelines for Small Animal
+
+walks on the nature path again.” Tailoring information to the unique
+
+Practice provide a detailed resource for implementing telehealth serv-
+
+situation of the client and pet is important.76
+
+ices in a veterinary practice.77 The components of an effective
+
+Home Tips for Clients Caring for Senior Pets
+• Provide regular gentle grooming and nail care
+• Consider having a mobile groomer for home grooming to minimize stress
+• Keep pets clean and dry at all times, including fur, skin, and bedding
+• Provide good bedding that is adequately padded
+• Cover slippery floors with secure rugs and mats for traction
+• Pets with decreased mobility need additional nursing care, including being walked or turned every few hours
+• Monitor skin for redness, rashes, swelling
+• Keep flies, fleas, and ticks off the senior pet
+• For pets with incontinence issues:
+䊊
+
+Minimize use of diapers to avoid secondary infections
+
+䊊
+
+Use disposable or washable waterproof covers for bedding (fleece or mesh)
+
+䊊
+
+Keep patient groomed and/or fur trimmed, particularly on the back legs, tail, and around the vulva, penis, and anus
+
+䊊
+
+Use baby wipes or medicated wipes to keep patient clean in between bathing
+
+JAAHA.ORG
+
+17
+
+diagnostic information. Clinicians should always be mindful of the
+limits of telemedicine and provide informed consent for pet owners.
+Challenges may arise with the quality of images, the accuracy of the
+description of the concern, missed symptoms or physical cues, and
+diagnosis without diagnostic testing. Breaches of privacy, ransomware, or malfunctions are additional concerns.79 Clarity on the scope
+of care should be addressed with the caregiver during the visit, along
+with advice to follow up in person as needed.
+Teleconsultation with specialists can aid patient care when specialty practices are hard to access. Check with your practice act
+regarding advice obtained from a veterinarian from out of state.
+Reports and information also may be transmitted by photo, audio,
+or recorded video methods. Clients may become more engaged in
+care with this real-time information and be more attuned to signiﬁcant changes.
+Pet wearable technology is rapidly expanding and may allow
+real-time monitoring of the senior pet. Smartphone apps that moniFIGURE 1
+
+tor pet health and activity are being developed and may further
+
+Components of Telehealth in Small-Animal Practice
+
+transform practice. Frequent inputs of blood glucose, weight, or cardiac abnormalities may enhance understanding of the patient’s
+condition and allow for improved treatment outcomes. Pain man-
+
+telehealth component in companion animal practice are shown in
+
+agement may be improved with future artiﬁcial intelligence apps that
+
+Figure 1, Components of Telehealth in Small-Animal Practice.
+
+can assess pain expressions and other aspects of movement. How-
+
+Telehealth can be especially helpful for the senior patient by
+increasing access to care in situations where caregivers may have dis-
+
+ever, it is important to note that telehealth and telemedicine innovations are intended to augment, but not replace, in-person care.
+
+abilities, challenges with transportation or time off from work, or
+home care obligations or need consultations with specialists. The
+
+Educating the Veterinary Team
+
+senior pet that is difﬁcult to transport, anxious, painful, or fragile
+
+Education of the veterinary team is vital if the practice wishes to pro-
+
+may be examined in less time and for less risk using telehealth
+
+vide the best possible senior care. Aging pets often require special
+
+resources. For the practice, telemedicine care can save time and
+
+nursing care because of changes in both physical and mental abilities.
+
+expense, decrease appointment congestion, and improve workﬂow
+
+If the healthcare team can recognize and address health issues that
+
+and ultimately work-life balance. Some practices allow clinicians to
+
+can inﬂuence the course of treatment, disease management, patient
+
+use a work-from-home option, which may expand hours and use a
+
+care, and outcomes will improve.
+Formal training for the veterinary team should involve educa-
+
+fee-for-service arrangement.
+Having high-quality rechecks more frequently can improve
+
+tion on the process of aging, senior pet–friendly techniques, and
+
+patient outcomes by assessing response to therapy, progression of
+
+modiﬁcation of the clinic environment to suit the needs of the pet. If
+
+signs, healing of lesions, and any barriers to adherence. Access to
+
+the staff understands that senior pets may be frail, both physically
+
+current electronic patient data can facilitate better discussion, com-
+
+and mentally, simple actions such as prolonging appointment times
+
+78
+
+munication, and cooperation between those involved in the care.
+
+for senior pets or offering gentle holding techniques can be beneﬁcial
+
+Video appointments may be used to gather background infor-
+
+for the pet and the client. If the team understands the aging process,
+
+mation before a clinical procedure or for a follow-up visit, especially
+
+then they are better able to counsel the client on how to manage
+
+with palliative or hospice care. The patient can be featured on cam-
+
+their pets. Every team member should be familiar with the common
+
+era to allow assessment of progress in pain control, movement, or
+
+symptoms of aging and invest time in learning how these changes
+
+wound healing. Often home environments allow a truer picture of
+
+will affect their patients. Low-stress handling and providing more
+
+the animal’s behavior.
+
+comfort measures for the senior pet are important in relieving anxi-
+
+Telemedicine examinations require planning to ensure compliance with state practice acts and optimal capture of accurate
+
+18
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+ety and making senior visits safe and rewarding for the caregiver and
+patient alike.80,81
+
+2023 AAHA Senior Care Guidelines
+
+The veterinary team should be aware of other methods for opti-
+
+Practices that successfully emphasize senior pet wellness should
+
+mum senior pet care, including:
+
+focus on two aspects of the practice’s culture—team training to pro-
+
+ Examination rooms can be repurposed into senior care rooms with
+the addition of yoga mats to prevent slippage; cushions and low
+beds for physical comfort; and natural light, soft music, and appropriate pheromone scents for the patients to relieve anxiety, soothe
+the patient and the caregiver, and help to relieve pain.
+ The use of a senior pet questionnaire can help to prioritize the goals
+of the caregiver as well as the veterinary focus for the examination.
+ The senior care room should contain materials about caring for
+senior pets that can be quickly and easily shared with the caregiver.
+ Treating larger patients on the ﬂoor and performing most tasks and
+sample collections in the room in the presence of the caregiver can
+ease anxiety and increase comfort.
+ If the patient requires hospitalization, ensure comfort and safety for
+the duration of the hospital stay. Mesh beds can be used to keep
+incontinent pets dry, and warm blankets and items from home can
+comfort hospitalized seniors.
+ Updating the caregiver regularly on the status of the patient helps
+build trust and reduce anxiety for the client.80
+
+mote senior pet care and client education to explain the practice’s
+
+The caregiver-pet bond is unique to all animals, and veterinary
+teams should recognize that this bond means different things to different people. Practitioners should work with clients to make sure the
+animal is not suffering, as sometimes families have difﬁculty letting go
+of a pet at the end of life. Teams should be educated on how to recognize and anticipate bereavement and grief. Support should be provided
+for team members who work in emotionally charged situations and
+may feel overtaxed or take on the pain clients are feeling. Veterinary
+team members should be encouraged to seek help when needed.80
+
+Summary
+All companion animal practices should ascribe special status to the
+senior patient because these clients usually have a very strong, longterm relationship with their pets. Many families of senior pets place
+an intrinsic value on their animals as personal companions and family members. Senior pet care presents an opportunity for a practice
+to implement optimum and individualized healthcare for its geriatric
+patient population.
+The onset of the senior life stage differs somewhat for dogs and
+cats and within breeds for both species. A thorough diagnostic
+assessment as described in the Guidelines will help the practitioner
+determine the speciﬁc needs of the senior pet. The senior pet’s
+healthcare plan can then be differentiated into evidence-guided protocols for the healthy and unhealthy patient. Using this approach,
+senior pet care becomes a carefully staged healthcare plan designed
+to preserve and extend the patient’s QOL and maintain a strong,
+active relationship between the pet and family. Practices that adopt a
+proactive senior pet health care philosophy can educate clients that
+the aging process is not an inevitable physical, mental, and behavioral decline that warrants minimal medical intervention.
+
+healthcare recommendations for the senior pet. When both the practice team and the practice’s clients understand the goals for senior
+pet care, successfully implementing an effective healthcare program
+for older pets is all but ensured.
+
+The authors gratefully acknowledge the contribution of Mark
+Dana of Kanara Consulting Group, LLC, in the preparation of
+the guidelines manuscript and Yee Lok To, HBSc, DVM, for
+assistance during the task force meetings.
+REFERENCES
+1. Creevy KE, Grady J, Little SE, et al. 2019 AAHA canine life stage guidelines. J Am Anim Hosp Assoc 2019;55(6):267–90.
+2. Quimby J, Gowland S, Carney HC, et al. 2021 AAHA/AAFP feline life
+stage guidelines. J Feline Med Surg 2021;23(3):211–33.
+3. Ray M, Carney HC, Boynton B, et al. 2021 AAFP feline senior care
+guidelines. J Feline Med Surg 2021;23(7):613–38.
+4. Hua J, Hoummady S, Muller C, et al. Assessment of frailty in aged dogs.
+Am J Vet Res 2016;77(12):1357–65.
+5. Banzato T, Franzo G, Di Maggio R, et al. A frailty index based on clinical data to quantify mortality risk in dogs. Sci Rep 2019;9(1):16749.
+6. Lian J, Yue Y, Yu W, et al. Immunosenescence: a key player in cancer
+development. J Hematol Oncol 2020;13(1):151.
+7. Kirkwood KL. Inﬂammaging. Immunol Invest 2018;47(8):770–3.
+8. Dysart LM, Coe JB, Adams CL. Analysis of solicitation of client concerns in companion animal practice. J Am Vet Med Assoc 2011;238(12):
+1609–15.
+9. Shariﬁ-Rad J, Rayess YE, Rizk AA, et al. Turmeric and its major compound curcumin on health: bioactive effects and safety proﬁles for food,
+pharmaceutical, biotechnological and medicinal applications. Front Pharmacol 2020;11:01021.
+10. Burge K, Gunasekaran A, Eckert J, Chaaban H. Curcumin and intestinal
+inﬂammatory diseases: molecular mechanisms of protection. Int J Mol
+Sci 2019;20(8):1912.
+11. Enomoto M, Lascelles BDX, Gruen ME. Development of a checklist for
+the detection of degenerative joint disease-associated pain in cats. J Feline
+Med Surg 2020;22(12):1137–47.
+12. Gruen ME, Lascelles BDX, Colleran E, et al. 2022 AAHA pain management guidelines for dogs and cats. J Am Anim Hosp Assoc 2022;58(2):
+55–76.
+13. Yin S. Low stress handling restraint and behavior modiﬁcation of dogs &
+cats: techniques for developing patients who love their visits. 1st ed. Davis
+(CA): CattleDog Publishing; 2009.
+14. Carney HC, Little S, Brownlee-Tomasso D, et al. AAFP and ISFM
+feline-friendly nursing care guidelines. J Feline Med Surg 2012;14(5):
+337–49.
+15. Slingerland LI, Hazewinkel HA, Meij BP, Picavet P, Voorhout G. Crosssectional study of the prevalence and clinical features of osteoarthritis in
+100 cats. Vet J 2011;187(3):304–9.
+16. Grubb T, Sager J, Gaynor JS, et al. 2020 AAHA anesthesia and monitoring
+guidelines for dogs and cats. J Am Anim Hosp Assoc 2020;56(2):59–82.
+17. Bellows J, Berg ML, Dennis S, et al. 2019 AAHA dental care guidelines
+for dogs and cats. J Am Anim Hosp Assoc. 2019;55:49–69.
+
+JAAHA.ORG
+
+19
+
+18. Harvey CE, Shofer FS, Laster L. Association of age and body weight
+with periodontal disease in North American dogs [published correction
+appears in J Vet Dent 1994;11(4):133]. J Vet Dent 1994;11(3):94–105.
+19. Kouki MI, Papadimitriou SA, Kazakos GM, et al. Periodontal disease as
+a potential factor for systemic inﬂammatory response in the dog. J Vet
+Dent 2013;30(1):26–9.
+20. Verstraete FJ, Kass PH, Terpak CH. Diagnostic value of full-mouth radiography in dogs. Am J Vet Res 1998;59(6):686–91.
+21. Verstraete FJ, Kass PH, Terpak CH. Diagnostic value of full-mouth radiography in cats. Am J Vet Res 1998;59(6):692–5.
+22. Reiter AM, Lewis JR, Okuda A. Update on the etiology of tooth resorption in domestic cats. Vet Clin North Am Small Anim Pract 2005;35(4):
+913–42.
+23. Soukup J, Lewis J. Oral and maxillofacial tumors, cysts, and tumor-like
+lesions. In: Lobprise HB, Dodd Jr, eds. Wiggs’ veterinary dentistry principles and practice. Hoboken (NJ): Wiley; 2019:131–53.
+24. Cline MG, Burns KM, Coe JB, et al. 2021 AAHA nutrition and weight
+management guidelines for dogs and cats. J Am Anim Hosp Assoc 2021;
+57(4):153–78.
+25. Laﬂamme DP, Ballam JM. Effect of age on maintenance energy requirements of adult cats. Compend Contin Educ Pract Vet 2002;24:82.
+26. Cupp C, Perez-Camargo G, Patil A, et al. Long-term food consumption
+and body weight changes in a controlled population of geriatric cats.
+Compend Contin Educ Small Anim Pract 2004;26:60.
+27. Bermingham EN, Thomas DG, Morris PJ, et al. Energy requirement of
+adult cats. Br J Nutr 2010;103(8):1083–93.
+28. Kealy RD, Lawler DF, Ballam JM, et al. Effects of diet restriction on life
+span and age-related changes in dogs. J Am Vet Med Assoc 2002;220:
+1315–20.
+29. Teng KT, McGreevy PD, Toribio JL, et al. Strong associations of ninepoint body condition scoring with survival and lifespan in cats. J Feline
+Med Surg 2018;20:1110–8.
+30. Perez-Camargo G. Cat nutrition: What is new in the old? Compend Contin Educ Pract Vet 2004;(suppl 26):5–10.
+31. Swanson KS, Kuzmuk KN, Schook LB, et al. Diet affects nutrient digestibility, hematology, and serum chemistry of senior and weanling dogs. J
+Anim Sci 2004;82:1713–24.
+32. Bufﬁngton CA. Lack of effect of age on digestibility of protein, fat and
+dry matter in beagle dogs. In: Burger I, Rivers J, eds. Nutrition of the dog
+and cat. 1st ed. New York: Cambridge University Press; 1989:397.
+33. Kim KH, Seo K, Cho HW, et al. Age-related digestibility of nutrients
+depending on the moisture content in aged dogs. J Anim Sci Technol
+2021;63(6):1355–61.
+34. Laﬂamme DP. Nutritional care for aging cats and dogs. Vet Clin North
+Am Small Anim Pract 2012;42:769–91.
+35. Kealy RD. Factors inﬂuencing lean body mass in aging dogs. Comp Cont
+Educ Pract Vet 1998;21:34–7.
+36. Cupp CJ, Kerr WW. Effect of diet and body composition on life span in
+aging cats. Proc Nestle Purina Companion Animal Nutrition Summit:
+Focus on Gerontology. Clearwater Beach (FL), March 26-7, 2010:36–42.
+37. Schauf S, Stockman J, Haydock R, et al. Healthy ageing is associated
+with preserved or enhanced nutrient and mineral apparent digestibility
+in dogs and cats fed commercially relevant extruded diets. Animals
+(Basel) 2021;11(7):2127.
+38. Gough A, Murphy KF. Differential Diagnosis in Small Animal Medicine.
+2nd ed. Oxford (UK): Wiley-Blackwell; 2015.
+39. Dewey CW, Davies ES, Xie H, et al. Canine cognitive dysfunction: pathophysiology, diagnosis, and treatment. Vet Clin North Am Small Anim
+Pract 2019;49(3):477–99.
+
+20
+
+JAAHA
+
+| 59:1 Jan/Feb 2023
+
+40. Salvin HE, McGreevy PD, Sachdev PS, et al. Under diagnosis of canine
+cognitive dysfunction: a cross-sectional survey of older companion dogs.
+Vet J 2010;184(3):277–81.
+41. Ozawa M, Inoue M, Uchida K, Chambers JK, Takeuch Y, Nakayama H.
+Physical signs of canine cognitive dysfunction. J Vet Med Sci 2019;81(
+12):1829–34.
+42. Sordo L, Gunn-Moore DA. Cognitive dysfunction in cats: update on
+neuropathological and behavioural changes plus clinical management.
+Vet Rec 2020;188(1):1–12.
+43. Fast R, Sch€
+utt T, Toft N, et al. An observational study with long-term
+follow-up of canine cognitive dysfunction: clinical characteristics, survival, and risk factors. J Vet Intern Med 2013;27(4):822–9.
+44. Hasegawa D, Yayoshi N, Fujita Y, et al. Measurement of interthalamic
+adhesion thickness as a criteria for brain atrophy in dogs with and without cognitive dysfunction (dementia). Vet Radiol Ultrasound 2005;46(6):
+452–7.
+45. Schutt T, Toft N, Berendt M. A comparison of 2 screening questionnaires for clinical assessment of canine cognitive dysfunction. J Vet
+Behav 2015;10:452–8.
+46. Salvin HE, McGreevy PD, Sachdev PS, et al. The canine cognitive dysfunction rating scale (CCDR): a data-driven and ecologically relevant
+assessment tool. Vet J 2011;188(3):331–6.
+47. Madari A, Farbakova J, Katina S, et al. Assessment of severity and
+progression of canine cognitive dysfunction syndrome using the
+CAnine DEmentia Scale (CADES). Appl Anim Behavior Sci 2015;171:
+138–45.
+48. Campbell S, Trettien A, Kozan B. A noncomparative open-label study
+evaluating the effect of selegiline hydrochloride in a clinical setting. Vet
+Ther 2001;2(1):24–39.
+49. Pipan MZ, Mihevc SP, Strbenc M, et al. Treatment of canine cognitive dysfunction with novel butyrylcholinesterase inhibitor. Sci Rep 2021;11:18098.
+50. Landsberg G. Therapeutic agents for the treatment of cognitive dysfunction syndrome in senior dogs. Prog Neuropsychopharmacol Biol Psychiatry 2005;29(3):471–9.
+51. Araujo JA, Studzinski CM, Head E, et al. Assessment of nutritional
+interventions for modiﬁcation of age-associated cognitive decline using a
+canine model of human aging. Age (Dordr) 2005;27(1):27–37.
+52. Khalid S, Sambamoorthi U, Umer A, Lilly CL, Gross DK, Innes KE.
+Increased odds of incident Alzheimer’s disease and related dementias in
+presence of common non-cancer chronic pain conditions in Appalachian
+older adults. J Aging Health 2022;34(2):158–72.
+53. Landsberg GM, Deporter T, Araujo JA. Clinical signs and management
+of anxiety, sleeplessness, and cognitive dysfunction in the senior pet. Vet
+Clin North Am Small Anim Pract 2011;41(3):565–90.
+54. Cacabelos R. Pharmacogenomics of cognitive dysfunction and neuropsychiatric disorders in dementia. Int J Mol Sci 2020;21(9):3059.
+55. Fox SM, Millis D. Multimodal management of canine osteoarthritis. 1st
+ed. London: Manson Publishing; 2010.
+56. Letko A, Minor KM, Friedenberg SG, et al. A CNTNAP1 missense variant is associated with canine laryngeal paralysis and polyneuropathy.
+Genes 2020;11(12):1426.
+57. MacPhail, CM. Laryngeal disease in dogs and cats: an update. Vet Clin
+North Am Small Anim Pract 2020;50(2):295–310.
+58. Pop V, Head E, Hill MA, et al. Synergistic effects of long-term antioxidant diet and behavioral enrichment on beta-amyloid load and nonamyloidgenic processing in aged canines. J Neurosci 2010;30:9831–9.
+59. Hall JA, Tooley KA, Gradin JL, et al. Effects of dietary n-6 and n-3 fatty
+acids and vitamin E on the immune response of healthy geriatric dogs.
+Am J Vet Res 2003;64:762–72.
+
+2023 AAHA Senior Care Guidelines
+
+60. Hayek MG, Massimino SP, Burr JR, et al. Dietary vitamin E improves
+immune function in cats. In: Reinhart GA, Carey DP, eds. Recent advances in canine and feline nutrition. Vol. 3. Iams Company; 2000:555–563.
+61. Hansen RA, Harris MA, Pluharc GE, et al. Fish oil decreases matrix metalloproteinases in knee synovia of dogs with inﬂammatory joint disease.
+J Nutr Biochem 2008;19:101–10.
+62. Bauer JE. Therapeutic use of ﬁsh oils in companion animals. J Am Vet
+Med Assoc 2011;239:1441–51.
+63. Lascelles BDX, DePuy V, Thomson A, et al. Evaluation of a therapeutic diet for feline degenerative joint disease. J Vet Intern Med 2010;24:
+487–95.
+64. Vandeweerd JM, Coisnon C, Clegg P, et al. Systematic review of efﬁcacy
+of nutraceuticals to alleviate clinical signs of osteoarthritis. J Vet Intern
+Med 2012;26(3):448–56.
+65. Pan Y, Landsberg G, Mougeot I, et al. Efﬁcacy of a therapeutic diet
+on dogs with signs of cognitive dysfunction syndrome (CDS): a prospective double blinded placebo controlled clinical study. Front Nutr 2018;5:
+127.
+66. Laﬂamme D, Gunn-Moore D. Nutrition of aging cats. Vet Clin North
+Am Small Anim Pract 2014;44(4):761–74.
+67. Ross SJ, Osborne CA, Kirk CA, et al. Clinical evaluation of dietary modiﬁcation for treatment of spontaneous chronic kidney disease in cats.
+J Am Vet Med Assoc 2006;229(6):949–57.
+68. International Renal Interest Society. IRIS Guidelines. Available at: http://
+iris-kidney.com/guidelines/index.html. Accessed September 19, 2022.
+69. Loftus JP, DeRosa S, Struble AM, et al. One-year study evaluating efﬁcacy of an iodine-restricted diet for the treatment of moderate-to-severe
+hyperthyroidism in cats. Vet Med (Auckl) 2019;10:9–16.
+70. Smith AJ. Perspectives on feeding and nutrition. Vet Clin North Am
+Small Anim Pract 2019;49(3):501–17.
+71. Bishop G, Cooney K, Cox S, et al. 2016 AAHA/IAAHPC end-of-life care
+guidelines. J Am Anim Hosp Assoc 2016;52(6):341–56.
+
+72. Amir Shanan A, Pierce J, Shearer T. Hospice and palliative care for companion animals; principles and practice. 1st ed. Ames (IA): Wiley Blackwell; 2017.
+73. Gaertner J, Siemens W, Meerpohl JJ, et al. Effect of specialist palliative
+care services on quality of life in adults with advanced incurable illness
+in hospital, hospice, or community settings: systematic review and metaanalysis. BMJ 2017;357:j2925.
+74. Belshaw Z, Asher L, Harvey ND, Dean RS. Quality of life assessment in
+domestic dogs: an evidence-based rapid review. Vet J 2015;206(2):203–12.
+75. Stoewen DL, Coe JB, MacMartin C. Qualitative study of the communication expectations of clients accessing oncology care at a tertiary referral
+center for dogs with life-limiting cancer. J Am Vet Med Assoc 2014;245:
+785–95.
+76. Adams C, Kurtz S. Skills for communicating in veterinary medicine. 1st
+ed. New York: Dewpoint Publishing; 2016.
+77. Cox S, Dodd C, Evans B, et al. 2021 AAHA/AVMA telehealth guidelines
+for small-animal practice. Available at: https://www.aaha.org/globalassets/
+02-guidelines/telehealth/2021-aaha-avma-telehealth-guidelines.pdf. Accessed
+September 19, 2022.
+78. Klein TM, Augustin M, Kirsten N, et al. Attitudes towards using electronic health records of patients with psoriasis and dermatologists: a
+cross-sectional study. BMC Med Inform Decis Mak 2020;20(1):344.
+79. Embrey JR Jr. How physicians can protect themselves from litigation
+risk from virtual care. Medical Economics Journal. September 8, 2021.
+Available at: https://www.medicaleconomics.com/view/how-physicianscan-protect-themselves-from-litigation-risk-from-virtual-care. Accessed
+September 19, 2022.
+80. Gardner M, McVety D, eds. Treatment and care of the geriatric veterinary patient. 1st ed. John Wiley & Sons; 2017.
+81. Goldberg ME, Tomlinson JE. Introduction to physical rehabilitation for
+veterinary technicians/nurses. In: Physical rehabilitation for veterinary
+technicians and nurses. Hoboken (NJ): Wiley Blackwell; 2018:1–10.
+
+JAAHA.ORG
+
+21
+
+

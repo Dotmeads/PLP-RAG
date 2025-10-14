@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from bm25_retriever import BM25Retriever, HybridRetriever
 from rrf_fusion import RRFFusion
 from cross_encoder_reranker import CrossEncoderReranker
-from extractive_generator import ExtractiveAnswerGenerator, ExtractiveAnswer
+from free_llm_generator import FreeLLMGenerator, LLMAnswerResult
 from vector_store import VectorStoreManager
 from document_processor import DocumentProcessor
 
@@ -45,7 +45,18 @@ class ProposedRAGSystem:
         self.bm25_retriever = None
         self.rrf_fusion = RRFFusion(k=60)
         self.reranker = CrossEncoderReranker()
-        self.answer_generator = ExtractiveAnswerGenerator()
+        # Try free LLM providers in order of preference
+        try:
+            self.answer_generator = FreeLLMGenerator(provider="groq")
+            logger.info("Using free LLM generator (Groq)")
+        except Exception:
+            try:
+                self.answer_generator = FreeLLMGenerator(provider="deepseek")
+                logger.info("Using free LLM generator (DeepSeek)")
+            except Exception:
+                # Fallback to basic generation (no LLM)
+                self.answer_generator = FreeLLMGenerator(provider="basic")
+                logger.info("Using basic answer generation (no LLM)")
         
         # Performance tracking
         self.query_count = 0
@@ -124,9 +135,14 @@ class ProposedRAGSystem:
             supported_extensions = ['.pdf', '.txt', '.docx', '.md', '.html']
             file_paths = []
             
+            # First, collect all files
+            all_files = []
             for ext in supported_extensions:
                 pattern = os.path.join(directory_path, f"**/*{ext}")
-                file_paths.extend(glob.glob(pattern, recursive=True))
+                all_files.extend(glob.glob(pattern, recursive=True))
+            
+            # Filter out PDF files if TXT version exists
+            file_paths = self._filter_duplicate_files(all_files)
             
             if not file_paths:
                 logger.warning(f"No supported documents found in {directory_path}")
@@ -145,6 +161,51 @@ class ProposedRAGSystem:
                 'error': str(e),
                 'documents_processed': 0
             }
+    
+    def _filter_duplicate_files(self, file_paths: List[str]) -> List[str]:
+        """
+        Filter out PDF files if a corresponding TXT file exists with the same name
+        
+        Args:
+            file_paths: List of all file paths found
+            
+        Returns:
+            Filtered list of file paths
+        """
+        import os
+        from pathlib import Path
+        
+        # Group files by their base name (without extension)
+        file_groups = {}
+        for file_path in file_paths:
+            path_obj = Path(file_path)
+            base_name = path_obj.stem  # filename without extension
+            if base_name not in file_groups:
+                file_groups[base_name] = []
+            file_groups[base_name].append(file_path)
+        
+        filtered_files = []
+        skipped_files = []
+        
+        for base_name, files in file_groups.items():
+            # Check if we have both PDF and TXT versions
+            pdf_files = [f for f in files if f.lower().endswith('.pdf')]
+            txt_files = [f for f in files if f.lower().endswith('.txt')]
+            
+            if pdf_files and txt_files:
+                # Prefer TXT files over PDF files
+                filtered_files.extend(txt_files)
+                skipped_files.extend(pdf_files)
+                logger.info(f"Skipping PDF files {pdf_files} in favor of TXT files {txt_files}")
+            else:
+                # No conflict, include all files
+                filtered_files.extend(files)
+        
+        if skipped_files:
+            logger.info(f"Filtered out {len(skipped_files)} duplicate PDF files")
+            logger.info(f"Processing {len(filtered_files)} files after deduplication")
+        
+        return filtered_files
     
     def query(self, question: str, use_reranking: bool = True, 
               rerank_threshold: float = 0.1, max_rerank: int = 20) -> ProposedRAGResult:
@@ -303,8 +364,8 @@ class ProposedRAGSystem:
             logger.error(f"Error in reranking: {str(e)}")
             return documents[:5]  # Fallback to top 5
     
-    def _generate_answer(self, question: str, documents: List[Dict]) -> ExtractiveAnswer:
-        """Generate extractive answer from documents"""
+    def _generate_answer(self, question: str, documents: List[Dict]) -> LLMAnswerResult:
+        """Generate hybrid answer from documents"""
         try:
             return self.answer_generator.generate_answer(question, documents)
         except Exception as e:
