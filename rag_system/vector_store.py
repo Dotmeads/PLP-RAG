@@ -10,15 +10,13 @@ from chromadb.config import Settings
 # LangChain components
 try:
     from langchain_community.vectorstores import Chroma
-    from langchain_openai import OpenAIEmbeddings
+    from langchain_community.embeddings import OpenAIEmbeddings, SentenceTransformerEmbeddings
     from langchain_core.documents import Document as LangChainDocument
-    from langchain_community.embeddings import SentenceTransformerEmbeddings
 except ImportError:
     # Fallback for older versions
     from langchain.vectorstores import Chroma
-    from langchain.embeddings import OpenAIEmbeddings
+    from langchain.embeddings import OpenAIEmbeddings, SentenceTransformerEmbeddings
     from langchain.schema import Document as LangChainDocument
-    from langchain.embeddings import SentenceTransformerEmbeddings
 
 from config import (
     CHROMA_PERSIST_DIRECTORY, 

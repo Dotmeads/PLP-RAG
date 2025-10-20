@@ -23,7 +23,13 @@ tiktoken==0.5.2
 numpy==1.24.3
 pandas==2.0.3
 
-# Optional: for advanced features
-transformers==4.36.2
-torch==2.1.1
+# Machine Learning & NLP
+scikit-learn==1.7.2
+transformers==4.57.1
+huggingface_hub==0.35.3
+torch==2.9.0
 accelerate==0.25.0
+rapidfuzz==3.14.1
+joblib==1.5.2
+
+# Optional: for advanced features

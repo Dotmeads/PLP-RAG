@@ -6,12 +6,12 @@ import time
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
-from bm25_retriever import BM25Retriever, HybridRetriever
-from rrf_fusion import RRFFusion
-from cross_encoder_reranker import CrossEncoderReranker
-from free_llm_generator import FreeLLMGenerator, LLMAnswerResult
-from vector_store import VectorStoreManager
-from document_processor import DocumentProcessor
+from .bm25_retriever import BM25Retriever, HybridRetriever
+from .rrf_fusion import RRFFusion
+from .cross_encoder_reranker import CrossEncoderReranker
+from .free_llm_generator import FreeLLMGenerator, LLMAnswerResult
+from .vector_store import VectorStoreManager
+from .document_processor import DocumentProcessor
 
 logger = logging.getLogger(__name__)
 
