@@ -14,21 +14,21 @@ import numpy as np
 
 # Import your existing RAG components
 from rag_system.proposed_rag_system import ProposedRAGManager
-from chatbot_system.chatbot_pipeline import ChatbotPipeline
-from chatbot_system.intent_classifier import IntentClassifier
-from chatbot_system.entity_extractor import EntityExtractor
+from chatbot_flow.chatbot_pipeline import ChatbotPipeline
+from chatbot_flow.intent_classifier import IntentClassifier
+from chatbot_flow.entity_extractor import EntityExtractor
 
 # Import Azure components
-from src.config import get_blob_settings, local_ner_dir, local_mr_dir, local_pets_csv_path
-from src.azure_io import download_prefix_flat, smart_download_single_blob
-from src.models import load_ner_pipeline, load_mr_model, load_faiss_index
-from src.retrieval import (
+from pet_retrieval.config import get_blob_settings, local_ner_dir, local_mr_dir, local_pets_csv_path
+from pet_retrieval.azure_io import download_prefix_flat, smart_download_single_blob
+from pet_retrieval.models import load_ner_pipeline, load_mr_model, load_faiss_index
+from pet_retrieval.retrieval import (
     only_text, BM25,
     parse_facets_from_text, entity_spans_to_facets, sanitize_facets_ner_light,
     filter_with_relaxation, make_boosted_query,
     emb_search, mmr_rerank
 )
-from src.ui import sidebar_controls
+from pet_retrieval.ui import sidebar_controls
 
 # Optional fuzzy breed mapping
 try:

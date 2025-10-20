@@ -54,7 +54,7 @@ PLP RAG/
 │   ├── rrf_fusion.py             # Rank fusion algorithm
 │   └── vector_store.py           # ChromaDB vector storage
 │
-├── 🤖 **Chatbot System** (`chatbot_system/`)
+├── 🤖 **Chatbot Flow** (`chatbot_flow/`)
 │   ├── chatbot_pipeline.py       # Main chatbot logic
 │   ├── entity_extractor.py       # NER for pet entities
 │   ├── intent_classifier.py      # Intent classification
@@ -78,7 +78,7 @@ PLP RAG/
 ├── 📚 **Data & Models**
 │   ├── documents/                # Pet care knowledge base
 │   ├── models/                   # Pre-trained ML models
-│   ├── src/                      # Azure components
+│   ├── pet_retrieval/            # Azure components
 │   └── chroma_db/                # Vector database
 │
 └── 📖 **Documentation**
@@ -164,7 +164,7 @@ print(f"Sources: {len(result['sources'])} documents")
 
 ### **Pet Adoption Queries (Chatbot)**
 ```python
-from chatbot_system.chatbot_pipeline import ChatbotPipeline
+from chatbot_flow.chatbot_pipeline import ChatbotPipeline
 from rag_system.proposed_rag_system import ProposedRAGManager
 
 # Initialize chatbot with RAG integration
@@ -179,7 +179,7 @@ print(response)
 
 ### **Multi-Turn Conversations**
 ```python
-from chatbot_system.chatbot_pipeline import ChatbotPipeline
+from chatbot_flow.chatbot_pipeline import ChatbotPipeline
 from rag_system.proposed_rag_system import ProposedRAGManager
 
 # Initialize chatbot with RAG integration
@@ -200,8 +200,8 @@ for i, response in enumerate(responses, 1):
 
 ### **Intent Classification & Entity Extraction**
 ```python
-from chatbot_system.intent_classifier import IntentClassifier
-from chatbot_system.entity_extractor import EntityExtractor
+from chatbot_flow.intent_classifier import IntentClassifier
+from chatbot_flow.entity_extractor import EntityExtractor
 
 # Intent classification
 intent_classifier = IntentClassifier()
@@ -251,7 +251,7 @@ python multi_turn_chat.py
 
 # Test specific conversation flows
 python -c "
-from chatbot_system.chatbot_pipeline import ChatbotPipeline
+from chatbot_flow.chatbot_pipeline import ChatbotPipeline
 from rag_system.proposed_rag_system import ProposedRAGManager
 
 rag = ProposedRAGManager('test', use_openai=False)
@@ -317,8 +317,8 @@ print('RAG system working!')
 
 # Test chatbot components
 python -c "
-from chatbot_system.intent_classifier import IntentClassifier
-from chatbot_system.entity_extractor import EntityExtractor
+from chatbot_flow.intent_classifier import IntentClassifier
+from chatbot_flow.entity_extractor import EntityExtractor
 print('Chatbot components working!')
 "
 ```

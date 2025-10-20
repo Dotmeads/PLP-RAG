@@ -20,16 +20,16 @@ def test_imports():
         from rag_system.proposed_rag_system import ProposedRAGManager
         print("✅ RAG system imported successfully")
         
-        from chatbot_system.chatbot_pipeline import ChatbotPipeline
-        from chatbot_system.intent_classifier import IntentClassifier
-        from chatbot_system.entity_extractor import EntityExtractor
+        from chatbot_flow.chatbot_pipeline import ChatbotPipeline
+        from chatbot_flow.intent_classifier import IntentClassifier
+        from chatbot_flow.entity_extractor import EntityExtractor
         print("✅ Chatbot components imported successfully")
         
         # Test Azure components
-        from src.config import get_blob_settings, local_ner_dir, local_mr_dir, local_pets_csv_path
-        from src.azure_io import download_prefix_flat, smart_download_single_blob
-        from src.models import load_ner_pipeline, load_mr_model, load_faiss_index
-        from src.retrieval import only_text, BM25, parse_facets_from_text, entity_spans_to_facets
+        from pet_retrieval.config import get_blob_settings, local_ner_dir, local_mr_dir, local_pets_csv_path
+        from pet_retrieval.azure_io import download_prefix_flat, smart_download_single_blob
+        from pet_retrieval.models import load_ner_pipeline, load_mr_model, load_faiss_index
+        from pet_retrieval.retrieval import only_text, BM25, parse_facets_from_text, entity_spans_to_facets
         print("✅ Azure components imported successfully")
         
         return True
@@ -75,9 +75,9 @@ def test_chatbot_components():
     print("\n🤖 Testing chatbot components...")
     
     try:
-        from chatbot_system.intent_classifier import IntentClassifier
-        from chatbot_system.entity_extractor import EntityExtractor
-        from chatbot_system.chatbot_pipeline import ChatbotPipeline
+        from chatbot_flow.intent_classifier import IntentClassifier
+        from chatbot_flow.entity_extractor import EntityExtractor
+        from chatbot_flow.chatbot_pipeline import ChatbotPipeline
         from rag_system.proposed_rag_system import ProposedRAGManager
         
         # Initialize components
@@ -115,7 +115,7 @@ def test_azure_components():
     print("\n☁️ Testing Azure components...")
     
     try:
-        from src.config import get_blob_settings, local_ner_dir, local_mr_dir, local_pets_csv_path
+        from pet_retrieval.config import get_blob_settings, local_ner_dir, local_mr_dir, local_pets_csv_path
         
         # Test configuration
         try:
@@ -139,7 +139,7 @@ def test_azure_components():
         print(f"   Pets CSV: {pets_csv}")
         
         # Test Azure I/O functions
-        from src.azure_io import list_blobs_with_prefix, try_download_single_blob
+        from pet_retrieval.azure_io import list_blobs_with_prefix, try_download_single_blob
         
         # This would require actual Azure credentials
         print("✅ Azure I/O functions available")

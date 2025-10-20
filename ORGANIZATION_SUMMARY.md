@@ -21,10 +21,10 @@ pip install -r requirements_stable.txt
 
 ```
 rag_system/          # RAG components (BM25, embeddings, reranker, Chroma)
-chatbot_system/      # Intent classifier, NER, pipeline, responses, synonyms
+chatbot_flow/      # Intent classifier, NER, pipeline, responses, synonyms
 apps/                # Streamlit apps (unified + optimized)
 tests/               # Integration tests
-src/                 # Azure pet search components from teammate
+pet_retrieval/       # Azure pet search components from teammate
 documents/           # Knowledge base
 models/              # Local intent model artifacts
 chroma_db/           # Chroma persistence dir
@@ -63,7 +63,7 @@ rag.ask("What can I feed my dog?")
 
 ## 🤖 Chatbot Components
 
-- `chatbot_system/chatbot_pipeline.py` orchestrates intent + NER + routing
+- `chatbot_flow/chatbot_pipeline.py` orchestrates intent + NER + routing
 - Intent model artifacts in `models/intent/*`
 - NER pipeline downloads from HF hub (teammate model) on first run
 

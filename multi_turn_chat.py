@@ -13,7 +13,7 @@ from typing import Dict, List, Any
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
-from chatbot_system.chatbot_pipeline import ChatbotPipeline
+from chatbot_flow.chatbot_pipeline import ChatbotPipeline
 from rag_system.proposed_rag_system import ProposedRAGManager
 
 class MultiTurnPetBot:
