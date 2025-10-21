@@ -124,24 +124,40 @@ class ChatbotPipeline:
     # PET CARE HANDLER (RAG Integration)
     # -----------------------------------------------------------------------
     def _handle_pet_care(self, user_input: str) -> str:
-        """Handle pet care questions - simplified version for now"""
-        # Simple keyword-based responses for common pet care questions
-        lower_input = user_input.lower()
+        """Handle pet care questions using RAG system"""
+        if self.rag_system is None:
+            return "🐾 I'd love to help with pet care questions! However, the RAG system is not available right now. Please try again later."
         
-        if any(word in lower_input for word in ['feed', 'food', 'eating', 'diet']):
-            return "🐾 For feeding your pet, I recommend:\n• High-quality commercial pet food appropriate for their age\n• Fresh water always available\n• Avoid human foods like chocolate, onions, and grapes\n• Consult your vet for specific dietary needs"
-        
-        elif any(word in lower_input for word in ['vaccine', 'vaccination', 'shots']):
-            return "🐾 Vaccination schedule:\n• Puppies: 6-8 weeks, then every 3-4 weeks until 16 weeks\n• Kittens: 6-8 weeks, then every 3-4 weeks until 16 weeks\n• Adult pets: Annual boosters\n• Always consult your veterinarian for the best schedule"
-        
-        elif any(word in lower_input for word in ['groom', 'bath', 'clean']):
-            return "🐾 Grooming tips:\n• Brush regularly to prevent matting\n• Bathe monthly or as needed\n• Trim nails carefully\n• Clean ears and teeth regularly\n• Use pet-safe products only"
-        
-        elif any(word in lower_input for word in ['exercise', 'walk', 'play']):
-            return "🐾 Exercise recommendations:\n• Dogs: Daily walks and playtime\n• Cats: Interactive toys and climbing structures\n• Adjust activity level to your pet's age and health\n• Always supervise outdoor activities"
-        
-        else:
-            return "🐾 I'd love to help with pet care questions! For now, I can provide general advice on feeding, vaccinations, grooming, and exercise. For specific medical concerns, please consult your veterinarian."
+        try:
+            # Use RAG system to get detailed answer
+            result = self.rag_system.ask(user_input)
+            answer = result.get('answer', 'Sorry, I couldn\'t find information about that.')
+            confidence = result.get('confidence', 0)
+            
+            # Add confidence indicator if low
+            if confidence < 0.7:
+                return f"🐾 {answer}\n\n*Note: This answer has lower confidence. Please consult your veterinarian for specific medical advice.*"
+            else:
+                return f"🐾 {answer}"
+                
+        except Exception as e:
+            # Fallback to simple responses if RAG fails
+            lower_input = user_input.lower()
+            
+            if any(word in lower_input for word in ['feed', 'food', 'eating', 'diet']):
+                return "🐾 For feeding your pet, I recommend:\n• High-quality commercial pet food appropriate for their age\n• Fresh water always available\n• Avoid human foods like chocolate, onions, and grapes\n• Consult your vet for specific dietary needs"
+            
+            elif any(word in lower_input for word in ['vaccine', 'vaccination', 'shots']):
+                return "🐾 Vaccination schedule:\n• Puppies: 6-8 weeks, then every 3-4 weeks until 16 weeks\n• Kittens: 6-8 weeks, then every 3-4 weeks until 16 weeks\n• Adult pets: Annual boosters\n• Always consult your veterinarian for the best schedule"
+            
+            elif any(word in lower_input for word in ['groom', 'bath', 'clean']):
+                return "🐾 Grooming tips:\n• Brush regularly to prevent matting\n• Bathe monthly or as needed\n• Trim nails carefully\n• Clean ears and teeth regularly\n• Use pet-safe products only"
+            
+            elif any(word in lower_input for word in ['exercise', 'walk', 'play']):
+                return "🐾 Exercise recommendations:\n• Dogs: Daily walks and playtime\n• Cats: Interactive toys and climbing structures\n• Adjust activity level to your pet's age and health\n• Always supervise outdoor activities"
+            
+            else:
+                return f"🐾 I'd love to help with pet care questions! However, I encountered an error: {str(e)}. For specific medical concerns, please consult your veterinarian."
 
     # -----------------------------------------------------------------------
     # FIND-PET HANDLER
