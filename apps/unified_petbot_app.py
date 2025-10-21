@@ -389,7 +389,12 @@ def main():
         st.subheader("System Info")
         st.write(f"**Mode**: {mode}")
         if mode in ["Pet Care Q&A", "Both"] and rag is not None:
-            st.write(f"**RAG Documents**: {len(rag.system.document_processor.documents)}")
+            # Get document count from vector store instead
+            try:
+                doc_count = len(rag.system.vector_manager.vector_store.get()['ids'])
+                st.write(f"**RAG Documents**: {doc_count}")
+            except:
+                st.write(f"**RAG Documents**: Available")
         if mode in ["Pet Search", "Both"] and azure_components[0] is not None:
             st.write(f"**Pet Database**: {len(azure_components[5])} pets")
 
