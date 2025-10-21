@@ -130,6 +130,36 @@ streamlit run apps/unified_petbot_app.py --server.port 8503
 # After initialization, all searches are instant!
 ```
 
+#### **⏱️ First-Time Setup Expectations**
+**First Run (One-time only):**
+- **Duration**: 2-3 minutes
+- **What's happening**: Downloading Azure models (23MB FAISS index, 11MB pets database)
+- **Progress**: You'll see "🚀 Initializing PetBot systems..." with loading spinner
+- **Components**: NER model, MR model, FAISS index, 6,956 pet records
+- **Status**: App accessible at `http://localhost:8503` but still initializing
+
+**Subsequent Runs:**
+- **Duration**: <10 seconds
+- **What's happening**: Loading cached components from disk
+- **Status**: Instant access to all features
+
+**💡 Pro Tip**: The first run downloads ~35MB of models and data. This is a one-time process - all future runs are lightning fast!
+
+#### **🔍 What You'll See During Initialization**
+```
+🚀 Initializing PetBot systems...
+├── Downloading NER model (9 files) ✅
+├── Downloading MR model (11 files) ✅  
+├── Downloading pets database (11.8MB) ✅
+├── Loading FAISS index (23MB) ✅
+├── Processing 6,956 pet records ✅
+└── Initializing search components ✅
+
+Sidebar Status:
+├── RAG System: ✅ Ready (941 documents)
+└── Pet Search: ✅ Ready (6,956 pets)
+```
+
 ### 4. **Test the System**
 ```bash
 # Run integration tests
@@ -388,14 +418,24 @@ print('Chatbot components working!')
 
 ### **Common Issues**
 
-1. **Import Errors**
+1. **App Stuck on "Initializing PetBot systems..."**
+   ```bash
+   # This is normal for first run - wait 2-3 minutes
+   # Check terminal for download progress
+   # Look for "✅ Pet search ready" in sidebar when complete
+   
+   # If stuck for >5 minutes, restart:
+   # Ctrl+C to stop, then restart the app
+   ```
+
+2. **Import Errors**
    ```bash
    # Ensure virtual environment is activated
    source .venv/bin/activate
    pip install -r requirements_stable.txt
    ```
 
-2. **Model Loading Issues**
+3. **Model Loading Issues**
    ```bash
    # Clear model cache and reinstall
    pip uninstall transformers sentence-transformers
