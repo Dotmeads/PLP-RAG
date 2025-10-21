@@ -338,7 +338,7 @@ def bootstrap_rag_system():
         # Initialize chatbot components
         intent_classifier = IntentClassifier()
         entity_extractor = EntityExtractor()
-        chatbot = ChatbotPipeline(intent_classifier, entity_extractor, rag)
+        chatbot = ChatbotPipeline(rag)
         
         st.success("RAG system loaded successfully!")
         return rag, chatbot
