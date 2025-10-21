@@ -129,7 +129,9 @@ def bootstrap_azure_components():
         dfp = pd.read_csv(local_pets_csv_path())
         
         # Initialize BM25
-        bm25 = BM25(dfp["description_clean"].fillna("").tolist())
+        bm25 = BM25()
+        doc_map = {i: text for i, text in enumerate(dfp["description_clean"].fillna("").tolist())}
+        bm25.fit(doc_map)
         
         # Create breed catalog
         breed_catalog = dfp["breed"].dropna().unique().tolist()
@@ -144,16 +146,18 @@ def bootstrap_azure_components():
 # -------------------------------------------
 # PET SEARCH FUNCTIONS
 # -------------------------------------------
+@st.cache_data(ttl=300)  # Cache search results for 5 minutes
 def perform_pet_search(query, azure_components, topk=12):
-    """Perform pet search using Azure components"""
+    """Perform pet search using Azure components - OPTIMIZED with caching"""
     if azure_components[0] is None:
         return None, "Pet search not available"
     
     ner, student, doc_ids, doc_vecs, faiss_index, dfp, bm25, breed_catalog, breed_to_animal = azure_components
     
     try:
-        # Process query
-        raw_spans = ner([query[:300]])[0] if query else []
+        # Process query - limit NER processing for speed
+        query_short = query[:300] if len(query) > 300 else query
+        raw_spans = ner([query_short])[0] if query else []
         spans = resolve_overlaps_longest(raw_spans)
         mf = entity_spans_to_facets(spans)
         rf = parse_facets_from_text(query)
@@ -277,13 +281,20 @@ def main():
     st.title("🐾 Unified PetBot")
     st.caption("Intelligent Pet Assistant - Ask about pet care or find pets for adoption")
 
-    # Load all components
+    # Pre-load all components at startup
+    with st.spinner("🚀 Initializing PetBot systems..."):
+        # Load RAG system
+        rag, chatbot = bootstrap_rag_system()
+        
+        # Load Azure components
+        azure_components = bootstrap_azure_components()
+
+    # Display system status
     with st.sidebar:
         st.header("System Status")
         
-        # Load RAG system
+        # RAG System Status
         st.subheader("RAG System")
-        rag, chatbot = bootstrap_rag_system()
         if rag is None:
             st.error("❌ RAG system failed to load")
         else:
@@ -294,9 +305,8 @@ def main():
             except:
                 st.write(f"**Documents**: Available")
         
-        # Load Azure components
+        # Azure System Status
         st.subheader("Pet Search")
-        azure_components = bootstrap_azure_components()
         if azure_components[0] is None:
             st.error("❌ Azure pet search failed to load")
         else:
