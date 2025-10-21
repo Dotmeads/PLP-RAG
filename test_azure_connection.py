@@ -14,14 +14,30 @@ def test_azure_connection():
     print("🔍 Testing Azure Blob Storage Connection...")
     print("=" * 50)
     
-    # Check for connection string
-    conn_str = os.getenv('AZURE_CONNECTION_STRING')
+    # Try to get connection string from Streamlit secrets first, then environment
+    conn_str = None
+    
+    # Try Streamlit secrets
+    try:
+        import streamlit as st
+        conn_str = st.secrets.get("AZURE_CONNECTION_STRING")
+        print("✅ Found Azure credentials in .streamlit/secrets.toml")
+    except Exception:
+        pass
+    
+    # Fallback to environment variable
     if not conn_str:
-        print("❌ No AZURE_CONNECTION_STRING environment variable found")
+        conn_str = os.getenv('AZURE_CONNECTION_STRING')
+        if conn_str:
+            print("✅ Found Azure credentials in environment variables")
+    
+    if not conn_str:
+        print("❌ No Azure credentials found")
         print("\n📝 To test Azure connection, you need:")
-        print("1. Azure Storage Account connection string")
-        print("2. Set environment variable: export AZURE_CONNECTION_STRING='your_connection_string'")
-        print("3. Or create .streamlit/secrets.toml with Azure credentials")
+        print("1. Create .streamlit/secrets.toml with Azure credentials")
+        print("2. Or set environment variable: export AZURE_CONNECTION_STRING='your_connection_string'")
+        print("\nExample .streamlit/secrets.toml:")
+        print("AZURE_CONNECTION_STRING = \"DefaultEndpointsProtocol=https;AccountName=...\"")
         return False
     
     try:

@@ -120,15 +120,16 @@ def bootstrap_azure_components():
         smart_download_single_blob(settings["connection_string"], settings["pets_container"], "all_pet_details_clean.csv", local_pets_csv_path())
         
         # Load models
-        ner = load_ner_pipeline()
-        student, doc_ids, doc_vecs = load_mr_model()
-        faiss_index = load_faiss_index()
+        ner = load_ner_pipeline(local_ner_dir())
+        student, doc_ids, doc_vecs = load_mr_model(local_mr_dir())
+        model_dim = student.get_sentence_embedding_dimension()
+        faiss_index = load_faiss_index(local_mr_dir(), model_dim)
         
         # Load pet data
-        dfp = pd.read_csv(local_pets_csv_path)
+        dfp = pd.read_csv(local_pets_csv_path())
         
         # Initialize BM25
-        bm25 = BM25(dfp["description"].fillna("").tolist())
+        bm25 = BM25(dfp["description_clean"].fillna("").tolist())
         
         # Create breed catalog
         breed_catalog = dfp["breed"].dropna().unique().tolist()
