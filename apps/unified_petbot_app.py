@@ -115,9 +115,9 @@ def bootstrap_azure_components():
         settings = get_blob_settings()
         
         # Download models and data
-        download_prefix_flat(settings, "ner", local_ner_dir)
-        download_prefix_flat(settings, "mr", local_mr_dir)
-        smart_download_single_blob(settings, "pet-adoption-data", "all_pet_details_clean.csv", local_pets_csv_path)
+        download_prefix_flat(settings["connection_string"], settings["ml_container"], "ner", local_ner_dir())
+        download_prefix_flat(settings["connection_string"], settings["ml_container"], "mr", local_mr_dir())
+        smart_download_single_blob(settings["connection_string"], settings["pets_container"], "all_pet_details_clean.csv", local_pets_csv_path())
         
         # Load models
         ner = load_ner_pipeline()
