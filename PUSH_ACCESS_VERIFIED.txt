@@ -1,0 +1,5 @@
+This file verifies push access to Dotmeads/PLP-RAG repository.
+Created on: October 22, 2025
+Purpose: Testing deployment setup for Streamlit Cloud
+Branch: test-push-access
+
