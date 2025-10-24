@@ -30,3 +30,4 @@ api_keys.py
 .vscode/
 .idea/
 
+artifacts/
