@@ -37,4 +37,9 @@ langchain-community>=0.0.20
 langchain-core>=0.1.0
 joblib==1.5.2
 
+# Azure Integration
+azure-storage-blob==12.19.1
+azure-identity==1.15.0
+azure-core==1.29.5
+
 # Optional: for advanced features
