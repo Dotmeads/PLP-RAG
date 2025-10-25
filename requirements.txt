@@ -2,7 +2,7 @@ openai==1.6.1
 
 # Vector DB & embeddings
 chromadb==0.4.22
-sentence-transformers==2.2.2
+sentence-transformers==2.7.0
 faiss-cpu==1.9.0.post1
 
 # Document processing
@@ -25,8 +25,8 @@ pandas>=2.1.0
 
 # Machine Learning & NLP
 scikit-learn>=1.4.0
-transformers==4.57.1
-huggingface_hub==0.35.3
+transformers==4.36.2
+huggingface_hub==0.19.4
 torch==2.9.0
 accelerate==0.25.0
 rapidfuzz==3.14.1
