@@ -91,49 +91,29 @@ def resolve_overlaps_longest(spans):
 def bootstrap_rag_system():
     """Initialize RAG system and chatbot pipeline"""
     try:
-        st.info("🔄 Initializing RAG system...")
-        
         # Initialize RAG system with free embeddings (no OpenAI required)
         rag = ProposedRAGManager(use_openai=False)
-        st.info("✅ RAG system initialized")
         
         # Load documents
         documents_dir = os.path.join(project_root, "documents")
-        st.info(f"🔍 Checking documents directory: {documents_dir}")
-        st.info(f"🔍 Directory exists: {os.path.exists(documents_dir)}")
-        
         if os.path.exists(documents_dir):
-            # List files in directory
-            files = os.listdir(documents_dir)
-            st.info(f"📁 Found {len(files)} files in documents directory")
-            
-            st.info(f"📚 Loading documents from: {documents_dir}")
             result = rag.add_directory(documents_dir)
-            st.info(f"📊 Document loading result: {result}")
-            
-            if result.get('success', False):
-                st.success(f"✅ Documents loaded: {result.get('documents_processed', 0)} documents")
-            else:
+            if not result.get('success', False):
                 st.warning(f"⚠️ Document loading had issues: {result.get('error', 'Unknown error')}")
         else:
             st.warning(f"⚠️ Documents directory not found: {documents_dir}")
             # Try to create it
             try:
                 os.makedirs(documents_dir, exist_ok=True)
-                st.info(f"📁 Created documents directory: {documents_dir}")
             except Exception as e:
                 st.error(f"❌ Could not create documents directory: {e}")
         
         # Initialize chatbot pipeline with RAG (Azure components will be added later)
-        st.info("🤖 Initializing chatbot pipeline...")
         chatbot = ChatbotPipeline(rag)
-        st.success("✅ Chatbot pipeline ready")
         
         return rag, chatbot
     except Exception as e:
         st.error(f"❌ Failed to initialize RAG system: {str(e)}")
-        import traceback
-        st.error(f"Full error: {traceback.format_exc()}")
         return None, None
 
 @st.cache_resource
