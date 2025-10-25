@@ -30,4 +30,7 @@ api_keys.py
 .vscode/
 .idea/
 
+# Temporary files
+temp/
+
 artifacts/

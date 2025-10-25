@@ -160,21 +160,37 @@ class DocumentProcessor:
         return chunks
     
     def process_directory(self, directory_path: str) -> List[LangChainDocument]:
-        """Process all supported files in a directory"""
+        """Process all supported files in a directory with better resource management"""
         directory = Path(directory_path)
         all_chunks = []
         
         if not directory.exists():
             raise FileNotFoundError(f"Directory not found: {directory}")
         
+        # Get list of files first to avoid resource issues
+        files_to_process = []
         for file_path in directory.rglob("*"):
             if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_EXTENSIONS:
-                try:
-                    chunks = self.process_file(str(file_path))
-                    all_chunks.extend(chunks)
-                except Exception as e:
-                    logger.error(f"Error processing {file_path}: {str(e)}")
-                    continue
+                files_to_process.append(file_path)
+        
+        logger.info(f"Found {len(files_to_process)} files to process")
+        
+        # Process files with better error handling and resource cleanup
+        for i, file_path in enumerate(files_to_process):
+            try:
+                logger.info(f"Processing file {i+1}/{len(files_to_process)}: {file_path.name}")
+                chunks = self.process_file(str(file_path))
+                all_chunks.extend(chunks)
+                logger.info(f"Document split into {len(chunks)} chunks")
+                
+                # Force garbage collection every 10 files to prevent resource leaks
+                if (i + 1) % 10 == 0:
+                    import gc
+                    gc.collect()
+                    
+            except Exception as e:
+                logger.error(f"Error processing {file_path}: {str(e)}")
+                continue
         
         logger.info(f"Processed {len(all_chunks)} total chunks from directory")
         return all_chunks
