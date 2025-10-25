@@ -98,22 +98,14 @@ def bootstrap_rag_system():
         documents_dir = os.path.join(project_root, "documents")
         if os.path.exists(documents_dir):
             result = rag.add_directory(documents_dir)
-            if not result.get('success', False):
-                st.warning(f"⚠️ Document loading had issues: {result.get('error', 'Unknown error')}")
         else:
-            st.warning(f"⚠️ Documents directory not found: {documents_dir}")
-            # Try to create it
-            try:
-                os.makedirs(documents_dir, exist_ok=True)
-            except Exception as e:
-                st.error(f"❌ Could not create documents directory: {e}")
+            st.warning(f"Documents directory not found: {documents_dir}")
         
-        # Initialize chatbot pipeline with RAG (Azure components will be added later)
+        # Initialize chatbot pipeline with RAG
         chatbot = ChatbotPipeline(rag)
-        
         return rag, chatbot
     except Exception as e:
-        st.error(f"❌ Failed to initialize RAG system: {str(e)}")
+        st.error(f"Failed to initialize RAG system: {str(e)}")
         return None, None
 
 @st.cache_resource
