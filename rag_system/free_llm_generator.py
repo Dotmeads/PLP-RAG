@@ -102,7 +102,7 @@ class FreeLLMGenerator:
             content = self._clean_content(content)
             
             if content and len(content) > 50:
-                context_parts.append(f"Source: {source}\nContent: {content[:500]}...")
+                context_parts.append(f"Source: {source}\nContent: {content[:1000]}...")
         
         return "\n\n".join(context_parts)
     
@@ -124,7 +124,7 @@ class FreeLLMGenerator:
                     {"role": "system", "content": "You are a helpful veterinary assistant. Provide clear, accurate, and professional advice about pet care based on the given context."},
                     {"role": "user", "content": prompt}
                 ],
-                "max_tokens": 400,
+                "max_tokens": 1500,
                 "temperature": 0.3,
                 "stream": False
             }
@@ -144,7 +144,7 @@ class FreeLLMGenerator:
             return LLMAnswerResult(
                 answer=answer,
                 confidence=0.9,
-                sources_used=[{'source': doc.get('source', 'Unknown'), 'content': doc.get('content', '')[:100]} for doc in documents[:3]],
+                sources_used=[{'source': doc.get('source', 'Unknown'), 'content': doc.get('content', '')[:200]} for doc in documents[:3]],
                 generation_method="deepseek",
                 citations=[doc.get('source', 'Unknown') for doc in documents[:3]]
             )
@@ -170,7 +170,7 @@ class FreeLLMGenerator:
                     {"role": "system", "content": "You are a helpful veterinary assistant. Provide clear, accurate, and professional advice about pet care based on the given context."},
                     {"role": "user", "content": prompt}
                 ],
-                "max_tokens": 400,
+                "max_tokens": 1500,
                 "temperature": 0.3
             }
             
@@ -183,7 +183,7 @@ class FreeLLMGenerator:
             return LLMAnswerResult(
                 answer=answer,
                 confidence=0.9,
-                sources_used=[{'source': doc.get('source', 'Unknown'), 'content': doc.get('content', '')[:100]} for doc in documents[:3]],
+                sources_used=[{'source': doc.get('source', 'Unknown'), 'content': doc.get('content', '')[:200]} for doc in documents[:3]],
                 generation_method="groq",
                 citations=[doc.get('source', 'Unknown') for doc in documents[:3]]
             )
@@ -220,7 +220,7 @@ class FreeLLMGenerator:
             return LLMAnswerResult(
                 answer=answer,
                 confidence=0.8,
-                sources_used=[{'source': doc.get('source', 'Unknown'), 'content': doc.get('content', '')[:100]} for doc in documents[:3]],
+                sources_used=[{'source': doc.get('source', 'Unknown'), 'content': doc.get('content', '')[:200]} for doc in documents[:3]],
                 generation_method="huggingface",
                 citations=[doc.get('source', 'Unknown') for doc in documents[:3]]
             )

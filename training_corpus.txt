@@ -1,0 +1,327 @@
+# RAG System Training Corpus
+
+This document provides a comprehensive reference of all documents used to train the RAG (Retrieval-Augmented Generation) system for pet care questions.
+
+## Document Statistics
+- **Total Documents**: 39
+- **Total Chunks**: 934
+- **Document Types**: PDF, TXT, MD (Markdown)
+- **Sources**: Academic papers, veterinary guidelines, pet care websites, and reference books
+
+---
+
+## Main Documents
+
+### 1. 2023 AAHA Senior Care Guidelines for Dogs and Cats
+- **File**: `2023-aaha-senior-care-guidelines-for-dogs-and-cats.txt`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 65
+- **Source**: American Animal Hospital Association (AAHA)
+- **URL**: N/A (Local document)
+
+### 2. A-Z Guide for Dog Owners
+- **File**: `article-a-z-guide-for-dog-owners.txt`
+- **Type**: Pet Care Guide
+- **Chunks**: 15
+- **Source**: General pet care resource
+- **URL**: N/A (Local document)
+
+### 3. Cat Care Guide
+- **File**: `cat-care-guide.txt`
+- **Type**: Pet Care Guide
+- **Chunks**: 12
+- **Source**: General cat care resource
+- **URL**: N/A (Local document)
+
+### 4. Cats For Dummies PDF
+- **File**: `Cats For Dummies PDF.txt`
+- **Type**: Reference Book
+- **Chunks**: 115
+- **Source**: For Dummies series
+- **URL**: N/A (Local document)
+
+### 5. Kitten Care Book
+- **File**: `Kitten-book.txt`
+- **Type**: Pet Care Guide
+- **Chunks**: 28
+- **Source**: General kitten care resource
+- **URL**: N/A (Local document)
+
+### 6. MSAH Ultimate Guide to Dog Care
+- **File**: `MSAH-ultimate-guide-to-dog-care.txt`
+- **Type**: Pet Care Guide
+- **Chunks**: 57
+- **Source**: Malaysian Small Animal Hospital
+- **URL**: N/A (Local document)
+
+### 7. Pet Health Guide
+- **File**: `pet_health_guide.txt`
+- **Type**: Pet Health Reference
+- **Chunks**: 5
+- **Source**: General pet health resource
+- **URL**: N/A (Local document)
+
+### 8. SOL - Kitten Care Guide
+- **File**: `SOL - Kitten Care Guide.txt`
+- **Type**: Pet Care Guide
+- **Chunks**: 32
+- **Source**: SOL (Save Our Lives) organization
+- **URL**: N/A (Local document)
+
+### 9. The Complete Dog Breed Book
+- **File**: `The-Complete-Dog-Breed-Book-Choose-the-Perfect-Dog-for-You-New-Edition.txt`
+- **Type**: Reference Book
+- **Chunks**: 340
+- **Source**: Dog breed reference book
+- **URL**: N/A (Local document)
+
+---
+
+## Scraped Web Documents
+
+### Veterinary Guidelines & Standards
+
+#### 1. 2024 Guidelines for the Vaccination of Dogs and Cats
+- **File**: `2024-guidelines-for-the-vaccination-of-dogs-and-cats-compiled-by-the-vaccination.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 4
+- **Source**: WSAVA (World Small Animal Veterinary Association)
+- **URL**: https://wsava.org/wp-content/uploads/2024/05/2024-Guidelines-for-the-Vaccination-of-Dogs-and-Cats.pdf
+
+#### 2. WSAVA Guidelines
+- **File**: `guidelines-wsava.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 1
+- **Source**: WSAVA
+- **URL**: https://wsava.org/global-guidelines/
+
+#### 3. WSAVA Vaccination Guidelines
+- **File**: `vaccination-guidelines-wsava.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 1
+- **Source**: WSAVA
+- **URL**: https://wsava.org/global-guidelines/vaccination-guidelines/
+
+#### 4. WSAVA Practical Guide for Preventive Pet Care
+- **File**: `wsava-creates-practical-guide-for-preventive-pet-care.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 1
+- **Source**: WSAVA
+- **URL**: https://www.dvm360.com/view/wsava-creates-practical-guide-for-preventive-pet-care
+
+#### 5. WSAVA Guidelines for Pet Reproduction
+- **File**: `wsava-guidelines-address-methods-risks-ethics-of-pet-reproduction-american-veter.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 3
+- **Source**: WSAVA
+- **URL**: https://www.avma.org/news/wsava-guidelines-address-methods-risks-ethics-pet-reproduction
+
+#### 6. WSAVA Vaccination Guidelines (PMC)
+- **File**: `wsava-guidelines-for-the-vaccination-of-dogs-and-cats-pmc.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 51
+- **Source**: WSAVA via PMC
+- **URL**: https://pmc.ncbi.nlm.nih.gov/articles/PMC7166871/
+
+### Nutrition & Feeding Guidelines
+
+#### 7. Basic Pet Nutrition - Whitefish Animal Hospital
+- **File**: `basic-pet-nutrition-whitefish-animal-hospital.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 2
+- **Source**: Whitefish Animal Hospital
+- **URL**: https://whitefishanimalhospital.com/resources/basic-pet-nutrition/
+
+#### 8. Cat Feeding Advice - Purina New Zealand
+- **File**: `cat-feeding-advice-top-tips-purina-new-zealand.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 6
+- **Source**: Purina New Zealand
+- **URL**: https://www.purina.co.nz/articles/cats/feeding/guides/cat-nutrition-guide
+
+#### 9. Cat Food Nutrition Guide - Mount Pleasant Veterinary Group
+- **File**: `cat-food-nutrition-guide-mount-pleasant-veterinary-group.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 13
+- **Source**: Mount Pleasant Veterinary Group
+- **URL**: https://www.mountpleasant.com.sg/education/cat-food-nutrition-guide/
+
+#### 10. Cat Nutrition 101 - PetDirect
+- **File**: `cat-nutrition-101-the-basics-petdirect.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 6
+- **Source**: PetDirect
+- **URL**: https://petdirect.co.nz/blog/cat-nutrition-101-the-basics
+
+#### 11. Cat Nutrition Guide - PetMD
+- **File**: `cat-nutrition-guide-to-cat-food-nutrients-petmd.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 9
+- **Source**: PetMD
+- **URL**: https://www.petmd.com/cat/nutrition/cat-nutrition-what-makes-nutritional-cat-food
+
+#### 12. Dog Nutrition Tips - ASPCA
+- **File**: `dog-nutrition-tips-aspca.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 1
+- **Source**: ASPCA
+- **URL**: https://www.aspca.org/pet-care/dog-care/dog-nutrition-tips
+
+#### 13. Dog Nutrition Guide - PetMD
+- **File**: `dog-nutrition-guide-to-dog-food-nutrients-petmd.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 15
+- **Source**: PetMD
+- **URL**: https://www.petmd.com/dog/nutrition/evr_dg_whats_in_a_balanced_dog_food
+
+#### 14. Dog Nutrition Essentials
+- **File**: `dog-nutrition-essential-nutrients-for-health-and-feeding-basics.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 3
+- **Source**: General nutrition resource
+- **URL**: N/A (Derived from multiple sources)
+
+#### 15. Feeding Your Cat - Common Sense Healthy Cats
+- **File**: `feeding-your-cat-know-the-basics-of-feline-nutrition-common-sense-healthy-cats.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 63
+- **Source**: Common Sense Healthy Cats
+- **URL**: https://catinfo.org/
+
+#### 16. Feline Nutrition Part 1 - Purina
+- **File**: `feline-nutrition-part-1-how-to-choose-the-purr-fect-diet-for-your-cat.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 3
+- **Source**: Purina
+- **URL**: https://www.purina.com/articles/cat/health/nutrition/cat-nutrition-basics
+
+#### 17. Nutrition 101 - Chimacum Valley Veterinary Hospital
+- **File**: `nutrition-101-choosing-the-right-diet-for-your-dog-chimacum-valley-veterinary-ho.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 4
+- **Source**: Chimacum Valley Veterinary Hospital
+- **URL**: https://chimacumvet.com/blog/dog-nutrition/
+
+#### 18. Nutrition Guidelines for Cats - VCA Animal Hospitals
+- **File**: `nutrition-general-feeding-guidelines-for-cats-vca-animal-hospitals.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 1
+- **Source**: VCA Animal Hospitals
+- **URL**: https://vcahospitals.com/know-your-pet/nutrition-feeding-guidelines-for-cats
+
+#### 19. Nutrition Guidelines for Dogs - VCA Animal Hospitals
+- **File**: `nutrition-general-feeding-guidelines-for-dogs-vca-animal-hospitals.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 1
+- **Source**: VCA Animal Hospitals
+- **URL**: https://vcahospitals.com/know-your-pet/nutrition-general-feeding-guidelines-for-dogs
+
+#### 20. Proper Nutrition for Cats - MSD Veterinary Manual
+- **File**: `proper-nutrition-for-cats-cat-owners-msd-veterinary-manual.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 4
+- **Source**: MSD Veterinary Manual
+- **URL**: https://www.msdvetmanual.com/cat-owners/selecting-and-providing-a-home-for-a-cat/proper-nutrition-for-cats
+
+#### 21. Understanding Pet Nutrition Basics
+- **File**: `understanding-the-basics-of-pet-nutrition-a-guide-for-pet-owners.md`
+- **Type**: Nutrition Guide
+- **Chunks**: 2
+- **Source**: Town and Country Veterinary Hospital
+- **URL**: https://www.townandcountrysd.com/understanding-the-basics-of-pet-nutrition-a-guide-for-pet-owners.html
+
+### Veterinary Resources & Manuals
+
+#### 22. MSD Veterinary Manual
+- **File**: `msd-veterinary-manual.md`
+- **Type**: Veterinary Reference
+- **Chunks**: 1
+- **Source**: MSD Veterinary Manual
+- **URL**: https://www.msdvetmanual.com/
+
+#### 23. Pet Care - American Veterinary Medical Association
+- **File**: `pet-care-american-veterinary-medical-association.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 2
+- **Source**: AVMA
+- **URL**: https://www.avma.org/resources-tools/pet-owners/petcare
+
+#### 24. Veterinary Care Guide - NCBI Bookshelf
+- **File**: `veterinary-care-guide-for-the-care-and-use-of-laboratory-animals-ncbi-bookshelf.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 47
+- **Source**: NCBI Bookshelf
+- **URL**: https://www.ncbi.nlm.nih.gov/books/NBK54052/
+
+#### 25. Veterinary Resources - CDC
+- **File**: `veterinary-resources-healthy-pets-healthy-people-cdc.md`
+- **Type**: Veterinary Guidelines
+- **Chunks**: 2
+- **Source**: CDC
+- **URL**: https://www.cdc.gov/healthy-pets/hcp/clinical-resources/veterinary-resources.html
+
+### Specialized Resources
+
+#### 26. Companion Animal Nutrition Support Service
+- **File**: `companion-animal-nutrition-support-service-veterinary-medical-center.md`
+- **Type**: Nutrition Support
+- **Chunks**: 10
+- **Source**: Veterinary Medical Center
+- **URL**: https://vmc.vet.osu.edu/services/companion-animal-nutrition-support-service
+
+#### 27. Guidelines (General)
+- **File**: `guidelines.md`
+- **Type**: General Guidelines
+- **Chunks**: 1
+- **Source**: Various
+- **URL**: N/A (Compiled from multiple sources)
+
+#### 28. Nutrition Math 101 - PetFoodology
+- **File**: `what-are-these-numbers-nutrition-math-101-petfoodology.md`
+- **Type**: Nutrition Education
+- **Chunks**: 3
+- **Source**: PetFoodology (Tufts University)
+- **URL**: https://sites.tufts.edu/petfoodology/2016/11/11/what-are-these-numbers-nutrition-math-101/
+
+#### 29. Vaccine Myths - Columbus Small Animal Hospital
+- **File**: `vaccine-myths-in-dogs-and-cats-what-the-wsava-says-columbus-small-animal-hospita.md`
+- **Type**: Vaccination Education
+- **Chunks**: 3
+- **Source**: Columbus Small Animal Hospital
+- **URL**: https://columbussmallanimalhospital.com/news/vaccine-myths-in-dogs-and-cats-what-the-wsava-says
+
+---
+
+## Document Processing Summary
+
+### By Document Type:
+- **Veterinary Guidelines**: 8 documents (WSAVA, AAHA, AVMA, CDC)
+- **Nutrition Guides**: 15 documents (PetMD, VCA, Purina, ASPCA)
+- **Reference Books**: 2 documents (Cats For Dummies, Dog Breed Book)
+- **General Pet Care**: 6 documents (Local guides and resources)
+- **Veterinary Resources**: 4 documents (MSD Manual, NCBI, etc.)
+- **Specialized Resources**: 4 documents (Nutrition support, education)
+
+### By Source Type:
+- **Professional Veterinary Organizations**: 12 documents
+- **Pet Care Websites**: 15 documents
+- **Academic/Research Sources**: 4 documents
+- **Local/Compiled Resources**: 8 documents
+
+### Total Content:
+- **934 text chunks** processed and indexed
+- **Vector embeddings** generated for semantic search
+- **BM25 indexing** for keyword-based search
+- **Cross-encoder reranking** for relevance scoring
+
+---
+
+## Usage Notes
+
+This corpus is specifically designed for answering pet care questions, with emphasis on:
+- **Nutrition and feeding** (largest category)
+- **Veterinary guidelines and standards**
+- **Health and wellness information**
+- **Breed-specific care information**
+
+The RAG system uses this corpus to provide evidence-based, accurate responses to pet care questions by retrieving relevant information and generating contextual answers.
