@@ -1,4 +1,4 @@
-# src/retrieval.py
+# pet_retrieval/retrieval.py
 import re, math, time, ast, json
 import numpy as np
 import pandas as pd
@@ -251,3 +251,67 @@ def mmr_rerank(
         else:
             break
     return sel
+
+# --- Public, UI-friendly entrypoint ---
+def search_pets(
+    text_query: str = "",
+    animal: str | None = None,
+    state: str | None = None,
+    breed: str | None = None,
+    color: str | None = None,
+    size: str | None = None,
+    gender: str | None = None,
+    fur_length: str | None = None,
+    age_min: int | None = None,
+    age_max: int | None = None,
+    top_k: int = 60,
+    pets_df: pd.DataFrame | None = None
+) -> pd.DataFrame:
+    """
+    Run hybrid/BM25 (if available) and then apply facet filters.
+    If your pipeline already builds candidates via embeddings, call it here.
+    """
+    # 1) Build initial candidate set (BM25 over name+desc as a simple default)
+    if pets_df is None:
+        # lazily load cached CSV path; adjust if you already keep a global in app
+        import os
+        from .config import local_pets_csv_path
+        pets_df = pd.read_csv(local_pets_csv_path())
+
+    text_cols = ["name","description_clean","breed","colors_canonical","state","animal"]
+    def _join(row):
+        return " ".join(str(row.get(c,"")) for c in text_cols)
+    corpus = {i: _join(r) for i, r in pets_df.iterrows()}
+
+    bm = BM25(); bm.fit(corpus)
+    q = only_text(text_query) if text_query else ""
+    cand_idx, scores = bm.search(q, topk=max(top_k, 200)) if q else (list(range(len(pets_df))), np.zeros(len(pets_df)))
+    cand = pets_df.iloc[cand_idx].copy()
+    cand.loc[:, "score"] = scores[:len(cand)]
+
+    # 2) Apply facet filters (keep tolerant matching)
+    def _norm(x): return str(x).strip().lower()
+    def _match(col, val):
+        if val is None: return True
+        if col not in cand.columns: return True
+        s = cand[col].astype(str).str.lower()
+        v = _norm(val)
+        return s.str.contains(re.escape(v), na=False)
+
+    mask = (
+        _match("animal", animal) &
+        _match("state", state) &
+        _match("breed", breed) &
+        (_match("colors_canonical", color) | _match("color", color)) &
+        _match("size", size) &
+        _match("gender", gender) &
+        _match("fur_length", fur_length)
+    )
+    if "age_months" in cand.columns and (age_min is not None or age_max is not None):
+        am = pd.to_numeric(cand["age_months"], errors="coerce")
+        if age_min is not None: mask &= (am >= age_min)
+        if age_max is not None: mask &= (am <  age_max)
+
+    out = cand.loc[mask].copy()
+    out = out.sort_values("score", ascending=False).head(top_k).reset_index(drop=True)
+    return out

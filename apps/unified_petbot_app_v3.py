@@ -9,14 +9,14 @@ Pawfect Match — Chat + Smart Pet Search
       supports "<1", "less than 1 year", ">1 year", "over 3 years", exact ages ("2 years")
     • Vaccinated / dewormed / neutered / spayed / healthy
     • Low adoption fee / fee cap
-- Hybrid ranking: BM25 + Embeddings with soft-feature bonus
-- Exact matches (ALL strict + soft) shown first (green), followed by close matches by similarity
+- Hybrid ranking: BM25 + Embeddings with soft-feature bonus and bucket-first ordering
 - Cards highlight light-green ONLY if they satisfy ALL strict + soft requirements
-- Facets persist across turns, but animal/breed changes clear persisted facets
+- Facets persist across turns, clear if animal/breed changes
 - Users can remove/clear constraints: "remove state", "remove breed", "clear all", etc.
 - After removal: conversational status lines showing **count of exact matches** (hard+soft)
 - If no facets remain: show random pets + invite user to enter fresh constraints
 - Top "➕ New search / Clear history" button resets everything
+- Pink background UI retained
 """
 
 import os, re, json, ast, html
@@ -741,43 +741,14 @@ def match_all_soft(row: pd.Series, facets: Dict[str, Any]) -> bool:
     if (soft.get("prefer_low_fee") or soft.get("fee_cap") is not None) and soft_flags["fee_ok"] != 1: return False
     return True
 
-# --------- exact match count (ALL hard + soft) ----------
-def count_exact_matches(dfp: pd.DataFrame, facets: Dict[str, Any]) -> int:
-    """Count pets that satisfy ALL hard facets (animal/breed/gender/state/color) AND ALL soft prefs."""
-    if dfp is None or dfp.empty:
-        return 0
-    df = dfp.copy()
-    # strict hard filters
-    if facets.get("animal"):
-        df = df[df["animal"] == facets["animal"]]
-    if facets.get("breed"):
-        df = df[df["breed"].str.contains(rf"\b{re.escape(facets['breed'])}\b", case=False, na=False)]
-    if facets.get("gender"):
-        df = df[df["gender"] == facets["gender"]]
-    if facets.get("state"):
-        df = df[df["state"] == facets["state"]]
-    if facets.get("color"):
-        df = df[df["color"].str.contains(rf"\b{re.escape(facets['color'])}\b", case=False, na=False)]
-    if df.empty:
-        return 0
-    # soft check row-wise
-    return int(df.apply(lambda r: match_all_soft(r, facets), axis=1).sum())
-
-# =========================================================
-# Ranking & Highlighting
-# =========================================================
 def hybrid_rank_and_highlight(query: str,
                               env: Dict[str, Any],
                               facets: Dict[str, Any],
                               df_pool: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray]:
-    """
-    Ranks candidates with hybrid (BM25 + embeddings) + soft bonus.
-    Results that satisfy ALL strict + soft facets appear FIRST (green), then remaining by similarity/bonus.
-    """
     student = env["student"]; doc_ids = env["doc_ids"]; doc_vecs = env["doc_vecs"]
     faiss_index = env["faiss_index"]; bm25 = env["bm25"]
 
-    # boosted query with facet bits
+    # boosted query with facet bits (helps BM25 and embeddings)
     facet_bits = []
     for k in ["animal","breed","gender","color","size","fur_length","state"]:
         if facets.get(k): facet_bits.append(str(facets[k]))
@@ -798,37 +769,62 @@ def hybrid_rank_and_highlight(query: str,
         den = (hi - lo) or 1.0
         return {k: (v - lo) / den for k, v in d.items()}
     nlex, nemb = _mm(slex), _mm(semb)
-    base_combo = {idx: HYBRID_W["lex"]*nlex.get(idx, 0.0) + HYBRID_W["emb"]*nemb.get(idx, 0.0)
-                  for idx in set(nlex) | set(nemb)}
-    if not base_combo:
+    combo = {idx: HYBRID_W["lex"]*nlex.get(idx, 0.0) + HYBRID_W["emb"]*nemb.get(idx, 0.0)
+             for idx in set(nlex) | set(nemb)}
+    if not combo:
         return pd.DataFrame(), np.array([], dtype=bool)
 
-    # Add soft-feature bonus
-    combo_with_bonus: Dict[int, float] = {}
-    for i in df_pool.index:
-        combo_with_bonus[int(i)] = base_combo.get(int(i), 0.0) + _feature_bonus(df_pool.loc[i], facets)
+    # bucket-first ordering using soft preferences
+    soft = facets.get("soft", {}) or {}
+    age_groups_req = soft.get("age_groups_pref") or []
 
-    # exact matches first
-    def _full_ok(i: int) -> bool:
+    def _bucket_tuple(i: int):
         row = df_pool.loc[i]
-        return match_all_strict(row, facets) and match_all_soft(row, facets)
+        flags = _health_fee_flags(row, soft)
+        age_ok = 1 if (age_groups_req and _age_groups_match(row, age_groups_req)) else (0 if age_groups_req else 0)
+        all_soft_ok = match_all_soft(row, facets)
+        bonus = _feature_bonus(row, facets)
+        return (
+            1 if (all_soft_ok) else 0,
+            age_ok,
+            flags["vaccinated"], flags["dewormed"], flags["neutered"], flags["spayed"], flags["healthy"], flags["fee_ok"],
+            round(bonus, 6),
+            round(combo.get(i, 0.0), 6),
+        )
 
-    exact_ids = [i for i in df_pool.index if _full_ok(int(i))]
-    rest_ids  = [i for i in df_pool.index if i not in exact_ids]
+    ranked_ids = sorted(df_pool.index.tolist(), key=lambda i: _bucket_tuple(int(i)), reverse=True)
 
-    exact_sorted = sorted(exact_ids, key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
-    rest_sorted  = sorted(rest_ids,  key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
-
-    chosen = (exact_sorted + rest_sorted)[:TOPK_CARDS]
+    chosen = ranked_ids[:TOPK_CARDS]
     if not chosen:
         return pd.DataFrame(), np.array([], dtype=bool)
 
     res_df = df_pool.loc[chosen].copy().reset_index(drop=True)
 
-    # highlight mask: True only for exact matches (strict + soft)
-    mask = np.array([_full_ok(int(i)) for i in chosen], dtype=bool)
-
+    # highlight mask: must meet ALL strict (original facets) + ALL soft
+    mask = res_df.apply(lambda r: match_all_strict(r, facets) and match_all_soft(r, facets), axis=1).to_numpy(dtype=bool)
     return res_df, mask
+
+# --------- NEW: exact match count (ALL hard + soft) ----------
+def count_exact_matches(dfp: pd.DataFrame, facets: Dict[str, Any]) -> int:
+    """Count pets that satisfy ALL hard facets (animal/breed/gender/state/color) AND ALL soft prefs."""
+    if dfp is None or dfp.empty:
+        return 0
+    df = dfp.copy()
+    # strict hard filters
+    if facets.get("animal"):
+        df = df[df["animal"] == facets["animal"]]
+    if facets.get("breed"):
+        df = df[df["breed"].str.contains(rf"\b{re.escape(facets['breed'])}\b", case=False, na=False)]
+    if facets.get("gender"):
+        df = df[df["gender"] == facets["gender"]]
+    if facets.get("state"):
+        df = df[df["state"] == facets["state"]]
+    if facets.get("color"):
+        df = df[df["color"].str.contains(rf"\b{re.escape(facets['color'])}\b", case=False, na=False)]
+    if df.empty:
+        return 0
+    # soft check row-wise
+    return int(df.apply(lambda r: match_all_soft(r, facets), axis=1).sum())
 
 # =========================================================
 # Cards / Grid rendering
@@ -1018,9 +1014,6 @@ def main():
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # ------------------------
-    # Pet/RAG routing & logic
-    # ------------------------
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             # PRE-PARSE REMOVALS before calling the bot
@@ -1091,14 +1084,7 @@ def main():
                 for k in (removal_keys | blocked):
                     new_facets.pop(k, None)
 
-                # HARD GUARD: drop COLOR from new_facets unless explicitly present in THIS prompt
-                if "color" in new_facets and "color" not in explicit_add_keys:
-                    new_facets.pop("color", None)
-
-                # ---- IMPORTANT FIX: do not carry forward COLOR unless explicitly present this turn ----
-                base = {} if (removal_intent and cleared_all) else dict(base_after_removal)
-                if "color" not in explicit_add_keys:
-                    base.pop("color", None)
+                base = {} if (removal_intent and cleared_all) else base_after_removal
 
                 # Merge base + new
                 merged = dict(base)
@@ -1106,7 +1092,6 @@ def main():
                     if new_facets.get(k):
                         merged[k] = new_facets[k]
 
-                # merge soft prefs
                 soft_prev = dict(base.get("soft", {}) or {})
                 soft_new  = dict(new_facets.get("soft", {}) or {})
                 for k, v in soft_new.items():
@@ -1128,6 +1113,7 @@ def main():
                     df_all = env["dfp"]
                     if len(df_all) > 0:
                         random_df = df_all.sample(min(TOPK_CARDS, len(df_all)), random_state=None).reset_index(drop=True)
+                        # Random pets: no highlight mask (all False)
                         render_grid(random_df, np.array([False]*len(random_df)))
                     st.caption("Tell me what you’re looking for — species/breed, gender, age group, color, and state (e.g., **female young poodle in Selangor**).")
                     st.session_state.messages.append({"role":"assistant","content":"(random suggestions shown)"})
@@ -1195,7 +1181,7 @@ def main():
 
                 st.markdown(status_msg)
 
-                # ------- Rank & highlight (EXACT first, then remainder by similarity) -------
+                # ------- Rank & highlight -------
                 if df_pool is None or df_pool.empty:
                     st.info("No pets found. Try adjusting or removing some constraints (e.g. **remove state**).")
                 else:

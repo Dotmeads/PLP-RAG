@@ -1,4 +1,4 @@
-# src/config.py
+# pet_retrieval/config.py
 from __future__ import annotations
 import os
 import streamlit as st
@@ -61,3 +61,19 @@ def local_mr_dir() -> str:
 def local_pets_csv_path() -> str:
     p = os.path.join(_cache_root(), "pets.csv")
     return p
+
+
+# --- NER source selection (HF vs Azure/local) ---
+def ner_source() -> str:
+    import streamlit as st
+    try:
+        return str(st.secrets.get("NER_SOURCE", "hf")).strip().lower()
+    except Exception:
+        return "hf"
+
+def ner_hf_repo() -> str:
+    import streamlit as st
+    try:
+        return str(st.secrets.get("NER_HF_REPO", "kerrringuo/pet-adoption-ner")).strip()
+    except Exception:
+        return "kerrringuo/pet-adoption-ner"

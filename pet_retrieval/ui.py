@@ -5,7 +5,7 @@ Created on Sat Oct 18 13:17:27 2025
 @author: zheng
 """
 
-# src/ui.py
+# pet_retrieval/ui.py
 import streamlit as st
 from typing import Dict
 
@@ -46,3 +46,18 @@ def sidebar_controls() -> Dict:
             "mmr_lambda": _MMR_LAMBDA,   # compatibility only
             "strict_mode": strict_mode,
         }
+
+def age_text_yr_mo(age_months) -> str:
+    try:
+        m = int(round(float(age_months)))
+        if m < 12: return f"{m} mo (puppy/kitten)"
+        y, r = divmod(m, 12)
+        return f"{y} yr" if r == 0 else f"{y} yr {r} mo"
+    except Exception:
+        return "—"
+
+def safe_colors_text(colors_val) -> str:
+    txt = ", ".join(colors_val) if isinstance(colors_val, (list, tuple)) else str(colors_val or "").strip()
+    if txt.lower() in {"unknown","nan","none",""}:
+        return "—"
+    return txt
