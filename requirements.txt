@@ -3,7 +3,7 @@ openai==1.6.1
 # Vector DB & embeddings
 chromadb==0.4.22
 sentence-transformers==2.2.2
-faiss-cpu==1.7.4
+faiss-cpu==1.9.0.post1
 
 # Document processing
 pypdf2==3.0.1
