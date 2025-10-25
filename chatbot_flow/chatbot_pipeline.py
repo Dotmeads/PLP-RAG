@@ -386,7 +386,36 @@ class ChatbotPipeline:
         # If Azure components are available, perform actual search
         if self.azure_components and all(comp is not None for comp in self.azure_components):
             try:
-                return self._perform_pet_search(ents)
+                # Use external pet search function if available
+                if hasattr(self, 'pet_search_func') and self.pet_search_func:
+                    # Build search query from entities
+                    query_parts = []
+                    if ents.get("PET_TYPE"):
+                        query_parts.append(ents["PET_TYPE"])
+                    if ents.get("BREED"):
+                        query_parts.append(ents["BREED"])
+                    if ents.get("SIZE"):
+                        query_parts.append(ents["SIZE"])
+                    if ents.get("COLOR"):
+                        query_parts.append(ents["COLOR"])
+                    if ents.get("GENDER"):
+                        query_parts.append(ents["GENDER"])
+                    if ents.get("AGE"):
+                        query_parts.append(ents["AGE"])
+                    
+                    query = " ".join(query_parts) if query_parts else desc
+                    results, error = self.pet_search_func(query, self.azure_components, topk=12)
+                    
+                    if error:
+                        return f"Got it! Searching for {desc} in {state}... (Search error: {error})"
+                    
+                    if results is None or len(results) == 0:
+                        return f"Got it! No pets found matching your criteria for {desc} in {state}. Try adjusting your search terms."
+                    
+                    # Return special marker for Streamlit to handle with photos
+                    return f"PET_SEARCH_RESULTS:{len(results)}"
+                else:
+                    return f"Got it! Searching for {desc} in {state}... (Enhanced search not available - please configure Azure credentials)"
             except Exception as e:
                 return f"Got it! Searching for {desc} in {state}... (Search temporarily unavailable: {str(e)})"
         
@@ -399,12 +428,26 @@ class ChatbotPipeline:
         """Perform actual pet search using enhanced retrieval system"""
         ner, student, doc_ids, doc_vecs, faiss_index, dfp, bm25, breed_catalog, breed_to_animal = self.azure_components
         
-        # Build search query
-        pet_type = ents.get("PET_TYPE", "cat")
+        # Build search query - infer pet type from breed if not provided
+        pet_type = ents.get("PET_TYPE")
+        if not pet_type and ents.get("BREED"):
+            # Try to infer pet type from breed using the breed_to_animal mapping
+            breed = ents.get("BREED")
+            pet_type = breed_to_animal.get(breed, "dog")  # Default to dog for unknown breeds
+        elif not pet_type:
+            pet_type = "dog"  # Default to dog instead of cat
+        
         state = ents.get("STATE", "Johor")
         
         # Create search query
-        query = f"{pet_type} in {state}"
+        query_parts = [pet_type]
+        
+        # Add breed if available
+        if ents.get("BREED"):
+            query_parts.append(ents["BREED"])
+        
+        # Add location
+        query_parts.append(f"in {state}")
         
         # Add additional filters if available
         filters = []
@@ -418,7 +461,9 @@ class ChatbotPipeline:
             filters.append(ents["AGE"])
         
         if filters:
-            query += " " + " ".join(filters)
+            query_parts.extend(filters)
+        
+        query = " ".join(query_parts)
         
         # Apply enhanced filtering with friend's approach
         try:

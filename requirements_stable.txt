@@ -37,8 +37,8 @@ azure-identity==1.15.0
 azure-core==1.29.5
 
 # Advanced ML (for Azure components)
-faiss-cpu==1.11.0
-rapidfuzz==3.6.1
+# faiss-cpu already specified above
+# rapidfuzz already specified above
 
 # Utilities
 python-dotenv==1.0.0
