@@ -16,6 +16,15 @@ except ImportError:
     GROQ_API_KEY = None
     HUGGINGFACE_API_KEY = None
 
+# Also try to get from environment variables as fallback
+import os
+if not GROQ_API_KEY:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not DEEPSEEK_API_KEY:
+    DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+if not HUGGINGFACE_API_KEY:
+    HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -33,6 +42,11 @@ class FreeLLMGenerator:
     def __init__(self, provider: str = "deepseek"):
         self.provider = provider.lower()
         self.api_key = self._get_api_key()
+        
+        logger.info(f"Initializing FreeLLMGenerator with provider: {provider}")
+        logger.info(f"API key found: {bool(self.api_key)}")
+        if self.api_key:
+            logger.info(f"API key length: {len(self.api_key)}")
         
         if not self.api_key:
             logger.warning(f"No API key found for {provider}, using basic generation")
