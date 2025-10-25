@@ -19,6 +19,11 @@ chromadb==0.4.22
 rank-bm25==0.2.2
 faiss-cpu==1.9.0.post1
 
+# LangChain dependencies
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-core>=0.1.0
+
 # LLM Integration
 requests==2.31.0
 openai==1.12.0
