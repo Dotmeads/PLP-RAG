@@ -1,0 +1,259 @@
+{
+  "timestamp": "2025-10-24 23:02:20",
+  "ragas_metrics": null,
+  "retrieval_metrics": {
+    "precision_at_5": 0.8333333333333333,
+    "recall_at_10": 0.8333333333333333,
+    "mrr": 0.85
+  },
+  "human_metrics": {
+    "helpfulness": 10.0,
+    "accuracy": 8.879999999999999,
+    "completeness": 10.0,
+    "clarity": 10.0
+  },
+  "custom_metrics": {
+    "questions": [
+      {
+        "question": "What vaccines does my dog need?",
+        "category": "health",
+        "answer": "**Vaccination Recommendations for Dogs**\n\nAs a veterinary assistant, I recommend the following core vaccines for dogs, based on the provided context from reputable veterinary sources.\n\n**Core Vaccines:**\n\n1. **Canine Distemper**: Protects against canine distemper, a highly contagious and potentially fatal disease.\n2. **Canine Parvovirus (Parvo)**: Prevents parvovirus, a highly contagious and often fatal disease that can survive on surfaces for extended periods.\n3. **Canine Hepatitis**: Protects against canine hepatitis, a contagious disease that can cause liver failure.\n4. **Rabies**: A mandatory vaccine that protects against rabies, a fatal viral disease that can be transmitted through bites or scratches.\n\n**Non-Core Vaccines (Recommended based on risk factors):**\n\n1. **Bordetella (Kennel Cough)**: Recommended for dogs that frequent dog parks, daycare, or boarding facilities.\n2. **Leptospirosis**: Recommended for dogs that spend time outdoors, especially in areas with high rodent populations.\n\n**Vaccination Schedule:**\n\n* Start vaccinations between 6-8 weeks of age.\n* Follow a series of vaccinations, as recommended by your veterinarian, to ensure effective immunity.\n* Booster shots may be necessary, but the frequency of boosters can be reduced due to long-lasting immunity.\n\n**Important Considerations:**\n\n* Indoor pets are not exempt from vaccinations, as they can still be exposed to infectious diseases through humans, contaminated objects, or other animals.\n* Consult with your veterinarian to determine the best vaccination schedule for your dog, taking into account factors such as age, health status, and lifestyle.\n\nRemember, a well-planned vaccination schedule is essential to protect your dog from preventable diseases. Consult with your veterinarian to determine the best vaccination plan for your furry friend.",
+        "answer_length": 258,
+        "context_utilization": 1.0,
+        "response_time": 1.8042430877685547,
+        "confidence": 0.9,
+        "topic_coverage": 0.6,
+        "num_sources": 3,
+        "expected_topics": [
+          "vaccination",
+          "puppy",
+          "adult",
+          "schedule",
+          "shots"
+        ]
+      },
+      {
+        "question": "How often should I feed my cat?",
+        "category": "feeding",
+        "answer": "**Feeding Frequency for Cats**\n\nBased on veterinary guidelines, the ideal feeding frequency for cats depends on their age and nutritional needs. Here's a comprehensive overview:\n\n**Kittens (less than 4 months old):**\n\n* Feed 3-4 times a day with specially formulated kitten food to support rapid growth and development.\n* Gradually decrease the number of feedings as they grow, but continue to provide kitten food until they reach adulthood (around 9-12 months old).\n\n**Adult Cats:**\n\n* Cats generally prefer small, frequent meals. However, the exact feeding frequency may vary depending on factors such as age, weight, and activity level.\n* A common recommendation is to feed 2-3 times a day, but this can be adjusted based on individual needs and preferences.\n\n**Key Considerations:**\n\n* Provide a consistent feeding schedule to maintain your cat's overall health and well-being.\n* Choose a high-quality, nutrient-rich cat food that meets your cat's specific needs.\n* Monitor your cat's weight, overall health, and adjust the feeding frequency as needed.\n\n**Recommendations:**\n\n* For kittens, stick to the recommended 3-4 feedings per day until they reach adulthood.\n* For adult cats, start with 2-3 feedings per day and adjust as needed based on individual needs and preferences.\n* Consult with your veterinarian for personalized feeding recommendations tailored to your cat's specific needs and health status.",
+        "answer_length": 217,
+        "context_utilization": 1.0,
+        "response_time": 1.3410661220550537,
+        "confidence": 0.9,
+        "topic_coverage": 0.8,
+        "num_sources": 3,
+        "expected_topics": [
+          "feeding",
+          "schedule",
+          "amount",
+          "age",
+          "weight"
+        ]
+      },
+      {
+        "question": "What should I do if my dog has diarrhea?",
+        "category": "health",
+        "answer": "**Diarrhea in Dogs: Causes and Recommendations**\n\nDiarrhea in dogs can be caused by various factors, including dietary changes, stress, infections, and gastrointestinal issues. Based on the provided veterinary sources, here are some recommendations to help manage your dog's diarrhea:\n\n1. **Dietary Changes**: If you've recently changed your dog's food, try to identify the cause of the diarrhea. Gradually transition your dog to a new food, as mentioned in the kitten care document. This can help minimize the risk of diarrhea.\n2. **Hydration**: Ensure your dog has access to plenty of fresh water to prevent dehydration. You can also offer a small amount of an unflavored, low-sodium broth to help replace lost electrolytes.\n3. **Fasting**: If your dog's diarrhea is mild, you can try a 12-24 hour fast to give their digestive system a break. However, if the diarrhea persists or worsens, consult with your veterinarian.\n4. **Medication**: If your dog's diarrhea is severe or persistent, consult with your veterinarian about administering a probiotic or anti-diarrheal medication.\n5. **Veterinary Care**: If your dog experiences any of the following, seek immediate veterinary attention:\n\t* Bloody diarrhea\n\t* Vomiting\n\t* Lethargy\n\t* Loss of appetite\n\t* Fever\n\t* Diarrhea that lasts more than 2-3 days\n6. **Preventative Measures**: To prevent diarrhea in the future, ensure your dog receives regular veterinary check-ups, stays up-to-date on vaccinations (as recommended in the puppy care document), and maintains a balanced diet.\n\nRemember, if you're unsure about the cause or severity of your dog's diarrhea, it's always best to consult with a veterinarian for professional advice and guidance.",
+        "answer_length": 260,
+        "context_utilization": 1.0,
+        "response_time": 1.4539642333984375,
+        "confidence": 0.9,
+        "topic_coverage": 0.6,
+        "num_sources": 3,
+        "expected_topics": [
+          "diarrhea",
+          "symptoms",
+          "treatment",
+          "vet",
+          "hydration"
+        ]
+      },
+      {
+        "question": "How can I train my puppy to stop biting?",
+        "category": "training",
+        "answer": "**Training Your Puppy to Stop Biting: A Comprehensive Guide**\n\nAs a veterinary assistant, I recommend the following steps to help your puppy stop biting:\n\n1. **Understand the Reason Behind the Behavior**: Puppies bite due to teething troubles and natural curiosity. At around four months of age, this habit often becomes more pronounced.\n2. **Provide Alternative Toys**: Keep a soft, big toy nearby during playtime to grab quickly whenever your puppy bites. This will help redirect their attention away from your hands and skin.\n3. **Use Positive Reinforcement Training**: Reward your puppy with treats, praise, and affection when they play with the toy instead of biting.\n4. **Set Boundaries**: Consistently say \"no\" or \"gentle\" when your puppy bites, and immediately withdraw your attention or toys if they continue to bite.\n5. **Supervise Playtime**: Always supervise playtime to ensure your puppy is not biting too aggressively.\n6. **Teach Bite Inhibition**: Encourage your puppy to bite soft toys or other acceptable objects to help them learn what is and isn't acceptable to bite.\n7. **Be Patient**: Training your puppy to stop biting takes time, patience, and consistency.\n\n**Additional Tips:**\n\n* Avoid physical punishment or scolding, as this can create anxiety and make the problem worse.\n* Provide plenty of chew toys and engage your puppy in playtime to satisfy their natural urge to chew.\n* Consider enlisting the help of a professional dog trainer if your puppy's biting persists or worsens.\n\nBy following these steps and being patient, you can help your puppy learn to stop biting and develop good habits that will last a lifetime.",
+        "answer_length": 263,
+        "context_utilization": 1.0,
+        "response_time": 1.356226921081543,
+        "confidence": 0.9,
+        "topic_coverage": 0.8,
+        "num_sources": 3,
+        "expected_topics": [
+          "biting",
+          "training",
+          "puppy",
+          "behavior",
+          "correction"
+        ]
+      },
+      {
+        "question": "What are the signs of a sick cat?",
+        "category": "health",
+        "answer": "**Recognizing Signs of a Sick Cat**\n\nAs a veterinary assistant, it's essential to identify early warning signs of illness in cats to ensure prompt medical attention. Based on veterinary sources, the following changes may indicate that your cat is unwell:\n\n1. **Changes in Appetite**: Decreased or increased food intake can signal potential health problems.\n2. **Litter Box Habits**: Changes in urination or defecation patterns, such as accidents outside the litter box or straining during bowel movements.\n3. **Grooming Habits**: Decreased grooming or excessive grooming in specific areas can indicate skin issues or parasites.\n4. **Vocalization**: Increased meowing or crying, which can be a sign of pain, anxiety, or distress.\n5. **Behavioral Changes**: Decreased activity, sleeping in different locations, or changes in social behavior.\n6. **Itching**: Signs of allergic reactions, such as excessive scratching or chewing.\n7. **Bad Breath**: A strong, unpleasant odor can indicate dental problems or other health issues.\n8. **Changes in Eating or Drinking Patterns**: Eating less or drinking more can be serious symptoms that require veterinary attention.\n9. **Weight Loss**: Unexplained weight loss in cats is often a sign of illness.\n10. **Reluctance to Jump or Play**: Decreased mobility or reluctance to engage in activities can indicate pain or discomfort.\n\n**Recommendations**\n\nTo monitor your cat's health, incorporate regular health checks into your routine:\n\n* Observe your cat's behavior and physical condition during daily interactions, such as petting or playtime.\n* Schedule annual check-ups with your veterinarian to ensure your cat receives necessary vaccinations and health screenings.\n* Keep a record of your cat's appetite, litter box habits, and overall health to identify potential changes.\n\nIf you notice any of these signs or changes in your cat's behavior, consult with your veterinarian promptly to ensure timely medical attention and prevent potential health complications.",
+        "answer_length": 295,
+        "context_utilization": 1.0,
+        "response_time": 1.5972750186920166,
+        "confidence": 0.9,
+        "topic_coverage": 0.8,
+        "num_sources": 3,
+        "expected_topics": [
+          "symptoms",
+          "sick",
+          "behavior",
+          "appetite",
+          "energy"
+        ]
+      },
+      {
+        "question": "How much exercise does my dog need daily?",
+        "category": "exercise",
+        "answer": "**Daily Exercise Needs for Dogs**\n\nAs a veterinary assistant, I recommend the following guidelines for daily exercise needs based on the provided context:\n\n1. **Duration and Frequency**: All dogs require daily exercise, which should include at least one walk. The duration and frequency of exercise may vary depending on the breed, age, and individual energy level of the dog. Generally, dogs need at least 30 minutes to 1 hour of exercise per day, including a combination of physical activity and mental stimulation.\n2. **Breed-Specific Exercise Needs**: Larger breeds may require more exercise than smaller breeds. For example, high-energy breeds like Labradors and Australian Shepherds may need 1-2 hours of exercise per day, while smaller breeds like Chihuahuas and Poodles may require shorter, more frequent exercise sessions.\n3. **Caloric Needs**: The estimated daily caloric needs for dogs are approximately 400 Calories/day, as mentioned in the Companion Animal Nutrition Support Service document. However, this value can vary depending on the individual dog's needs, age, and activity level. It's essential to adjust the amount of food provided daily to maintain a healthy body condition score.\n4. **Age and Health Considerations**: Puppies and senior dogs may require more frequent, shorter exercise sessions due to their age and potential health limitations. Dogs with medical conditions, such as arthritis or heart disease, may require modified exercise plans to ensure their safety and comfort.\n\n**Recommendations**:\n\n* For healthy adult dogs, aim for at least 30 minutes to 1 hour of exercise per day, including a combination of physical activity and mental stimulation.\n* For larger breeds, consider 1-2 hours of exercise per day, while smaller breeds may require shorter, more frequent exercise sessions.\n* Monitor your dog's body condition score and adjust their food intake accordingly to ensure they receive the right amount of calories for their needs.\n* Consult with a veterinarian to determine the best exercise plan for your dog based",
+        "answer_length": 316,
+        "context_utilization": 1.0,
+        "response_time": 1.4515597820281982,
+        "confidence": 0.9,
+        "topic_coverage": 0.6,
+        "num_sources": 3,
+        "expected_topics": [
+          "exercise",
+          "daily",
+          "walking",
+          "play",
+          "breed"
+        ]
+      },
+      {
+        "question": "What human foods are toxic to dogs?",
+        "category": "safety",
+        "answer": "**Toxic Foods for Dogs: A Comprehensive Guide**\n\nAs a veterinary assistant, it is essential to inform pet owners about the potential dangers of human foods that can be toxic to dogs. The following list highlights common foods and substances that can cause harm to your canine companion:\n\n1. **Chocolate**: Contains theobromine, which can cause vomiting, diarrhea, increased heart rate, and in severe cases, seizures and death.\n2. **Grapes and Raisins**: Can cause kidney failure in dogs, even in small amounts.\n3. **Onions and Garlic**: Belonging to the Allium family, these can cause anemia and damage to a dog's red blood cells.\n4. **Macadamia Nuts**: Can cause weakness, depression, vomiting, tremors, and hyperthermia in dogs.\n5. **Caffeine**: Similar to theobromine, caffeine can cause vomiting, diarrhea, increased heart rate, and in severe cases, seizures and death.\n6. **Xylitol**: Found in sugar-free candy, gum, and peanut butter, xylitol can cause a rapid drop in blood sugar and even liver failure in dogs.\n7. **Raw Bread Dough**: Can expand in a dog's stomach, causing bloating and potentially life-threatening complications.\n8. **Baby Food**: Some baby foods contain onions or garlic, which can be toxic to dogs.\n9. **Peanut Butter**: While not toxic in small amounts, excessive consumption can lead to pancreatitis in dogs.\n10. **Mushrooms**: Certain species of mushrooms can be toxic to dogs, causing a range of symptoms from mild to severe.\n11. **Nicotine**: Found in tobacco products, nicotine can cause vomiting, diarrhea, increased heart rate, and in severe cases, seizures and death.\n12. **Alcohol**: Can cause vomiting, diarrhea, increased heart rate, and in severe cases, seizures and death.\n\n**Recommendations:**\n\n* Keep all toxic",
+        "answer_length": 270,
+        "context_utilization": 1.0,
+        "response_time": 1.332209825515747,
+        "confidence": 0.9,
+        "topic_coverage": 1.0,
+        "num_sources": 3,
+        "expected_topics": [
+          "toxic",
+          "human food",
+          "chocolate",
+          "onions",
+          "grapes"
+        ]
+      },
+      {
+        "question": "How do I groom my long-haired cat?",
+        "category": "grooming",
+        "answer": "**Grooming Your Long-Haired Cat: A Comprehensive Guide**\n\nAs a veterinary assistant, I recommend a gradual and gentle approach to grooming your long-haired cat to prevent negative associations and ensure their comfort. Here's a step-by-step guide:\n\n**Preparation**\n\n1. **Gradual Introduction**: Introduce grooming gradually, starting with short sessions (5-10 minutes) and increasing duration as your cat becomes more comfortable.\n2. **Choose the Right Tools**: Use a wide-tooth comb, a slicker brush, or a pin brush specifically designed for long-haired cats. Avoid using human hairbrushes or combs, as they can cause discomfort and matting.\n3. **Select a Quiet and Comfortable Location**: Groom your cat in a quiet, distraction-free area where they feel safe and relaxed.\n\n**Grooming Routine**\n\n1. **Start with Brushing**: Begin by gently brushing your cat's coat, working from head to tail, to remove loose hair and tangles.\n2. **Use a Comb for Mats and Tangles**: If you encounter mats or tangles, apply cornstarch or talcum powder to help loosen them. Then, use sharp scissors to carefully cut the mat from the skin outward. If mats are severe, consider taking your cat to a professional groomer for a safe shave.\n3. **Pay Attention to Sensitive Areas**: Be gentle when grooming sensitive areas, such as the face, ears, and paws.\n4. **Reward Good Behavior**: Praise and reward your cat with treats and affection to associate grooming with positive experiences.\n\n**Benefits of Grooming for Cat Owners**\n\nGrooming your long-haired cat not only keeps their coat healthy and prevents matting but also:\n\n* Strengthens the bond between you and your cat\n* Provides protection against the elements\n* Aids in scent-marking\n* Controls parasites\n* Helps prevent discomfort and health issues associated with matting and tangling\n\n**Remember**: If your",
+        "answer_length": 284,
+        "context_utilization": 1.0,
+        "response_time": 1.5552589893341064,
+        "confidence": 0.9,
+        "topic_coverage": 0.8,
+        "num_sources": 3,
+        "expected_topics": [
+          "grooming",
+          "brushing",
+          "mats",
+          "bathing",
+          "tools"
+        ]
+      },
+      {
+        "question": "What should I do if my cat stops eating?",
+        "category": "health",
+        "answer": "**Addressing a Cat's Refusal to Eat**\n\nIf your cat stops eating, it's essential to identify the underlying cause and take prompt action to ensure their nutritional needs are met. Based on the provided veterinary sources, here's a step-by-step approach to help your cat regain their appetite:\n\n1. **Establish a Scheduled Feeding Routine**: Cats thrive on routine, so ensure you're feeding your cat at the same times every day. This will help regulate their appetite and make it easier to manage their eating habits.\n2. **Gradually Reduce Food Portion Sizes**: To stimulate your cat's natural hunger sensation, try feeding smaller portions at each mealtime. This will encourage your cat to eat more frequently and maintain a healthy appetite.\n3. **Offer Canned Food**: If your cat is resistant to eating, try feeding a meal of canned food only. Canned food is often more palatable and can be a good option for cats with finicky appetites.\n4. **Monitor and Adjust**: Keep a close eye on your cat's eating habits and adjust their diet accordingly. If they still refuse to eat, consider consulting with your veterinarian for personalized advice.\n5. **Consult a Veterinarian**: If your cat's refusal to eat persists, it's crucial to rule out any underlying medical issues. Consult with your veterinarian to determine the cause of your cat's loss of appetite and develop a plan to address it.\n\n**Additional Tips**\n\n* Ensure your cat has access to fresh water at all times.\n* Avoid overfeeding or underfeeding, as this can lead to digestive issues or malnutrition.\n* Consider a gradual transition to a new diet to prevent digestive upset.\n* If your cat's refusal to eat is accompanied by other symptoms such as vomiting, diarrhea, or lethargy, seek veterinary attention immediately.\n\nBy following these steps and consulting with your veterinarian, you can help your cat regain their appetite and maintain a healthy, balanced diet.",
+        "answer_length": 312,
+        "context_utilization": 1.0,
+        "response_time": 1.3113181591033936,
+        "confidence": 0.9,
+        "topic_coverage": 0.6,
+        "num_sources": 3,
+        "expected_topics": [
+          "appetite",
+          "eating",
+          "vet",
+          "stress",
+          "illness"
+        ]
+      },
+      {
+        "question": "How can I help my dog with separation anxiety?",
+        "category": "behavior",
+        "answer": "**Helping Your Dog with Separation Anxiety**\n\nSeparation anxiety in dogs can be distressing for both the pet and its owner. Based on veterinary sources, we recommend the following steps to help your dog overcome separation anxiety:\n\n**Early Training and Gradual Separation**\n\n1. **Acclimatize your puppy to being alone**: Start training early, setting aside short periods during the day where you leave your puppy alone. This will help build confidence and reduce anxiety.\n2. **Use a stair gate for gradual separation**: For anxious dogs, use a stair gate to create a barrier between you and your dog while still allowing them to see and hear you. This will help them become comfortable with your absence.\n\n**Addressing Separation Anxiety in Older Dogs**\n\n1. **Recognize the signs**: If your mature dog has never been acclimatized to being left alone, they may exhibit extreme anxiety, such as scratching at doors or exhibiting destructive behavior.\n2. **Gradual separation**: Implement a gradual separation plan, starting with short periods of absence and increasing the duration over time.\n3. **Provide mental stimulation**: Engage your dog's mind with puzzle toys, treats, and interactive games to distract them from your absence.\n4. **Consider professional help**: If your dog's separation anxiety persists or worsens, consult a veterinarian or a certified animal behaviorist for personalized guidance and support.\n\n**Additional Tips**\n\n1. **Maintain a consistent routine**: Establish a regular daily schedule to provide a sense of security and stability for your dog.\n2. **Leave a familiar object**: Leave an article of clothing, such as a t-shirt or sock, with your scent on it to provide comfort for your dog.\n3. **Exercise and mental stimulation**: Ensure your dog receives adequate physical and mental stimulation to reduce anxiety and stress.\n\nBy following these steps and recommendations, you can help your dog overcome separation anxiety and develop a more confident and calm demeanor.",
+        "answer_length": 307,
+        "context_utilization": 1.0,
+        "response_time": 1.3293440341949463,
+        "confidence": 0.9,
+        "topic_coverage": 1.0,
+        "num_sources": 3,
+        "expected_topics": [
+          "anxiety",
+          "separation",
+          "training",
+          "comfort",
+          "routine"
+        ]
+      }
+    ],
+    "overall_metrics": {
+      "answer_length": [
+        258,
+        217,
+        260,
+        263,
+        295,
+        316,
+        270,
+        284,
+        312,
+        307
+      ],
+      "context_utilization": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "response_time": [
+        1.8042430877685547,
+        1.3410661220550537,
+        1.4539642333984375,
+        1.356226921081543,
+        1.5972750186920166,
+        1.4515597820281982,
+        1.332209825515747,
+        1.5552589893341064,
+        1.3113181591033936,
+        1.3293440341949463
+      ],
+      "confidence_scores": [
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9
+      ]
+    }
+  },
+  "overall_metrics": {
+    "total_questions": 10,
+    "average_answer_length": 278.2,
+    "average_context_utilization": 1.0,
+    "average_response_time": 1.4532466173171996,
+    "average_confidence": 0.9000000000000001,
+    "average_topic_coverage": 0.7599999999999999,
+    "questions_with_sources": 10,
+    "high_confidence_answers": 10
+  }
+}

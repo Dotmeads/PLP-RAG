@@ -99,7 +99,7 @@ def bootstrap_rag_system():
         if os.path.exists(documents_dir):
             rag.add_directory(documents_dir)
         
-        # Initialize chatbot pipeline with RAG
+        # Initialize chatbot pipeline with RAG (Azure components will be added later)
         chatbot = ChatbotPipeline(rag)
         
         return rag, chatbot
@@ -114,16 +114,44 @@ def bootstrap_azure_components():
         # Get Azure settings
         settings = get_blob_settings()
         
-        # Download models and data
-        download_prefix_flat(settings["connection_string"], settings["ml_container"], "ner", local_ner_dir())
-        download_prefix_flat(settings["connection_string"], settings["ml_container"], "mr", local_mr_dir())
-        smart_download_single_blob(settings["connection_string"], settings["pets_container"], "all_pet_details_clean.csv", local_pets_csv_path())
+        # Download models and data (only if not already cached)
+        ner_dir = local_ner_dir()
+        mr_dir = local_mr_dir()
+        pets_csv = local_pets_csv_path()
+        
+        # Check if files already exist to avoid re-downloading
+        if not os.path.exists(ner_dir) or len(os.listdir(ner_dir)) == 0:
+            print("📥 Downloading NER models...")
+            download_prefix_flat(settings["connection_string"], settings["ml_container"], "ner", ner_dir)
+        else:
+            print("✅ NER models already cached")
+            
+        if not os.path.exists(mr_dir) or len(os.listdir(mr_dir)) == 0:
+            print("📥 Downloading MR models...")
+            download_prefix_flat(settings["connection_string"], settings["ml_container"], "mr", mr_dir)
+        else:
+            print("✅ MR models already cached")
+            
+        if not os.path.exists(pets_csv):
+            print("📥 Downloading pet data...")
+            smart_download_single_blob(settings["connection_string"], settings["pets_container"], "all_pet_details_clean.csv", pets_csv)
+        else:
+            print("✅ Pet data already cached")
         
         # Load models
+        print("🔄 Loading NER pipeline...")
         ner = load_ner_pipeline(local_ner_dir())
+        print("✅ NER pipeline loaded")
+        
+        print("🔄 Loading sentence transformer model (437MB - this may take 1-2 minutes)...")
         student, doc_ids, doc_vecs = load_mr_model(local_mr_dir())
+        print("✅ Sentence transformer model loaded")
+        
+        print("🔄 Getting model dimensions...")
         model_dim = student.get_sentence_embedding_dimension()
+        print("🔄 Loading FAISS index...")
         faiss_index = load_faiss_index(local_mr_dir(), model_dim)
+        print("✅ FAISS index loaded")
         
         # Load pet data
         dfp = pd.read_csv(local_pets_csv_path())
@@ -288,6 +316,10 @@ def main():
         
         # Load Azure components
         azure_components = bootstrap_azure_components()
+        
+        # Add Azure components to chatbot if both systems loaded successfully
+        if chatbot is not None and azure_components[0] is not None:
+            chatbot.azure_components = azure_components
 
     # Display system status
     with st.sidebar:
@@ -361,8 +393,131 @@ def main():
             with st.spinner("Analyzing your request..."):
                 try:
                     response = chatbot.handle_message(prompt)
-                    st.markdown(response)
-                    st.session_state.messages.append({"role": "assistant", "content": response})
+                    
+                    # Check if response is structured pet data
+                    if isinstance(response, dict) and "pets" in response:
+                        # Display pet search results with enhanced UI
+                        st.markdown(response["message"])
+                        
+                        # Helper functions from friend's code
+                        def _safe_list_from_cell(x):
+                            """Parse strings like "['a','b']" or '["a","b"]' or comma strings into list."""
+                            if isinstance(x, list): return x
+                            if x is None: return []
+                            s = str(x).strip()
+                            if not s: return []
+                            if s.startswith("[") and s.endswith("]"):
+                                try:
+                                    import json
+                                    obj = json.loads(s)
+                                    if isinstance(obj, list): return obj
+                                except Exception:
+                                    pass
+                                try:
+                                    import ast
+                                    obj = ast.literal_eval(s)
+                                    if isinstance(obj, list): return obj
+                                except Exception:
+                                    return []
+                            if "," in s: return [t.strip() for t in s.split(",") if t.strip()]
+                            return [s]
+                        
+                        def _first_photo_url(photo_links):
+                            """Extract first photo URL safely"""
+                            if not photo_links:
+                                return None
+                            photos = _safe_list_from_cell(photo_links)
+                            if photos:
+                                url = str(photos[0]).strip().strip('"').strip("'")
+                                return url if url else None
+                            return None
+                        
+                        def _age_years_from_months(age_months):
+                            """Convert months to readable age format"""
+                            try:
+                                m = float(age_months)
+                                y = m/12.0
+                                if m < 12: return f"{int(round(m))} mo (puppy/kitten)"
+                                return f"{y:.1f} yrs"
+                            except Exception:
+                                return "—"
+                        
+                        def _badge_bool(x, label):
+                            """Create status badges"""
+                            v = str(x or "").strip().lower()
+                            if v in {"true","yes","y","1"}: return f"✅ {label}"
+                            if v in {"false","no","n","0"}: return f"❌ {label}"
+                            if v in {"unknown", "nan", ""}: return f"➖ {label}"
+                            return f"ℹ️ {label}: {x}"
+                        
+                        # Display pets in a grid layout
+                        pets = response["pets"][:6]  # Limit to 6 pets for performance
+                        cols_per_row = 2
+                        
+                        for i in range(0, len(pets), cols_per_row):
+                            cols = st.columns(cols_per_row, gap="medium")
+                            for j, col in enumerate(cols):
+                                if i + j >= len(pets):
+                                    break
+                                pet = pets[i + j]
+                                
+                                with col:
+                                    with st.container(border=True):
+                                        # Pet name and link
+                                        name = pet.get('name', f"Pet {i+j+1}")
+                                        adoption_url = pet.get('adoption_url', '')
+                                        if adoption_url:
+                                            st.markdown(f"### [{name}]({adoption_url})")
+                                        else:
+                                            st.markdown(f"### {name}")
+                                        
+                                        # Display first photo
+                                        photo_url = _first_photo_url(pet.get('photo_urls', []))
+                                        if photo_url:
+                                            try:
+                                                st.image(photo_url, width=300)
+                                            except Exception:
+                                                st.markdown(f"![photo]({photo_url})")
+                                        else:
+                                            st.info("No photo available.")
+                                        
+                                        # Pet details
+                                        animal = pet.get('animal', 'Unknown').title()
+                                        breed = pet.get('breed', '—')
+                                        gender = pet.get('gender', '—').title()
+                                        state = pet.get('state', '—').title()
+                                        color = pet.get('color', '—')
+                                        age_text = _age_years_from_months(pet.get('age_months'))
+                                        size = pet.get('size', '—').title()
+                                        
+                                        st.write(
+                                            f"**{animal}** • **Breed:** {breed} • **Gender:** {gender} • "
+                                            f"**Age:** {age_text} • **State:** {state}"
+                                        )
+                                        st.write(f"**Color:** {color} • **Size:** {size}")
+                                        
+                                        # Status badges (if available)
+                                        if pet.get('n_photos', 0) > 0:
+                                            st.write(f"📸 {pet['n_photos']} photo(s) available")
+                                        
+                                        # Description
+                                        desc = pet.get('description', '')
+                                        if desc:
+                                            with st.expander("Description", expanded=False):
+                                                excerpt = desc if len(desc) < 200 else (desc[:200] + "…")
+                                                st.write(excerpt)
+                        
+                        # Store the formatted response for chat history
+                        formatted_response = response["message"] + "\n\n" + "\n".join([
+                            f"**{i+1}. {pet['name']}** - {pet['breed']}, {pet['age_months']} months, {pet['gender']}, {pet['color']}, {pet['size']}"
+                            for i, pet in enumerate(response["pets"])
+                        ])
+                        st.session_state.messages.append({"role": "assistant", "content": formatted_response})
+                    else:
+                        # Regular text response
+                        st.markdown(response)
+                        st.session_state.messages.append({"role": "assistant", "content": response})
+                        
                 except Exception as e:
                     error_msg = f"Sorry, I encountered an error: {str(e)}"
                     st.error(error_msg)

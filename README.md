@@ -72,9 +72,10 @@ PLP RAG/
 │   └── unified_petbot_app.py     # Main unified application
 │
 ├── 🧪 **Tests** (`tests/`)
-│   └── test_unified_integration.py # Integration tests
-│
-├── 💬 **Multi-Turn Scripts**
+│   ├── test_unified_integration.py # Integration tests
+│   ├── test_azure_connection.py    # Azure connection testing
+│   ├── test_enhanced_retrieval.py  # Enhanced retrieval testing
+│   ├── evaluate_rag_quality.py    # RAG quality evaluation
 │   ├── multi_turn_chat.py          # Interactive multi-turn chat
 │   └── multi_turn_demo.py          # Automated conversation demos
 │
@@ -85,8 +86,8 @@ PLP RAG/
 │   └── chroma_db/                # Vector database
 │
 └── 📖 **Documentation**
-    ├── AZURE_SETUP.md           # Azure configuration guide
-    └── PROJECT_ORGANIZATION.md  # Project organization details
+    ├── AZURE_SETUP.md                    # Azure configuration guide
+    └── ORGANIZATION_SUMMARY.md           # Project organization summary
 ```
 
 ## 🚀 Quick Start
@@ -166,10 +167,16 @@ Sidebar Status:
 python tests/test_unified_integration.py
 
 # Test multi-turn conversations
-python multi_turn_demo.py
+python tests/multi_turn_demo.py
 
 # Interactive chat mode
-python multi_turn_chat.py
+python tests/multi_turn_chat.py
+
+# Test Azure connection
+python tests/test_azure_connection.py
+
+# Run RAG quality evaluation
+python tests/evaluate_rag_quality.py
 
 # Test specific components
 python -c "
@@ -280,10 +287,10 @@ print(f"Entities: {entities}")
 ### **🚀 Testing Multi-Turn Features**
 ```bash
 # Automated demo scenarios
-python multi_turn_demo.py
+python tests/multi_turn_demo.py
 
 # Interactive chat mode
-python multi_turn_chat.py
+python tests/multi_turn_chat.py
 
 # Test specific conversation flows
 python -c "
@@ -410,9 +417,11 @@ print('Chatbot components working!')
 ### **Technical Improvements**
 - **🔧 Fixed Azure Integration**: Proper function calls and error handling
 - **📁 Organized Structure**: Clean folder organization with proper imports
-- **🧪 Enhanced Testing**: Comprehensive integration tests
+- **🧪 Enhanced Testing**: Comprehensive integration tests in organized `tests/` folder
 - **📚 Updated Documentation**: Complete setup and usage guides
 - **🔒 Security**: Proper API key management and environment variables
+- **🐱 Fixed Pet Search**: Corrected animal type filtering for accurate cat/dog search results
+- **🎯 Enhanced Retrieval**: Integrated friend's robust filtering and facet parsing system
 
 ## 🛠️ Troubleshooting
 

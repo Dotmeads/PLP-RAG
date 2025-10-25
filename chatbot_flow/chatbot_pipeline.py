@@ -6,6 +6,7 @@ from .responses import get_response
 from rapidfuzz import process
 from transformers.utils import logging as hf_logging
 import warnings, re
+import pandas as pd
 
 # Silence noisy warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -44,10 +45,11 @@ def autocorrect_text(text, known_words=None, threshold=80):
 class ChatbotPipeline:
     """End-to-end pet adoption chatbot with clean fallbacks and context."""
 
-    def __init__(self, rag_system=None):
+    def __init__(self, rag_system=None, azure_components=None):
         self.intent_clf = IntentClassifier()
         self.ner_extractor = EntityExtractor()
         self.rag_system = rag_system  # Will be None for now
+        self.azure_components = azure_components  # (ner, student, doc_ids, doc_vecs, faiss_index, dfp, bm25)
         self.session = {"intent": None, "entities": {}, "greeted": False}
 
     # -----------------------------------------------------------------------
@@ -352,7 +354,15 @@ class ChatbotPipeline:
         missing = [e for e in required_entities if e not in self.session["entities"]]
 
         msg = " ".join(confirm)
-        return f"{msg} {self.ask_for(missing[0])}" if missing else f"{msg} {self._confirm_and_search()}"
+        if missing:
+            return f"{msg} {self.ask_for(missing[0])}"
+        else:
+            search_result = self._confirm_and_search()
+            # If search_result is structured data, return it directly
+            if isinstance(search_result, dict) and "pets" in search_result:
+                return search_result
+            # Otherwise, concatenate with confirmation message
+            return f"{msg} {search_result}"
 
     # -----------------------------------------------------------------------
     # FINAL SEARCH MESSAGE
@@ -368,7 +378,182 @@ class ChatbotPipeline:
         desc = " ".join(details + [pet])
         if not ents.get("BREED"):
             desc += "s"
+        
+        # If Azure components are available, perform actual search
+        if self.azure_components and all(comp is not None for comp in self.azure_components):
+            try:
+                return self._perform_pet_search(ents)
+            except Exception as e:
+                return f"Got it! Searching for {desc} in {state}... (Search temporarily unavailable: {str(e)})"
+        
         return f"Got it! Searching for {desc} in {state}..."
+
+    # -----------------------------------------------------------------------
+    # PET SEARCH IMPLEMENTATION
+    # -----------------------------------------------------------------------
+    def _perform_pet_search(self, ents):
+        """Perform actual pet search using enhanced retrieval system"""
+        ner, student, doc_ids, doc_vecs, faiss_index, dfp, bm25, breed_catalog, breed_to_animal = self.azure_components
+        
+        # Build search query
+        pet_type = ents.get("PET_TYPE", "cat")
+        state = ents.get("STATE", "Johor")
+        
+        # Create search query
+        query = f"{pet_type} in {state}"
+        
+        # Add additional filters if available
+        filters = []
+        if ents.get("SIZE"):
+            filters.append(ents["SIZE"])
+        if ents.get("COLOR"):
+            filters.append(ents["COLOR"])
+        if ents.get("GENDER"):
+            filters.append(ents["GENDER"])
+        if ents.get("AGE"):
+            filters.append(ents["AGE"])
+        
+        if filters:
+            query += " " + " ".join(filters)
+        
+        # Apply enhanced filtering with friend's approach
+        try:
+            # Import enhanced retrieval functions
+            import sys
+            sys.path.append('/Users/dotsnoise/PLP RAG')
+            from pet_retrieval.enhanced_retrieval import (
+                parse_facets_from_text, filter_with_relaxation, 
+                make_boosted_query
+            )
+            
+            # Parse facets from query
+            facets = parse_facets_from_text(query)
+            
+            # Apply filtering with relaxation (friend's approach)
+            results, used_facets = filter_with_relaxation(
+                dfp, facets, 
+                order=["state", "gender", "colors_any", "breed"], 
+                min_floor=5
+            )
+            
+            # If we have results, use them directly (enhanced filtering already did the work)
+            if len(results) > 0:
+                # Just use the filtered results directly - the enhanced filtering already found the right pets
+                final_results = results.head(10)
+            else:
+                # Fallback to original search if filtering fails
+                bm25_scores = bm25.search(query, topk=20)
+                bm25_indices = [i for i, score in bm25_scores if score > 0]
+                
+                query_embedding = student.encode([query])
+                faiss_scores, faiss_indices = faiss_index.search(query_embedding, 20)
+                faiss_indices = faiss_indices[0].tolist()
+                
+                combined_indices = list(set(bm25_indices + faiss_indices))
+                if combined_indices:
+                    results = dfp.iloc[combined_indices]
+                    animal_filter = results['animal'].str.lower() == pet_type.lower()
+                    final_results = results[animal_filter]
+                else:
+                    final_results = pd.DataFrame()
+            
+            if len(final_results) == 0:
+                return f"🐾 Sorry, I couldn't find any {pet_type}s in {state}. Try searching in a different area or with different criteria."
+            
+            # Limit to top 10 results
+            results = final_results.head(10)
+            
+            # Return structured data for Streamlit to display with images
+            pet_data = {
+                "message": f"🐾 Found {len(results)} {pet_type}s in {state}:",
+                "pets": []
+            }
+            
+            for i, (_, pet) in enumerate(results.head(5).iterrows(), 1):
+                pet_info = {
+                    "name": pet.get('name', 'Unnamed'),
+                    "animal": pet.get('animal', 'Unknown'),
+                    "breed": pet.get('breed', 'Unknown'),
+                    "age_months": pet.get('age_months', 'Unknown'),
+                    "gender": pet.get('gender', 'Unknown'),
+                    "color": pet.get('color', 'Unknown'),
+                    "size": pet.get('size', 'Unknown'),
+                    "state": pet.get('state', 'Unknown'),
+                    "n_photos": pet.get('n_photos', 0),
+                    "photo_urls": [],
+                    "adoption_url": pet.get('url', ''),
+                    "description": str(pet.get('description_clean', ''))[:100] + "..." if pd.notna(pet.get('description_clean')) else ""
+                }
+                
+                # Parse photo links with better error handling
+                photo_links = pet.get('photo_links', '')
+                if photo_links and photo_links != '[]':
+                    try:
+                        # Try multiple parsing methods like friend's code
+                        if isinstance(photo_links, list):
+                            photos = photo_links
+                        else:
+                            s = str(photo_links).strip()
+                            if s.startswith("[") and s.endswith("]"):
+                                try:
+                                    import json
+                                    photos = json.loads(s)
+                                except:
+                                    import ast
+                                    photos = ast.literal_eval(s)
+                            elif "," in s:
+                                photos = [t.strip().strip('"').strip("'") for t in s.split(",") if t.strip()]
+                            else:
+                                photos = [s]
+                        
+                        if photos and len(photos) > 0:
+                            # Clean up photo URLs
+                            clean_photos = []
+                            for photo in photos[:3]:  # Limit to first 3 photos
+                                clean_url = str(photo).strip().strip('"').strip("'")
+                                if clean_url:
+                                    clean_photos.append(clean_url)
+                            pet_info["photo_urls"] = clean_photos
+                    except Exception as e:
+                        # Fallback: try to extract any URL-like strings
+                        import re
+                        urls = re.findall(r'https?://[^\s,]+', str(photo_links))
+                        if urls:
+                            pet_info["photo_urls"] = urls[:3]
+                
+                pet_data["pets"].append(pet_info)
+            
+            if len(results) > 5:
+                pet_data["message"] += f"\n... and {len(results) - 5} more {pet_type}s available!"
+            
+            return pet_data
+            
+        except Exception as e:
+            print(f"Enhanced retrieval error: {e}")
+            # Fallback to original search method
+            try:
+                bm25_scores = bm25.search(query, topk=20)
+                bm25_indices = [i for i, score in bm25_scores if score > 0]
+                
+                query_embedding = student.encode([query])
+                faiss_scores, faiss_indices = faiss_index.search(query_embedding, 20)
+                faiss_indices = faiss_indices[0].tolist()
+                
+                combined_indices = list(set(bm25_indices + faiss_indices))
+                if combined_indices:
+                    results = dfp.iloc[combined_indices]
+                    animal_filter = results['animal'].str.lower() == pet_type.lower()
+                    results = results[animal_filter]
+                else:
+                    return f"🐾 Sorry, I couldn't find any {pet_type}s in {state}. Try searching in a different area or with different criteria."
+                
+                if len(results) == 0:
+                    return f"🐾 Sorry, I couldn't find any {pet_type}s in {state}. Try searching in a different area or with different criteria."
+                
+                results = results.head(10)
+            except Exception as fallback_error:
+                print(f"Fallback search error: {fallback_error}")
+                return f"🐾 Found some {pet_type}s in {state}, but I'm having trouble displaying the details. Please try again or contact support."
 
     # -----------------------------------------------------------------------
     # HELPERS
