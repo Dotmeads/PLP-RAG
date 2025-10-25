@@ -30,6 +30,11 @@ huggingface_hub==0.35.3
 torch==2.9.0
 accelerate==0.25.0
 rapidfuzz==3.14.1
+
+# LangChain dependencies
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-core>=0.1.0
 joblib==1.5.2
 
 # Optional: for advanced features
