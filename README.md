@@ -68,14 +68,16 @@ PLP RAG/
 │   └── azure_petbot_app.py       # Azure pet search app
 │
 ├── 🚀 **Applications** (`apps/`)
-│   ├── optimized_unified_app.py  # Optimized unified app
-│   └── unified_petbot_app.py     # Main unified application
+│   ├── unified_petbot_app.py     # Main unified application
+│   └── ui_style.py              # UI styling module
 │
 ├── 🧪 **Tests** (`tests/`)
 │   ├── test_unified_integration.py # Integration tests
 │   ├── test_azure_connection.py    # Azure connection testing
 │   ├── test_enhanced_retrieval.py  # Enhanced retrieval testing
-│   ├── evaluate_rag_quality.py    # RAG quality evaluation
+│   └── evaluate_rag_quality.py    # RAG quality evaluation
+│
+├── 💬 **Multi-Turn Chat** (`multi_turn/`)
 │   ├── multi_turn_chat.py          # Interactive multi-turn chat
 │   └── multi_turn_demo.py          # Automated conversation demos
 │
@@ -102,7 +104,7 @@ python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install dependencies
-pip install -r requirements_stable.txt
+pip install -r requirements.txt
 ```
 
 ### 2. **API Keys Configuration**
@@ -441,7 +443,7 @@ print('Chatbot components working!')
    ```bash
    # Ensure virtual environment is activated
    source .venv/bin/activate
-   pip install -r requirements_stable.txt
+   pip install -r requirements.txt
    ```
 
 3. **Model Loading Issues**
