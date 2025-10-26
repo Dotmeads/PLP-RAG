@@ -31,3 +31,4 @@ api_keys.py
 .idea/
 
 artifacts/
+venv/

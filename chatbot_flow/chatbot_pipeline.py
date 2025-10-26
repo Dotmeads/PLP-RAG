@@ -56,7 +56,13 @@ class ChatbotPipeline:
     # MAIN MESSAGE HANDLER
     # -----------------------------------------------------------------------
     def handle_message(self, user_input: str) -> str:
-        user_input = user_input.strip()
+        if "intent" not in self.session:
+            self.session["intent"] = None
+        if "entities" not in self.session:
+            self.session["entities"] = {}
+        if "greeted" not in self.session:
+            self.session["greeted"] = False
+            user_input = user_input.strip()
 
         # --- Show greeting if user presses Enter at start ---
         if not user_input:

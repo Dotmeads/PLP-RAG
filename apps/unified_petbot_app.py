@@ -23,11 +23,13 @@ import os, re, json, ast, html
 from typing import List, Dict, Any, Tuple, Optional, Set
 
 import streamlit as st
-st.set_page_config(page_title="Pawfect Match", layout="wide")
+st.set_page_config(page_title="Pawfect Match", page_icon="🐾", layout="wide")
 
 import sys
 import numpy as np
 import pandas as pd
+
+from ui_style import apply_global_ui, render_status_bar, render_loading_box
 
 # --------------------------
 # Project path & imports
@@ -151,8 +153,8 @@ def _age_text_from_months(age_months) -> str:
 
 def _badge_bool(x, label):
     v = str(x or "").strip().lower()
-    if v in {"true","yes","y","1"}: return f"✅ {label}"
-    if v in {"false","no","n","0"}: return f"❌ {label}"
+    if v in {"true","yes","y","1"}: return f"✔ {label}"
+    if v in {"false","no","n","0"}: return f"✖ {label}"
     if v in {"unknown","nan",""}: return f"➖ {label}"
     return f"ℹ️ {label}: {x}"
 
@@ -291,7 +293,7 @@ def parse_soft_prefs_from_text(text: str) -> Dict[str, Any]:
 # =========================================================
 # Bootstrap RAG & Chatbot (HF NER + Intent)
 # =========================================================
-@st.cache_resource(show_spinner=True)
+@st.cache_resource(show_spinner=False)
 def bootstrap_rag_system():
     try:
         rag = ProposedRAGManager()
@@ -307,7 +309,7 @@ def bootstrap_rag_system():
 # =========================================================
 # Bootstrap Search (BM25, Embeddings, FAISS, Pets CSV)
 # =========================================================
-@st.cache_resource(show_spinner=True)
+@st.cache_resource(show_spinner=False)
 def bootstrap_search_components():
     try:
         cfg = get_blob_settings()
@@ -835,49 +837,94 @@ def hybrid_rank_and_highlight(query: str,
 # =========================================================
 def render_pet_card(row: pd.Series, highlight: bool = False):
     name = str(row.get("name") or "Pet")
-    url  = str(row.get("url") or "")
+    url = str(row.get("url") or "")
     animal = (row.get("animal") or "").title()
-    breed  = str(row.get("breed") or "—").title()
+    breed = str(row.get("breed") or "—").title()
     gender = (row.get("gender") or "—").title()
-    state  = (row.get("state") or "—").title()
-    color  = str(row.get("color") or "—").title()
+    state = (row.get("state") or "—").title()
+    color = str(row.get("color") or "—").title()
     age_mo = row.get("age_months")
     age_txt = _age_text_from_months(age_mo)
     size = str(row.get("size") or "—").title()
-    fur  = str(row.get("fur_length") or "—").title()
+    fur = str(row.get("fur_length") or "—").title()
     cond = str(row.get("condition") or "—").title()
 
-    v_b, d_b, n_b, s_b = (_badge_bool(row.get("vaccinated"), "vaccinated"),
-                          _badge_bool(row.get("dewormed"), "dewormed"),
-                          _badge_bool(row.get("neutered"), "neutered"),
-                          _badge_bool(row.get("spayed"), "spayed"))
+    v_b, d_b, n_b, s_b = (
+        _badge_bool(row.get("vaccinated"), "vaccinated"),
+        _badge_bool(row.get("dewormed"), "dewormed"),
+        _badge_bool(row.get("neutered"), "neutered"),
+        _badge_bool(row.get("spayed"), "spayed"),
+    )
 
     img_url = _first_photo_url_from_row(row)
-
-    bg = "#E8F7E1" if highlight else "#FFFFFF"
-    border_left = "5px solid #22c55e" if highlight else "5px solid #ff6b9d"
-
     desc_raw = str(row.get("description_clean") or "").strip()
     desc_safe = html.escape(desc_raw).replace("\n", "<br />") if desc_raw else ""
 
+    # --- Visual theme ---
+    bg = "#FFFFFF"
+    border_left = "5px solid #ffc6bb"
+    title_color = "#e85c7d"
+    text_color = "#444"
+
+    # --- Scrollable description style ---
+    st.markdown("""
+        <style>
+        .desc-box {
+            background: #fff9f8;
+            border: 1px solid #ffe0d6;
+            border-radius: 8px;
+            padding: 8px 10px;
+            max-height: 120px;          
+            overflow-y: auto;         
+            line-height: 1.55;
+            color: #444;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    if img_url:
+        img_html = (
+            "<img src='" + html.escape(img_url) + "' alt='photo' loading='lazy' "
+            "style='max-width:100%;max-height:100%;object-fit:contain;"
+            "object-position:center;display:block;' />"
+        )
+    else:
+        img_html = "<div style='color:#b3b3b3;'>No photo available</div>"
+
+    # --- Card HTML ---
     st.markdown(
-        "<div style='background:"+bg+"; border-radius:15px; padding:14px; margin:8px 0; border-left:"+border_left+"; box-shadow:0 4px 15px rgba(0,0,0,0.08);'>"
-        "<div style='font-size:1.1rem; font-weight:800; color:#2563EB; margin-bottom:6px;'>"
-        + ("<a href='"+html.escape(url)+"' target='_blank' style='text-decoration:none; color:#2563EB;'>🔗 "+html.escape(name)+"</a>" if url else html.escape(name)) +
+        "<div style='background:" + bg + "; border-radius:15px; padding:14px; margin:8px 0; "
+        "border-left:" + border_left + "; box-shadow:0 4px 15px rgba(0,0,0,0.05);'>"
+
+        "<div style='font-size:1.1rem; font-weight:800; color:" + title_color + "; margin-bottom:6px;'>"
+        + (
+            "<a href='" + html.escape(url) + "' target='_blank' "
+            "style='text-decoration:none; color:" + title_color + ";'>• " + html.escape(name) + "</a>"
+            if url else "• " + html.escape(name)
+        )
+        + "</div>"
+
+        "<div style='height:220px;width:100%;border-radius:10px;background:#fff9f8;"
+        "display:flex;align-items:center;justify-content:center;margin:8px 0 10px;"
+        "overflow:hidden;border:1px solid #ffe0d6;'>"
+        + img_html +
         "</div>"
-        "<div style='height:220px;width:100%;border-radius:10px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;margin:8px 0 10px;overflow:hidden;border:1px solid #E5E7EB;'>"
-        + (("<img src='"+html.escape(img_url)+"' alt='photo' loading='lazy' style='max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;object-position:center;display:block;' />") if img_url else "<div style='color:#6B7280;'>No photo available</div>") +
+
+        "<div style='color:" + text_color + ";margin-bottom:6px;'>"
+        "<strong>" + animal + "</strong> • <strong>Breed:</strong> " + breed +
+        " • <strong>Gender:</strong> " + gender + " • <strong>Age:</strong> " + age_txt +
+        " • <strong>State:</strong> " + state + "</div>"
+
+        "<div style='color:" + text_color + ";margin-bottom:8px;'>"
+        "<strong>Color:</strong> " + color + " • <strong>Size:</strong> " + size +
+        " • <strong>Fur:</strong> " + fur + " • <strong>Condition:</strong> " + cond +
         "</div>"
-        "<div style='color:#374151;margin-bottom:6px;'>"
-        "<strong>"+animal+"</strong> • <strong>Breed:</strong> "+breed+" • <strong>Gender:</strong> "+gender+" • <strong>Age:</strong> "+age_txt+" • <strong>State:</strong> "+state+
-        "</div>"
-        "<div style='color:#374151;margin-bottom:8px;'>"
-        "<strong>Color:</strong> "+color+" • <strong>Size:</strong> "+size+" • <strong>Fur:</strong> "+fur+" • <strong>Condition:</strong> "+cond+
-        "</div>"
-        "<div style='color:#111827;'>"+ " | ".join([v_b, d_b, n_b, s_b]) +"</div>"
-        + (("<div style='margin-top:10px;border-top:1px solid #E5E7EB;padding-top:8px;'><details style='cursor:pointer;'><summary style='color:#374151;font-weight:600;list-style:none;display:inline-block;'>▶ Show description</summary><div style='margin-top:8px;color:#374151;line-height:1.55;'>"+ desc_safe +"</div></details></div>") if desc_safe else "") +
-        "</div>",
-        unsafe_allow_html=True
+
+        "<div style='color:#222; margin-bottom:8px;'>" + " | ".join([v_b, d_b, n_b, s_b]) + "</div>"
+
+        + (f"<div class='desc-box'>{desc_safe}</div>" if desc_safe else "")
+        + "</div>",
+        unsafe_allow_html=True,
     )
 
 def render_grid(df: pd.DataFrame, mask: np.ndarray, max_cols: int = GRID_COLS):
@@ -894,130 +941,185 @@ def render_grid(df: pd.DataFrame, mask: np.ndarray, max_cols: int = GRID_COLS):
             idx = i + j
             if idx >= n: break
             with col:
-                render_pet_card(rows[idx], highlight=bool(flags[idx]))
+                render_pet_card(rows[idx])
 
-# =========================================================
-# Pink UI CSS
-# =========================================================
-PINK_CSS = """
-<style>
-.stApp { background: linear-gradient(135deg, #ffb6c1 0%, #ffc0cb 50%, #ffd1dc 100%); background-attachment: fixed; }
-.main-header { text-align: center; padding: 2rem 0; background: linear-gradient(45deg, #ff6b9d, #ff8fab); border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(255, 107, 157, 0.3); }
-.main-header h1 { color: white; font-size: 3rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-.main-header p  { color: white; font-size: 1.2rem; margin: .5rem 0 0 0; opacity: .9; }
-.status-bar { background: linear-gradient(135deg, #ff6b9d, #ff8fab); color: white; padding: 1rem 2rem; margin: -1rem -1rem 2rem -1rem; border-radius: 0 0 20px 20px; box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3); }
-.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: center; }
-.status-item { background: rgba(255,255,255,0.2); padding:.8rem; border-radius:10px; text-align:center; backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.3); }
-.status-item.success { background: rgba(76,175,80,0.3); border-color:rgba(76,175,80,0.5); }
-.status-item.warning { background: rgba(255,152,0,0.3); border-color:rgba(255,152,0,0.5); }
-.status-item.error   { background: rgba(244,67,54,0.3); border-color:rgba(244,67,54,0.5); }
-.status-icon { font-size:1.5rem; margin-bottom:.5rem; display:block; }
-.status-text { font-weight:600; margin-bottom:.3rem; }
-.status-detail { font-size:.9rem; opacity:.9; }
-</style>
-"""
+
+     # ---------------- Footer Section (Suggestions + New Search) ----------------
+def render_footer():
+    st.markdown("""
+    <style>
+        .footer-section {
+            margin-top: 1.2rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #ffe0d6;
+        }
+
+        /* Arrange columns evenly and center-align */
+        div[data-testid="stHorizontalBlock"] {
+            align-items: center !important;
+        }
+
+        /* Label alignment */
+        .footer-label {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #3b3b3b;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            white-space: nowrap;
+            margin-right: 0.1rem;
+            margin-bottom: 15px;
+        }
+
+        /* Suggestion buttons (general style) */
+        .stButton > button {
+            font-size: 0.95rem !important;
+            padding: 0.45rem 0.8rem !important;
+            border-radius: 10px !important;
+            border: 1px solid #ffd6bf !important;
+            background: #fff !important;
+            color: #3b3b3b !important;
+            height: 42px !important;
+            width: 100% !important; /* Make buttons fill their container */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            white-space: nowrap !important;
+            transition: all 0.15s ease;
+        }
+        .stButton > button:hover {
+            background: #fff3ef !important;
+            transform: translateY(-1px);
+        }
+
+        /* New search button styling */
+        div[data-testid="stVerticalBlock"] > div.new-search-button-container .stButton > button {
+            width: 200px !important;   
+            height: 40px !important;
+            font-size: 0.9rem !important;
+            background-color: red !important; /* Debugging: to confirm selector is working */
+        }
+
+        /* tighter gaps */
+        div[data-testid="column"] {
+            padding-left: 0.2rem !important;
+            padding-right: 0.2rem !important;
+            margin: 0 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='footer-section'>", unsafe_allow_html=True)
+
+    # --- Single functional row layout ---
+    col_new, col_label, col1, col2, col3 = st.columns([0.8, 0.8, 1, 1, 1], gap="small")
+
+    with col_new:
+        st.markdown("<div class='footer-newsearch'>", unsafe_allow_html=True)
+        if st.button("➕ New search / Clear history", key="new_search_clear"):
+            st.session_state["__clear_all__"] = True
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col_label:
+        st.markdown("<div class='footer-label'>💡 Try asking me:</div>", unsafe_allow_html=True)
+
+    with col1:
+        if st.button("🐕 What should I feed my puppy?", key="ex1"):
+            st.session_state.example_prompt = "What should I feed my puppy?"
+            st.rerun()
+
+    with col2:
+        if st.button("🏠 Find a poodle in Selangor", key="ex2"):
+            st.session_state.example_prompt = "Find a poodle in Selangor"
+            st.rerun()
+
+    with col3:
+        if st.button("🏥 My cat is sick, what should I do?", key="ex3"):
+            st.session_state.example_prompt = "My cat is sick, what should I do?"
+            st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================================
 # Main App
 # =========================================================
 def main():
-    st.markdown(PINK_CSS, unsafe_allow_html=True)
-    st.markdown(
-        "<div class='main-header'>"
-        "<h1>🐾 Pawfect Match</h1>"
-        "<p>Your Intelligent Pet Assistant - Ask about pet care or find your pawfect pet</p>"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    apply_global_ui()
 
-    # --- Top "New search / Clear history" button ---
-    if st.button("➕ New search / Clear history", type="primary", use_container_width=True, key="top_clear"):
-        st.session_state["__clear_all__"] = True
-        st.experimental_rerun()
+    # Initialize systems with auto-clearing loader ---
+    loading_area = st.empty()
+    render_loading_box(loading_area, "Initializing systems...", "🚀")
 
-    with st.spinner("🚀 Initializing systems..."):
-        rag, bot = bootstrap_rag_system()
-        env = bootstrap_search_components()
+    rag, bot = bootstrap_rag_system()
+    env = bootstrap_search_components()
+    loading_area.empty()
 
-    # If user requested a full clear, clear everything including bot session
+    # If user requested a full clear, safely reset without breaking bot pipeline
     if st.session_state.pop("__clear_all__", False):
         st.session_state["messages"] = []
         st.session_state["last_facets"] = {}
         st.session_state["blocked_facets"] = set()
         if hasattr(st.session_state, "example_prompt"):
             delattr(st.session_state, "example_prompt")
+
         try:
             if bot is not None and hasattr(bot, "session"):
-                bot.session = {}
-        except Exception:
-            pass
-        st.experimental_rerun()
+                bot.session.clear()
+                bot.session["state"] = "greeted"
+                bot.session["intent"] = None
+                bot.session["entities"] = {}
+        except Exception as e:
+            st.warning(f"Bot reset warning: {e}")
 
+        st.rerun()
+
+
+    # --- Status bar ---
     rag_ok = rag is not None and bot is not None
     env_ok = env is not None and env.get("dfp") is not None
-
-    def badge(status): return "success" if status else "error"
-    def icon(status): return "✅" if status else "❌"
 
     pets_detail = f"{len(env['dfp'])} pets available" if env_ok else "Unavailable"
     app_status_ok = rag_ok and env_ok
     app_status_text = "All Systems Ready" if app_status_ok else "Issues Detected"
-
-    st.markdown(
-        "<div class='status-bar'>"
-        "<div class='status-grid'>"
-        f"<div class='status-item {badge(app_status_ok)}'>"
-        f"<span class='status-icon'>{icon(app_status_ok)}</span>"
-        "<div class='status-text'>App Status</div>"
-        f"<div class='status-detail'>{app_status_text}</div>"
-        "</div>"
-        f"<div class='status-item {badge(rag_ok)}'>"
-        f"<span class='status-icon'>{icon(rag_ok)}</span>"
-        "<div class='status-text'>RAG / Chatbot</div>"
-        f"<div class='status-detail'>{'Online' if rag_ok else 'Unavailable'}</div>"
-        "</div>"
-        f"<div class='status-item {badge(env_ok)}'>"
-        f"<span class='status-icon'>{icon(env_ok)}</span>"
-        "<div class='status-text'>Pet Search</div>"
-        f"<div class='status-detail'>{pets_detail}</div>"
-        "</div>"
-        "</div>"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    
+    render_status_bar(rag_ok, env_ok, app_status_ok, app_status_text, pets_detail)
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
+    if "last_prompt" not in st.session_state:
+        st.session_state.last_prompt = None
 
-    for m in st.session_state.messages:
-        with st.chat_message(m["role"]):
-            st.markdown(m["content"])
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
-    st.markdown("### 💡 Try asking me:")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        if st.button("🐕 What should I feed my puppy?", use_container_width=True):
-            st.session_state.example_prompt = "What should I feed my puppy?"
-    with c2:
-        if st.button("🏠 Find a golden retriever in Selangor", use_container_width=True):
-            st.session_state.example_prompt = "Find a golden retriever in Selangor"
-    with c3:
-        if st.button("🏥 My cat is sick, what should I do?", use_container_width=True):
-            st.session_state.example_prompt = "My cat is sick, what should I do?"
-
-    prompt = st.chat_input("Ask me anything about pets...")
-
-    if hasattr(st.session_state, "example_prompt"):
-        prompt = st.session_state.example_prompt
+    user_input = st.chat_input("Ask me anything about pets", key="chat_input_main")
+    
+    if hasattr(st.session_state, "example_prompt") and st.session_state.example_prompt:
+        user_input = st.session_state.example_prompt
         delattr(st.session_state, "example_prompt")
-
-    if not prompt:
+        st.session_state.last_prompt = None
+    
+    if not user_input or not user_input.strip():
+            render_footer()
+            return
+    
+    if user_input == st.session_state.last_prompt:
+        render_footer()
         return
 
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.last_prompt = user_input
+    prompt = user_input
+
+    # Display user message
+    st.markdown('<span style="display:none">.</span>', unsafe_allow_html=True)
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
     # ------------------------
     # Pet/RAG routing & logic
     # ------------------------
@@ -1060,7 +1162,6 @@ def main():
             if not env_ok:
                 st.markdown(reply)
                 st.session_state.messages.append({"role": "assistant", "content": reply})
-                return
 
             # ----- PET SEARCH PATH -----
             if intent_now == "find_pet":
@@ -1131,7 +1232,7 @@ def main():
                         render_grid(random_df, np.array([False]*len(random_df)))
                     st.caption("Tell me what you’re looking for — species/breed, gender, age group, color, and state (e.g., **female young poodle in Selangor**).")
                     st.session_state.messages.append({"role":"assistant","content":"(random suggestions shown)"})
-                    return
+                    render_footer()
 
                 # Facets banner
                 def chip(label, value, accent=False):
@@ -1211,6 +1312,8 @@ def main():
                 # ----- RAG Q&A PATH -----
                 st.markdown(reply)
                 st.session_state.messages.append({"role": "assistant", "content": reply})
+
+    render_footer()
 
 if __name__ == "__main__":
     main()
