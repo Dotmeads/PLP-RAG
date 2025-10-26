@@ -250,6 +250,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "processing" not in st.session_state:
     st.session_state.processing = False
+if "clicked_buttons" not in st.session_state:
+    st.session_state.clicked_buttons = set()
 
 # ==== Retrieval stack ====
 from pet_retrieval.config import get_blob_settings, local_mr_dir, local_pets_csv_path
@@ -1204,6 +1206,7 @@ with st.sidebar:
     if st.button("🗑️ Clear History", key="clear_sidebar"):
         st.session_state.messages = []
         st.session_state.processing = False
+        st.session_state.clicked_buttons.clear()
         st.rerun()
     
     st.markdown("---")
@@ -1287,21 +1290,30 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     if st.button("🐕 What should I feed my puppy?", use_container_width=True, key="suggestion_1"):
-        user_text = "What should I feed my puppy?"
-        st.session_state.messages.append({"role": "user", "content": user_text})
-        st.rerun()
+        button_key = "suggestion_1"
+        if button_key not in st.session_state.clicked_buttons:
+            user_text = "What should I feed my puppy?"
+            st.session_state.messages.append({"role": "user", "content": user_text})
+            st.session_state.clicked_buttons.add(button_key)
+            st.rerun()
 
 with col2:
     if st.button("🏠 Find my pawfect golden retriever", use_container_width=True, key="suggestion_2"):
-        user_text = "I want to adopt a golden retriever"
-        st.session_state.messages.append({"role": "user", "content": user_text})
-        st.rerun()
+        button_key = "suggestion_2"
+        if button_key not in st.session_state.clicked_buttons:
+            user_text = "I want to adopt a golden retriever"
+            st.session_state.messages.append({"role": "user", "content": user_text})
+            st.session_state.clicked_buttons.add(button_key)
+            st.rerun()
 
 with col3:
     if st.button("🏥 My cat is sick, what should I do?", use_container_width=True, key="suggestion_3"):
-        user_text = "My cat is sick, what should I do?"
-        st.session_state.messages.append({"role": "user", "content": user_text})
-        st.rerun()
+        button_key = "suggestion_3"
+        if button_key not in st.session_state.clicked_buttons:
+            user_text = "My cat is sick, what should I do?"
+            st.session_state.messages.append({"role": "user", "content": user_text})
+            st.session_state.clicked_buttons.add(button_key)
+            st.rerun()
 
 st.markdown("---")
 
@@ -1429,6 +1441,8 @@ if st.session_state.messages and len(st.session_state.messages) > 0 and not st.s
                 
                 # Reset processing flag after completion
                 st.session_state.processing = False
+                # Reset clicked buttons to allow new suggestions
+                st.session_state.clicked_buttons.clear()
 
             else:
                 # Pet-care: keep ChatbotPipeline reply behavior
@@ -1441,6 +1455,8 @@ if st.session_state.messages and len(st.session_state.messages) > 0 and not st.s
                 
                 # Reset processing flag after completion
                 st.session_state.processing = False
+                # Reset clicked buttons to allow new suggestions
+                st.session_state.clicked_buttons.clear()
 
 
 # Streamlit apps don't need a main() function
