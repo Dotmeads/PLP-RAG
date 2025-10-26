@@ -1,4 +1,4 @@
-# 🐾 Unified PetBot - Advanced Pet Care & Adoption System
+# 🐾 Pawfect Match - Advanced Pet Care & Adoption System
 
 A comprehensive AI-powered system that combines **Retrieval-Augmented Generation (RAG)** for pet care questions with **intelligent chatbot capabilities** for pet adoption assistance. Features hybrid retrieval, intent classification, entity extraction, and seamless integration with Azure cloud services.
 
