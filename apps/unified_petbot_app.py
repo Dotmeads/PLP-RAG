@@ -1,25 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Pawfect Match — Chat + Smart Pet Search
-- Hugging Face NER & Intent routed via ChatbotPipeline (no Azure NER download)
-- STRONG hard filters: animal/breed/gender/state (animal & breed always strict)
-- Auto-relax when <6 results, in order: state -> color -> age -> gender
-- Soft preferences (bucket-first priority):
-    • Age groups: puppy/kitten (0–12), young (12–36), adult (36–84), senior (84+)
-      supports "<1", "less than 1 year", ">1 year", "over 3 years", exact ages ("2 years")
-    • Vaccinated / dewormed / neutered / spayed / healthy
-    • Low adoption fee / fee cap
-- Hybrid ranking: BM25 + Embeddings with soft-feature bonus
-- Exact matches (ALL strict + soft) shown first (green), followed by close matches by similarity
-- Cards highlight light-green ONLY if they satisfy ALL strict + soft requirements
-- Facets persist across turns, but animal/breed changes clear persisted facets
-- Users can remove/clear constraints: "remove state", "remove breed", "clear all", etc.
-- After removal: conversational status lines showing **count of exact matches** (hard+soft)
-- If no facets remain: show random pets + invite user to enter fresh constraints
-- Top "➕ New search / Clear history" button resets everything
+- Hugging Face NER & Intent via ChatbotPipeline (no Azure NER download)
+- STRONG hard filters: animal/breed/gender/state (animal & breed always strict; state can auto-relax)
+- Auto-relax when <6 results: state -> color -> age -> gender
+- Soft preferences: age buckets, vaccinated/dewormed/neutered/spayed/healthy, low fee/cap
+- Hybrid ranking: BM25 + Embeddings + soft-feature bonus
+- Exact matches (ALL strict + soft) first (green), then close matches
+- Facets persist across turns; animal/breed change clears persisted facets but **preserves blocked facets**
+- Constraint removal parsing ("remove state", "clear all", etc.)
+- "➕ New search / Clear history" appears **only after** a response; now does a true blank-slate reset.
+- Viewport: jumps to the **last assistant reply**; on hard reset, jumps to the very top.
 """
 
-import os, re, json, ast, html
+import os, re, json, ast, html, time, random
 from typing import List, Dict, Any, Tuple, Optional, Set
 
 import streamlit as st
@@ -28,6 +22,7 @@ st.set_page_config(page_title="Pawfect Match", layout="wide")
 import sys
 import numpy as np
 import pandas as pd
+import streamlit.components.v1 as components
 
 # --------------------------
 # Project path & imports
@@ -35,7 +30,7 @@ import pandas as pd
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-# RAG + Chatbot (HF NER & intent model are inside this pipeline)
+# RAG + Chatbot (HF NER & intent model via this pipeline)
 from rag_system.proposed_rag_system import ProposedRAGManager
 from chatbot_flow.chatbot_pipeline import ChatbotPipeline  # exposes intent + HF NER
 
@@ -59,7 +54,7 @@ except Exception:
 TOPK_CARDS = 6
 GRID_COLS = 3
 LEX_POOL = 2000
-EMB_POOL = 200
+EMB_POOL = 1000
 HYBRID_W = {"lex": 0.1, "emb": 0.9}
 
 # Age groups (months)
@@ -236,8 +231,8 @@ def parse_age_group_prefs(text: str) -> Set[str]:
     if re.search(r"\bsenior\b", t): prefs.add("senior")
     comp_patterns = [
         r"(<=|>=|<|>)\s*(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)",
-        r"\b(less\s+than|under)\s*(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)",
-        r"\b(more\s+than|over|at\s+least)\s*(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)",
+        r"\b(less\s+than|under)\s*(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)\b",
+        r"\b(more\s+than|over|at\s+least)\s*(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)\b",
     ]
     def add_groups_for_threshold(op: str, months: float):
         if op in ("<", "lt", "less"):
@@ -291,7 +286,7 @@ def parse_soft_prefs_from_text(text: str) -> Dict[str, Any]:
 # =========================================================
 # Bootstrap RAG & Chatbot (HF NER + Intent)
 # =========================================================
-@st.cache_resource(show_spinner=True)
+@st.cache_resource(show_spinner=False)
 def bootstrap_rag_system():
     try:
         rag = ProposedRAGManager()
@@ -307,16 +302,15 @@ def bootstrap_rag_system():
 # =========================================================
 # Bootstrap Search (BM25, Embeddings, FAISS, Pets CSV)
 # =========================================================
-@st.cache_resource(show_spinner=True)
+@st.cache_resource(show_spinner=False)
 def bootstrap_search_components():
     try:
         cfg = get_blob_settings()
         conn = cfg["connection_string"]
 
-        with st.spinner("Downloading Matching/Ranking model..."):
-            download_prefix_flat(conn, cfg["ml_container"], cfg["mr_prefix"], local_mr_dir())
-        with st.spinner("Downloading pet CSV..."):
-            smart_download_single_blob(conn, cfg["pets_container"], cfg["pets_csv_blob"], local_pets_csv_path())
+        # Quiet downloads (no extra Streamlit spinners)
+        download_prefix_flat(conn, cfg["ml_container"], cfg["mr_prefix"], local_mr_dir())
+        smart_download_single_blob(conn, cfg["pets_container"], cfg["pets_csv_blob"], local_pets_csv_path())
 
         student, doc_ids, doc_vecs = load_mr_model(local_mr_dir())
         faiss_index = load_faiss_index(local_mr_dir(), dim=doc_vecs.shape[1])
@@ -332,7 +326,6 @@ def bootstrap_search_components():
         docs_raw = {int(i): only_text(str(t)) for i, t in zip(dfp.index, dfp[text_col].fillna("").tolist())}
         bm25 = BM25().fit(docs_raw)
 
-        # Breed catalog (lowercased)
         breed_catalog = sorted(set([b for b in dfp.get("breed", pd.Series([], dtype=str)).astype(str).str.lower().tolist() if b]))
         return {
             "cfg": cfg,
@@ -347,7 +340,30 @@ def bootstrap_search_components():
         return None
 
 # =========================================================
-# Entities → Facets (from ChatbotPipeline HF NER)
+# SAFE CHATBOT SESSION
+# =========================================================
+def ensure_bot_session(bot: Optional[ChatbotPipeline]):
+    try:
+        if bot is None:
+            return
+        if not hasattr(bot, "session") or bot.session is None or not isinstance(bot.session, dict):
+            bot.session = {}
+        bot.session.setdefault("greeted", False)
+        bot.session.setdefault("intent", None)
+        bot.session.setdefault("entities", {})
+    except Exception:
+        pass
+
+def hard_reset_bot_session(bot: Optional[ChatbotPipeline]):
+    try:
+        if bot is None:
+            return
+        bot.session = {"greeted": False, "intent": None, "entities": {}}
+    except Exception:
+        pass
+
+# =========================================================
+# Entities → Facets
 # =========================================================
 def _entities_to_facets(ents: Dict[str, str], raw_query: str) -> Dict[str, Any]:
     facets: Dict[str, Any] = {}
@@ -390,9 +406,6 @@ def is_constraint_removal_query(query: str) -> bool:
     return bool(re.search(r"\b(remove|clear|reset)\b", t))
 
 def apply_constraint_removals(prev_facets: Dict[str, Any], query: str) -> Tuple[Dict[str, Any], List[str], bool, Set[str]]:
-    """
-    Returns: (updated_facets, removed_labels, cleared_all, removed_keys)
-    """
     t = (query or "").strip().lower()
     facets = dict(prev_facets) if prev_facets else {}
     removed = []
@@ -402,14 +415,12 @@ def apply_constraint_removals(prev_facets: Dict[str, Any], query: str) -> Tuple[
     if re.search(r"\b(clear|remove)\s+(all|everything|constraints|filters|facets)\b", t) or re.search(r"\breset\b", t):
         return {}, ["all constraints"], True, {"animal","breed","gender","state","color","size","fur_length","soft"}
 
-    # Remove state by keyword
     if re.search(r"\b(remove|clear)\s+state\b", t):
         if "state" in facets:
             removed.append(f"state: {facets['state']}")
             facets.pop("state", None)
             removed_keys.add("state")
 
-    # Remove state by value mention
     for s in MALAYSIA_STATES:
         if re.search(rf"\bremove\s+{re.escape(s)}\b", t):
             if facets.get("state") and _norm_state(facets["state"]) == _norm_state(s):
@@ -417,7 +428,6 @@ def apply_constraint_removals(prev_facets: Dict[str, Any], query: str) -> Tuple[
                 facets.pop("state", None)
                 removed_keys.add("state")
 
-    # Hard facets
     if re.search(r"\b(remove|clear)\s+animal\b", t):
         if "animal" in facets: removed.append(f"animal: {facets['animal']}"); facets.pop("animal", None); removed_keys.add("animal")
     if re.search(r"\b(remove|clear)\s+breed\b", t):
@@ -445,7 +455,6 @@ def apply_constraint_removals(prev_facets: Dict[str, Any], query: str) -> Tuple[
     if re.search(r"\b(remove|clear)\s+(fur|fur\s*length|furlength)\b", t):
         if "fur_length" in facets: removed.append(f"fur_length: {facets['fur_length']}"); facets.pop("fur_length", None); removed_keys.add("fur_length")
 
-    # Soft prefs
     soft = dict(facets.get("soft", {}) or {})
     soft_removed = []
 
@@ -477,7 +486,6 @@ def apply_constraint_removals(prev_facets: Dict[str, Any], query: str) -> Tuple[
 
     if soft_removed or "age_groups_pref" in soft or "fee_cap" in soft:
         facets["soft"] = soft
-        removed.extend(soft_removed)
     elif "soft" in facets and soft == {}:
         facets.pop("soft", None)
 
@@ -499,7 +507,7 @@ def get_blocked_facets() -> Set[str]:
 def set_blocked_facets(blocked: Set[str]):
     st.session_state["blocked_facets"] = set(blocked)
 
-def maybe_reset_persistence(new_facets: Dict[str, Any]) -> bool:
+def maybe_reset_persistence(new_facets: Dict[str, Any], bot: Optional[ChatbotPipeline] = None) -> bool:
     prev = get_persisted_facets()
     new_animal = new_facets.get("animal")
     new_breed  = new_facets.get("breed")
@@ -508,39 +516,38 @@ def maybe_reset_persistence(new_facets: Dict[str, Any]) -> bool:
         changed = True
     if prev.get("breed") and new_breed and prev["breed"] != new_breed:
         changed = True
+
     if changed:
+        blocked_keep = get_blocked_facets()
         st.session_state["last_facets"] = {}
-        st.session_state["blocked_facets"] = set()
+        set_blocked_facets(blocked_keep)
+        try:
+            ensure_bot_session(bot)
+            bot.session["entities"] = {}
+        except Exception:
+            pass
     return changed
 
-# ===== Unblock only if prompt explicitly mentions a facet =====
+# Only accept entities explicitly mentioned in this prompt (safety fuse)
 def explicit_add_keys_from_prompt(prompt: str) -> Set[str]:
     t = (prompt or "").lower()
     keys: Set[str] = set()
-    # animal
     if re.search(r"\b(dog|puppy|pup)\b", t) or re.search(r"\b(cat|kitten|kitties)\b", t):
         keys.add("animal")
-    # gender
     if re.search(r"\bmale\b", t) or re.search(r"\bfemale\b", t):
         keys.add("gender")
-    # state names / "in <state>"
     for s in MALAYSIA_STATES:
         if re.search(rf"\b{s}\b", t):
-            keys.add("state")
-            break
+            keys.add("state"); break
     if re.search(r"\bin\s+(johor|kedah|kelantan|malacca|melaka|negeri sembilan|pahang|penang|pulau pinang|perak|perlis|sabah|sarawak|selangor|terengganu|kuala lumpur|labuan|putrajaya)\b", t):
         keys.add("state")
-    # color
     for word in re.findall(r"[a-z]+", t):
         if normalize_color(word):
-            keys.add("color")
-            break
-    # size / fur
+            keys.add("color"); break
     if re.search(r"\b(small|medium|large|xl)\b", t):
         keys.add("size")
     if re.search(r"\b(short|long)\s*fur\b", t) or re.search(r"\bfurlength|fur length\b", t):
         keys.add("fur_length")
-    # breed heuristic
     if re.search(r"\bbreed\b", t) or re.search(r"\bpoodle|ragdoll|retriever|husky|persian|siamese|chihuahua|beagle|pug|bulldog|gsd\b", t):
         keys.add("breed")
     return keys
@@ -555,10 +562,8 @@ def _apply_filters_once(dfp: pd.DataFrame,
                         use_color: bool,
                         use_age: bool,
                         use_gender: bool) -> Tuple[pd.DataFrame, int]:
-    """Return candidate pool and 'strict_in_state_count' (meaningful only when use_state is True)."""
     df = dfp.copy()
 
-    # Always strict on animal/breed if provided
     if facets.get("animal"):
         df = df[df["animal"] == facets["animal"]]
         if df.empty: return df, 0
@@ -567,7 +572,6 @@ def _apply_filters_once(dfp: pd.DataFrame,
         df = df[df["breed"].str.contains(pattern, case=False, na=False)]
         if df.empty: return df, 0
 
-    # Optional strict filters
     if use_gender and facets.get("gender"):
         df = df[df["gender"] == facets["gender"]]
         if df.empty: return df, 0
@@ -585,7 +589,6 @@ def _apply_filters_once(dfp: pd.DataFrame,
             df = strict_df
 
     if use_color and facets.get("color"):
-        # strict color contains
         df = df[df["color"].str.contains(rf"\b{re.escape(facets['color'])}\b", case=False, na=False)]
         if df.empty: return df, strict_in_state
 
@@ -607,11 +610,6 @@ def _apply_filters_once(dfp: pd.DataFrame,
     return df, strict_in_state
 
 def build_relaxed_pool(dfp: pd.DataFrame, facets: Dict[str, Any]) -> Tuple[pd.DataFrame, Dict[str, Any]]:
-    """
-    Try progressively relaxing filters to reach TOPK_CARDS:
-    state -> color -> age -> gender   (animal & breed always strict)
-    Returns: (df_pool, relax_meta)
-    """
     steps = [
         dict(use_state=True,  relax_state_to_cross=False, use_color=True,  use_age=True,  use_gender=True,  tag="strict_all"),
         dict(use_state=True,  relax_state_to_cross=True,  use_color=True,  use_age=True,  use_gender=True,  tag="relax_state"),
@@ -644,7 +642,7 @@ def build_relaxed_pool(dfp: pd.DataFrame, facets: Dict[str, Any]) -> Tuple[pd.Da
         if size_try >= TOPK_CARDS:
             chosen_df = df_try
             break
-        chosen_df = df_try  # keep best-so-far
+        chosen_df = df_try
     return chosen_df, chosen_meta
 
 # =========================================================
@@ -725,7 +723,6 @@ def match_all_strict(row: pd.Series, facets: Dict[str, Any]) -> bool:
         ok &= str(row.get("state","")).strip().lower() == facets["state"]
     if facets.get("color"):
         ok &= bool(re.search(rf"\b{re.escape(facets['color'])}\b", str(row.get("color","")), flags=re.I))
-    # age is soft, handled separately
     return bool(ok)
 
 def match_all_soft(row: pd.Series, facets: Dict[str, Any]) -> bool:
@@ -741,13 +738,10 @@ def match_all_soft(row: pd.Series, facets: Dict[str, Any]) -> bool:
     if (soft.get("prefer_low_fee") or soft.get("fee_cap") is not None) and soft_flags["fee_ok"] != 1: return False
     return True
 
-# --------- exact match count (ALL hard + soft) ----------
 def count_exact_matches(dfp: pd.DataFrame, facets: Dict[str, Any]) -> int:
-    """Count pets that satisfy ALL hard facets (animal/breed/gender/state/color) AND ALL soft prefs."""
     if dfp is None or dfp.empty:
         return 0
     df = dfp.copy()
-    # strict hard filters
     if facets.get("animal"):
         df = df[df["animal"] == facets["animal"]]
     if facets.get("breed"):
@@ -760,75 +754,7 @@ def count_exact_matches(dfp: pd.DataFrame, facets: Dict[str, Any]) -> int:
         df = df[df["color"].str.contains(rf"\b{re.escape(facets['color'])}\b", case=False, na=False)]
     if df.empty:
         return 0
-    # soft check row-wise
     return int(df.apply(lambda r: match_all_soft(r, facets), axis=1).sum())
-
-# =========================================================
-# Ranking & Highlighting
-# =========================================================
-def hybrid_rank_and_highlight(query: str,
-                              env: Dict[str, Any],
-                              facets: Dict[str, Any],
-                              df_pool: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray]:
-    """
-    Ranks candidates with hybrid (BM25 + embeddings) + soft bonus.
-    Results that satisfy ALL strict + soft facets appear FIRST (green), then remaining by similarity/bonus.
-    """
-    student = env["student"]; doc_ids = env["doc_ids"]; doc_vecs = env["doc_vecs"]
-    faiss_index = env["faiss_index"]; bm25 = env["bm25"]
-
-    # boosted query with facet bits
-    facet_bits = []
-    for k in ["animal","breed","gender","color","size","fur_length","state"]:
-        if facets.get(k): facet_bits.append(str(facets[k]))
-    boost_q = (query or "").strip()
-    if facet_bits:
-        boost_q = (boost_q + " " + " ".join(facet_bits)).strip()
-
-    # scores
-    lex_all = bm25.search(only_text(boost_q), topk=LEX_POOL)
-    slex = {int(idx): float(s) for idx, s in lex_all if idx in df_pool.index}
-    emb_all = emb_search(boost_q, student, doc_ids, doc_vecs, pool_topn=EMB_POOL, faiss_index=faiss_index)
-    semb = {int(pid): float(s) for pid, s in emb_all if pid in df_pool.index}
-
-    def _mm(d):
-        if not d: return {}
-        vals = np.fromiter(d.values(), dtype=float)
-        lo, hi = float(vals.min()), float(vals.max())
-        den = (hi - lo) or 1.0
-        return {k: (v - lo) / den for k, v in d.items()}
-    nlex, nemb = _mm(slex), _mm(semb)
-    base_combo = {idx: HYBRID_W["lex"]*nlex.get(idx, 0.0) + HYBRID_W["emb"]*nemb.get(idx, 0.0)
-                  for idx in set(nlex) | set(nemb)}
-    if not base_combo:
-        return pd.DataFrame(), np.array([], dtype=bool)
-
-    # Add soft-feature bonus
-    combo_with_bonus: Dict[int, float] = {}
-    for i in df_pool.index:
-        combo_with_bonus[int(i)] = base_combo.get(int(i), 0.0) + _feature_bonus(df_pool.loc[i], facets)
-
-    # exact matches first
-    def _full_ok(i: int) -> bool:
-        row = df_pool.loc[i]
-        return match_all_strict(row, facets) and match_all_soft(row, facets)
-
-    exact_ids = [i for i in df_pool.index if _full_ok(int(i))]
-    rest_ids  = [i for i in df_pool.index if i not in exact_ids]
-
-    exact_sorted = sorted(exact_ids, key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
-    rest_sorted  = sorted(rest_ids,  key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
-
-    chosen = (exact_sorted + rest_sorted)[:TOPK_CARDS]
-    if not chosen:
-        return pd.DataFrame(), np.array([], dtype=bool)
-
-    res_df = df_pool.loc[chosen].copy().reset_index(drop=True)
-
-    # highlight mask: True only for exact matches (strict + soft)
-    mask = np.array([_full_ok(int(i)) for i in chosen], dtype=bool)
-
-    return res_df, mask
 
 # =========================================================
 # Cards / Grid rendering
@@ -897,30 +823,113 @@ def render_grid(df: pd.DataFrame, mask: np.ndarray, max_cols: int = GRID_COLS):
                 render_pet_card(rows[idx], highlight=bool(flags[idx]))
 
 # =========================================================
-# Pink UI CSS
+# Pink UI CSS  (COMPACT STATUS BAR)
 # =========================================================
 PINK_CSS = """
 <style>
 .stApp { background: linear-gradient(135deg, #ffb6c1 0%, #ffc0cb 50%, #ffd1dc 100%); background-attachment: fixed; }
-.main-header { text-align: center; padding: 2rem 0; background: linear-gradient(45deg, #ff6b9d, #ff8fab); border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(255, 107, 157, 0.3); }
-.main-header h1 { color: white; font-size: 3rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-.main-header p  { color: white; font-size: 1.2rem; margin: .5rem 0 0 0; opacity: .9; }
-.status-bar { background: linear-gradient(135deg, #ff6b9d, #ff8fab); color: white; padding: 1rem 2rem; margin: -1rem -1rem 2rem -1rem; border-radius: 0 0 20px 20px; box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3); }
-.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: center; }
-.status-item { background: rgba(255,255,255,0.2); padding:.8rem; border-radius:10px; text-align:center; backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.3); }
-.status-item.success { background: rgba(76,175,80,0.3); border-color:rgba(76,175,80,0.5); }
-.status-item.warning { background: rgba(255,152,0,0.3); border-color:rgba(255,152,0,0.5); }
-.status-item.error   { background: rgba(244,67,54,0.3); border-color:rgba(244,67,54,0.5); }
-.status-icon { font-size:1.5rem; margin-bottom:.5rem; display:block; }
-.status-text { font-weight:600; margin-bottom:.3rem; }
-.status-detail { font-size:.9rem; opacity:.9; }
+.main-header { text-align: center; padding: 1.25rem 0; background: linear-gradient(45deg, #ff6b9d, #ff8fab); border-radius: 16px; margin-bottom: 1rem; box-shadow: 0 6px 24px rgba(255, 107, 157, 0.28); }
+.main-header h1 { color: white; font-size: 2.25rem; margin: 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.25); }
+.main-header p  { color: white; font-size: .95rem; margin: .35rem 0 0 0; opacity: .92; }
+.status-bar { background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+  color: white; padding: .45rem .9rem; margin: -.5rem -.5rem 1rem -.5rem;
+  border-radius: 0 0 14px 14px; box-shadow: 0 3px 14px rgba(255, 107, 157, 0.25); }
+.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .5rem; align-items: center; }
+.status-item { background: rgba(255,255,255,0.18); padding:.45rem .55rem; border-radius:8px;
+  text-align:center; backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.28); }
+.status-item.success { background: rgba(76,175,80,0.22); border-color:rgba(76,175,80,0.42); }
+.status-item.error   { background: rgba(244,67,54,0.22); border-color:rgba(244,67,54,0.42); }
+.status-icon { font-size:.95rem; margin-bottom:.2rem; display:block; line-height: 1; }
+.status-text { font-weight:700; margin-bottom:.05rem; font-size:.85rem; line-height:1; }
+.status-detail { font-size:.8rem; opacity:.95; line-height:1; }
+.block-container { padding-top: 1rem; }
 </style>
 """
+
+# =========================================================
+# Scroll helpers (JS)
+# =========================================================
+def _emit_scroll_js(anchor_id: Optional[str]):
+    if not anchor_id:
+        return
+    if anchor_id == "__top__":
+        components.html(
+            """
+            <script>
+            try { parent.document.querySelector('html').style.scrollBehavior = 'auto'; } catch(e) {}
+            function toTop(){ parent.window.scrollTo({top: 0, left: 0, behavior: "auto"}); }
+            toTop(); setTimeout(toTop, 80); setTimeout(toTop, 160); setTimeout(toTop, 320);
+            </script>
+            """, height=0
+        )
+        return
+    components.html(
+        f"""
+        <script>
+        try {{ parent.document.querySelector('html').style.scrollBehavior = 'auto'; }} catch(e) {{}}
+        const targetId = "{anchor_id}";
+        let tries = 0;
+        function jump() {{
+          const root = parent.document;
+          const el = root.getElementById(targetId);
+          if (el) {{
+            const r = el.getBoundingClientRect();
+            parent.window.scrollTo({{ top: r.top + parent.window.pageYOffset - 8, left: 0, behavior: "auto" }});
+            return true;
+          }}
+          return false;
+        }}
+        function loop() {{
+          if (jump() || ++tries > 25) return;
+          setTimeout(loop, 40);
+        }}
+        loop();
+        </script>
+        """, height=0
+    )
+
+# =========================================================
+# Reset helpers
+# =========================================================
+def trigger_hard_reset():
+    st.session_state["__pending_hard_reset__"] = True
+    st.rerun()
+
+def post_reset_scrub(bot: Optional[ChatbotPipeline]):
+    """Extra safety: after caches are cleared and app reruns, ensure nothing stale remains."""
+    st.session_state["last_facets"] = {}
+    st.session_state["blocked_facets"] = set()
+    st.session_state["messages"] = []
+    try:
+        ensure_bot_session(bot)
+        bot.session = {"greeted": False, "intent": None, "entities": {}}
+    except Exception:
+        pass
 
 # =========================================================
 # Main App
 # =========================================================
 def main():
+    # ---------- PHASE 1: perform hard reset if armed ----------
+    if st.session_state.pop("__pending_hard_reset__", False):
+        # Clear *both* caches so cached ChatbotPipeline/env cannot leak state
+        try:
+            st.cache_resource.clear()
+        except Exception:
+            pass
+        try:
+            st.cache_data.clear()
+        except Exception:
+            pass
+        # Clear all session vars
+        st.session_state.clear()
+        # Mark for post-reset scrub on the next run
+        st.session_state["__post_reset_scrub__"] = True
+        st.session_state["__scroll_after_render__"] = "__top__"
+        st.rerun()
+
+    # Header
     st.markdown(PINK_CSS, unsafe_allow_html=True)
     st.markdown(
         "<div class='main-header'>"
@@ -930,31 +939,76 @@ def main():
         unsafe_allow_html=True
     )
 
-    # --- Top "New search / Clear history" button ---
-    if st.button("➕ New search / Clear history", type="primary", use_container_width=True, key="top_clear"):
-        st.session_state["__clear_all__"] = True
-        st.experimental_rerun()
+    # ===== Friendly Loading (first boot only) =====
+    if not st.session_state.get("_boot_done", False):
+        loading_ph = st.empty()
+        st.markdown("""
+        <style>
+        .pm-loading { display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+          min-height:64vh; padding-top:6vh; text-align:center; }
+        .pm-loading .paw { font-size:3.6rem; animation: pm-spin 2s linear infinite; }
+        .pm-loading .chat { font-size:2.2rem; margin-top:8px; animation: pm-bounce 1.5s infinite; }
+        .pm-loading h2 { margin:10px 0 6px 0; color:#ff4d88; }
+        .pm-loading p  { margin:4px 0; color:#444; }
+        .pm-tip { margin-top:10px; font-size:.95rem; color:#333; background:rgba(255,255,255,0.85);
+          border-radius:10px; padding:8px 12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); display:inline-block; }
+        @keyframes pm-spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
+        @keyframes pm-bounce { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
+        </style>
+        """, unsafe_allow_html=True)
 
-    with st.spinner("🚀 Initializing systems..."):
-        rag, bot = bootstrap_rag_system()
+        FUN_FACTS = [
+            "Did you know? A quick 20-minute walk can boost your dog’s mood and health!",
+            "Fun fact: Cats sleep for ~70% of their lives — champions of chill!",
+            "Did you know? Puppies are born blind, deaf, and toothless!",
+            "Fun fact: Dogs can learn 1,000+ words — brainy buddies!",
+            "Did you know? A cat’s purr can help lower human stress levels!",
+            "Tip: Fresh water and a steady routine keep pets happiest.",
+        ]
+        def render_stage(headline, subtext, fun_tip):
+            loading_ph.markdown(
+                f"""
+                <div class='pm-loading'>
+                  <div class='paw'>🐾</div>
+                  <div class='chat'>💬</div>
+                  <h2>{headline}</h2>
+                  <p>{subtext}</p>
+                  <div class='pm-tip'>{random.choice(FUN_FACTS)}</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
+
+        render_stage("Paws-itively Preparing Your Chat!", "Fetching the best advice and available pets...", random.choice(FUN_FACTS))
+        time.sleep(0.4)
+        render_stage("🐶 Initializing Pet Adoption Database... 😺", "Fetching profiles of our furry friends...", random.choice(FUN_FACTS))
         env = bootstrap_search_components()
+        render_stage("🩺 Gathering Pet Care Tips & Chat Intelligence...", "Training our assistant to answer your pet questions!", random.choice(FUN_FACTS))
+        rag, bot = bootstrap_rag_system()
+        ensure_bot_session(bot)
+        time.sleep(0.6)
+        loading_ph.empty()
 
-    # If user requested a full clear, clear everything including bot session
-    if st.session_state.pop("__clear_all__", False):
-        st.session_state["messages"] = []
-        st.session_state["last_facets"] = {}
-        st.session_state["blocked_facets"] = set()
-        if hasattr(st.session_state, "example_prompt"):
-            delattr(st.session_state, "example_prompt")
-        try:
-            if bot is not None and hasattr(bot, "session"):
-                bot.session = {}
-        except Exception:
-            pass
-        st.experimental_rerun()
+        st.session_state["_boot_done"] = True
+        st.session_state["_boot_env"] = env
+        st.session_state["_boot_rag"] = rag
+        st.session_state["_boot_bot"] = bot
+    else:
+        env = st.session_state.get("_boot_env")
+        rag = st.session_state.get("_boot_rag")
+        bot = st.session_state.get("_boot_bot")
+        ensure_bot_session(bot)
 
-    rag_ok = rag is not None and bot is not None
-    env_ok = env is not None and env.get("dfp") is not None
+    # ---------- PHASE 2: one-time scrub after a reset ----------
+    if st.session_state.pop("__post_reset_scrub__", False):
+        post_reset_scrub(st.session_state.get("_boot_bot"))
+
+    # Initialize chat log if missing
+    if "messages" not in st.session_state:
+        hard_reset_bot_session(st.session_state.get("_boot_bot"))
+        st.session_state.messages = []
+
+    rag_ok = (st.session_state.get("_boot_rag") is not None) and (st.session_state.get("_boot_bot") is not None)
+    env_ok = (st.session_state.get("_boot_env") is not None) and (st.session_state["_boot_env"].get("dfp") is not None)
 
     def badge(status): return "success" if status else "error"
     def icon(status): return "✅" if status else "❌"
@@ -966,33 +1020,18 @@ def main():
     st.markdown(
         "<div class='status-bar'>"
         "<div class='status-grid'>"
-        f"<div class='status-item {badge(app_status_ok)}'>"
-        f"<span class='status-icon'>{icon(app_status_ok)}</span>"
-        "<div class='status-text'>App Status</div>"
-        f"<div class='status-detail'>{app_status_text}</div>"
-        "</div>"
-        f"<div class='status-item {badge(rag_ok)}'>"
-        f"<span class='status-icon'>{icon(rag_ok)}</span>"
-        "<div class='status-text'>RAG / Chatbot</div>"
-        f"<div class='status-detail'>{'Online' if rag_ok else 'Unavailable'}</div>"
-        "</div>"
-        f"<div class='status-item {badge(env_ok)}'>"
-        f"<span class='status-icon'>{icon(env_ok)}</span>"
-        "<div class='status-text'>Pet Search</div>"
-        f"<div class='status-detail'>{pets_detail}</div>"
-        "</div>"
-        "</div>"
-        "</div>",
-        unsafe_allow_html=True
+        f"<div class='status-item {badge(app_status_ok)}'><span class='status-icon'>{icon(app_status_ok)}</span><div class='status-text'>App Status</div><div class='status-detail'>{app_status_ok and 'All good' or 'Check modules'}</div></div>"
+        f"<div class='status-item {badge(rag_ok)}'><span class='status-icon'>{icon(rag_ok)}</span><div class='status-text'>RAG / Chatbot</div><div class='status-detail'>{'Online' if rag_ok else 'Unavailable'}</div></div>"
+        f"<div class='status-item {badge(env_ok)}'><span class='status-icon'>{icon(env_ok)}</span><div class='status-text'>Pet Search</div><div class='status-detail'>{pets_detail}</div></div>"
+        "</div></div>", unsafe_allow_html=True
     )
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
+    # Render prior messages
     for m in st.session_state.messages:
         with st.chat_message(m["role"]):
             st.markdown(m["content"])
 
+    # Helper chips
     st.markdown("### 💡 Try asking me:")
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -1007,13 +1046,15 @@ def main():
 
     prompt = st.chat_input("Ask me anything about pets...")
 
-    if hasattr(st.session_state, "example_prompt"):
+    if "example_prompt" in st.session_state:
         prompt = st.session_state.example_prompt
-        delattr(st.session_state, "example_prompt")
+        del st.session_state["example_prompt"]
 
     if not prompt:
+        _emit_scroll_js(st.session_state.pop("__scroll_after_render__", None))
         return
 
+    # ===== Record user message =====
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -1021,196 +1062,281 @@ def main():
     # ------------------------
     # Pet/RAG routing & logic
     # ------------------------
+    assistant_anchor_id = None
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            # PRE-PARSE REMOVALS before calling the bot
+            bot = st.session_state.get("_boot_bot")
+            env = st.session_state.get("_boot_env")
+            ensure_bot_session(bot)
+
+            # Extra fuse: if this is the first prompt after a reset or after a fresh boot, ensure no stale facets/entities
+            if st.session_state.get("_just_started_turn", True):
+                st.session_state["last_facets"] = {}
+                st.session_state["blocked_facets"] = set()
+                hard_reset_bot_session(bot)
+            st.session_state["_just_started_turn"] = False
+
             removal_intent = is_constraint_removal_query(prompt)
             prev_facets_for_removal = get_persisted_facets()
             prev_after_removal = None
-            removed_labels = []
             cleared_all = False
-            removed_keys = set()
+            removed_keys: Set[str] = set()
 
             if removal_intent:
-                prev_after_removal, removed_labels, cleared_all, removed_keys = apply_constraint_removals(
-                    prev_facets_for_removal, prompt
-                )
-                # Force route to pet search when removing constraints
-                if hasattr(bot, "session"):
-                    bot.session["intent"] = "find_pet"
-
-                # Persist blocked facets across turns
+                prev_after_removal, _, cleared_all, removed_keys = apply_constraint_removals(prev_facets_for_removal, prompt)
+                ensure_bot_session(bot)
+                bot.session["intent"] = "find_pet"
                 blocked = get_blocked_facets()
                 if cleared_all:
                     blocked = {"animal","breed","gender","state","color","size","fur_length","soft"}
                 blocked |= set(removed_keys)
                 set_blocked_facets(blocked)
 
-            # Get the bot's text (for Q&A etc.)
             try:
                 reply = bot.handle_message(prompt)
             except Exception as e:
                 reply = f"(Chat pipeline error: {e})"
 
-            # Routing
-            intent_now = (getattr(bot, "session", None) or {}).get("intent")
+            ensure_bot_session(bot)
+            intent_now = bot.session.get("intent")
             if removal_intent:
                 intent_now = "find_pet"
 
             if not env_ok:
+                assistant_anchor_id = f"assistant_msg_{len(st.session_state.messages)}"
+                st.markdown(f"<div id='{assistant_anchor_id}'></div>", unsafe_allow_html=True)
                 st.markdown(reply)
                 st.session_state.messages.append({"role": "assistant", "content": reply})
-                return
-
-            # ----- PET SEARCH PATH -----
-            if intent_now == "find_pet":
-                ents = (bot.session or {}).get("entities", {}) or {}
-                new_facets = _entities_to_facets(ents, raw_query=prompt)
-
-                # persistence: clear if animal/breed changed
-                reset_done = maybe_reset_persistence(new_facets)
-                prev = {} if reset_done else get_persisted_facets()
-
-                # If we already computed removals above, reuse them. Otherwise compute now.
-                if removal_intent:
-                    base_after_removal = prev_after_removal
-                    removal_keys = removed_keys
-                else:
-                    base_after_removal, _, _, removal_keys = apply_constraint_removals(prev, prompt)
-
-                # --- Blocked facets persist across turns
-                blocked = get_blocked_facets()
-
-                # Unblock only if the USER TEXT explicitly mentions the facet
-                explicit_add_keys = explicit_add_keys_from_prompt(prompt)
-                if explicit_add_keys:
-                    blocked = blocked - explicit_add_keys
-                    set_blocked_facets(blocked)
-
-                # Do not reintroduce removed/blocked keys from current entities
-                for k in (removal_keys | blocked):
-                    new_facets.pop(k, None)
-
-                # HARD GUARD: drop COLOR from new_facets unless explicitly present in THIS prompt
-                if "color" in new_facets and "color" not in explicit_add_keys:
-                    new_facets.pop("color", None)
-
-                # ---- IMPORTANT FIX: do not carry forward COLOR unless explicitly present this turn ----
-                base = {} if (removal_intent and cleared_all) else dict(base_after_removal)
-                if "color" not in explicit_add_keys:
-                    base.pop("color", None)
-
-                # Merge base + new
-                merged = dict(base)
-                for k in ["animal","breed","gender","state","color","size","fur_length"]:
-                    if new_facets.get(k):
-                        merged[k] = new_facets[k]
-
-                # merge soft prefs
-                soft_prev = dict(base.get("soft", {}) or {})
-                soft_new  = dict(new_facets.get("soft", {}) or {})
-                for k, v in soft_new.items():
-                    if v not in (None, [], {}, False, ""):
-                        soft_prev[k] = v
-                if any(bool(v) for v in soft_prev.values()):
-                    merged["soft"] = soft_prev
-                else:
-                    merged.pop("soft", None)
-
-                # Persist final facets
-                set_persisted_facets(merged)
-                facets = merged
-
-                # If no facets at all → show random suggestions + prompt user again
-                non_soft_keys = [k for k in facets.keys() if k != "soft"]
-                if len(non_soft_keys) == 0 and not (facets.get("soft") and any(facets["soft"].values())):
-                    st.info("No active filters right now. Consider taking these fur babies home 🥹 — here are some random sweethearts!")
-                    df_all = env["dfp"]
-                    if len(df_all) > 0:
-                        random_df = df_all.sample(min(TOPK_CARDS, len(df_all)), random_state=None).reset_index(drop=True)
-                        render_grid(random_df, np.array([False]*len(random_df)))
-                    st.caption("Tell me what you’re looking for — species/breed, gender, age group, color, and state (e.g., **female young poodle in Selangor**).")
-                    st.session_state.messages.append({"role":"assistant","content":"(random suggestions shown)"})
-                    return
-
-                # Facets banner
-                def chip(label, value, accent=False):
-                    color = "#eaffea" if accent else "#fff"
-                    border = "#a3e6a3" if accent else "#eee"
-                    return (
-                        "<span style='background:"+color+";border:1px solid "+border+
-                        ";border-radius:8px;padding:4px 8px;margin:2px;display:inline-block;'><strong>"+
-                        html.escape(label)+":</strong> "+html.escape(str(value))+"</span>"
-                    )
-
-                chips = []
-                labels = {"animal":"Animal","breed":"Breed","gender":"Gender","state":"State","color":"Color","size":"Size","fur_length":"Fur"}
-                for k, lab in labels.items():
-                    if facets.get(k): chips.append(chip(lab, facets[k]))
-
-                soft = facets.get("soft", {}) or {}
-                if soft.get("age_groups_pref"):
-                    chips.append(chip("Age group", "/".join(soft["age_groups_pref"]), accent=True))
-                if soft.get("prefer_vaccinated"): chips.append(chip("Pref", "vaccinated", accent=True))
-                if soft.get("prefer_dewormed"):   chips.append(chip("Pref", "dewormed",   accent=True))
-                if soft.get("prefer_neutered"):   chips.append(chip("Pref", "neutered",   accent=True))
-                if soft.get("prefer_spayed"):     chips.append(chip("Pref", "spayed",     accent=True))
-                if soft.get("prefer_healthy"):    chips.append(chip("Pref", "healthy",    accent=True))
-                if soft.get("fee_cap") is not None:
-                    val = soft["fee_cap"]
-                    try: val = int(float(val))
-                    except Exception: pass
-                    chips.append(chip("Fee cap", f"≤ {val}", accent=True))
-
-                if chips:
-                    st.markdown(
-                        "<div style='margin:10px 0 4px;color:#374151;'>Facets used (tip: if too few pets, try <em>remove state</em>):</div>"
-                        "<div style='margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;'>"
-                        + "".join(chips) + "</div>",
-                        unsafe_allow_html=True
-                    )
-
-                # ------- Build pool with stepwise relaxation -------
-                df_pool, relax_meta = build_relaxed_pool(env["dfp"], facets)
-
-                # ------- Compute exact-match count (ALL hard + soft) over strict hard filters -------
-                exact_total = count_exact_matches(env["dfp"], facets)
-
-                # Conversational status line using EXACT count
-                status_msg = None
-                if facets.get("state"):
-                    if exact_total >= TOPK_CARDS:
-                        status_msg = f"Found {exact_total} pets matching all your filters in {facets['state'].title()}! Here are some lovely matches."
-                    elif exact_total > 0:
-                        status_msg = f"Only {exact_total} pet(s) match all your filters in {facets['state'].title()}. Showing similar fur babies needing a forever home~"
-                    else:
-                        status_msg = f"No pets match all your filters in {facets['state'].title()}. Trying close matches for you ~"
-                else:
-                    if exact_total >= TOPK_CARDS:
-                        status_msg = f"Found {exact_total} pets matching all your filters! Here are some lovely matches."
-                    elif exact_total > 0:
-                        status_msg = f"Only {exact_total} pet(s) match all your filters. Showing similar fur babies needing a forever home~"
-                    else:
-                        status_msg = "No pets match all your filters. Trying close matches for you ~"
-
-                st.markdown(status_msg)
-
-                # ------- Rank & highlight (EXACT first, then remainder by similarity) -------
-                if df_pool is None or df_pool.empty:
-                    st.info("No pets found. Try adjusting or removing some constraints (e.g. **remove state**).")
-                else:
-                    res_df, highlight_mask = hybrid_rank_and_highlight(prompt, env, facets, df_pool)
-                    if res_df is None or res_df.empty:
-                        st.info("No pets found. Try adjusting or removing some constraints (e.g. **remove state**).")
-                    else:
-                        render_grid(res_df, highlight_mask, max_cols=GRID_COLS)
-
-                st.session_state.messages.append({"role": "assistant", "content": status_msg})
-
+                st.divider()
+                if st.button("➕ New search / Clear history", type="primary", use_container_width=True, key="bottom_clear_emptyenv"):
+                    trigger_hard_reset()
             else:
-                # ----- RAG Q&A PATH -----
-                st.markdown(reply)
-                st.session_state.messages.append({"role": "assistant", "content": reply})
+                # ----- PET SEARCH PATH -----
+                if intent_now == "find_pet":
+                    ents = (bot.session or {}).get("entities", {}) or {}
+                    # Safety: only allow facets that are explicitly present in THIS prompt
+                    explicit_keys = explicit_add_keys_from_prompt(prompt)
+                    ents = {k:v for k,v in ents.items() if (
+                        (k=="PET_TYPE" and "animal" in explicit_keys) or
+                        (k=="STATE" and "state" in explicit_keys) or
+                        (k=="BREED" and "breed" in explicit_keys) or
+                        (k=="GENDER" and "gender" in explicit_keys) or
+                        (k=="COLOR" and "color" in explicit_keys) or
+                        (k=="SIZE" and "size" in explicit_keys) or
+                        (k=="FURLENGTH" and "fur_length" in explicit_keys)
+                    )}
+                    new_facets = _entities_to_facets(ents, raw_query=prompt)
+
+                    reset_done = maybe_reset_persistence(new_facets, bot)
+                    prev = {} if reset_done else get_persisted_facets()
+
+                    if removal_intent:
+                        base_after_removal = prev_after_removal
+                        removal_keys = removed_keys
+                    else:
+                        base_after_removal, _, _, removal_keys = apply_constraint_removals(prev, prompt)
+
+                    blocked = get_blocked_facets()
+                    if explicit_keys:
+                        blocked = blocked - explicit_keys
+                        set_blocked_facets(blocked)
+
+                    for k in (removal_keys | blocked):
+                        new_facets.pop(k, None)
+
+                    # HARD GUARD on NEW entities: drop COLOR unless explicitly present this turn
+                    if "color" in new_facets and "color" not in explicit_keys:
+                        new_facets.pop("color", None)
+
+                    base = {} if (removal_intent and cleared_all) else dict(base_after_removal)
+
+                    if removal_intent:
+                        if ("color" in removal_keys) or ("color" in blocked):
+                            base.pop("color", None)
+
+                    merged = dict(base)
+                    for k in ["animal","breed","gender","state","color","size","fur_length"]:
+                        if new_facets.get(k):
+                            merged[k] = new_facets[k]
+
+                    # --- ANIMAL ↔ BREED EXCLUSIVITY ---
+                    # If user changed animal this turn, drop any breed.
+                    # If user changed breed this turn, drop any animal.
+                    # If both changed, prefer breed (more specific): drop animal.
+                    animal_changed = ("animal" in new_facets) and ("animal" in explicit_keys)
+                    breed_changed  = ("breed" in new_facets) and ("breed" in explicit_keys)
+
+                    if breed_changed:
+                        # Prefer breed; remove animal to avoid "animal=cat, breed"
+                        merged.pop("animal", None)
+                    elif animal_changed:
+                        # Animal changed without breed change => remove breed
+                        merged.pop("breed", None)
+                    # ----------------------------------
+
+                    # merge soft prefs
+                    soft_prev = dict(base.get("soft", {}) or {})
+                    soft_new  = dict(new_facets.get("soft", {}) or {})
+                    for k, v in soft_new.items():
+                        if v not in (None, [], {}, False, ""):
+                            soft_prev[k] = v
+                    if any(bool(v) for v in soft_prev.values()):
+                        merged["soft"] = soft_prev
+                    else:
+                        merged.pop("soft", None)
+
+                    # Persist final facets
+                    set_persisted_facets(merged)
+                    facets = merged
+
+                    non_soft_keys = [k for k in facets.keys() if k != "soft"]
+                    assistant_anchor_id = f"assistant_msg_{len(st.session_state.messages)}"
+                    st.markdown(f"<div id='{assistant_anchor_id}'></div>", unsafe_allow_html=True)
+
+                    if len(non_soft_keys) == 0 and not (facets.get("soft") and any(facets["soft"].values())):
+                        st.info("No active filters right now. Here are some random sweethearts!")
+                        df_all = env["dfp"]
+                        if len(df_all) > 0:
+                            random_df = df_all.sample(min(TOPK_CARDS, len(df_all)), random_state=None).reset_index(drop=True)
+                            render_grid(random_df, np.array([False]*len(random_df)))
+                        st.caption("Tell me what you’re looking for — e.g., **female young poodle in Selangor**.")
+                        st.session_state.messages.append({"role":"assistant","content":"(random suggestions shown)"})
+                        st.divider()
+                        if st.button("➕ New search / Clear history", type="primary", use_container_width=True, key="bottom_clear_random"):
+                            trigger_hard_reset()
+                    else:
+                        # Facet chips
+                        def chip(label, value, accent=False):
+                            color = "#eaffea" if accent else "#fff"
+                            border = "#a3e6a3" if accent else "#eee"
+                            return (
+                                "<span style='background:"+color+";border:1px solid "+border+
+                                ";border-radius:8px;padding:4px 8px;margin:2px;display:inline-block;'><strong>"+
+                                html.escape(label)+":</strong> "+html.escape(str(value))+"</span>"
+                            )
+                        chips = []
+                        labels = {"animal":"Animal","breed":"Breed","gender":"Gender","state":"State","color":"Color","size":"Size","fur_length":"Fur"}
+                        for k, lab in labels.items():
+                            if facets.get(k): chips.append(chip(lab, facets[k]))
+                        soft = facets.get("soft", {}) or {}
+                        if soft.get("age_groups_pref"): chips.append(chip("Age group", "/".join(soft["age_groups_pref"]), accent=True))
+                        if soft.get("prefer_vaccinated"): chips.append(chip("Pref", "vaccinated", accent=True))
+                        if soft.get("prefer_dewormed"):   chips.append(chip("Pref", "dewormed",   accent=True))
+                        if soft.get("prefer_neutered"):   chips.append(chip("Pref", "neutered",   accent=True))
+                        if soft.get("prefer_spayed"):     chips.append(chip("Pref", "spayed",     accent=True))
+                        if soft.get("prefer_healthy"):    chips.append(chip("Pref", "healthy",    accent=True))
+                        if soft.get("fee_cap") is not None:
+                            val = soft["fee_cap"]
+                            try: val = int(float(val))
+                            except Exception: pass
+                            chips.append(chip("Fee cap", f"≤ {val}", accent=True))
+                        if chips:
+                            st.markdown(
+                                "<div style='margin:10px 0 4px;color:#374151;'>Facets used (tip: try <em>remove state</em> if too few results):</div>"
+                                "<div style='margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;'>"
+                                + "".join(chips) + "</div>", unsafe_allow_html=True
+                            )
+
+                        # Build pool + exact match count
+                        df_pool, _ = build_relaxed_pool(env["dfp"], facets)
+                        exact_total = count_exact_matches(env["dfp"], facets)
+
+                        if facets.get("state"):
+                            if exact_total >= TOPK_CARDS:
+                                status_msg = f"Found {exact_total} pets matching all your filters in {facets['state'].title()}! Here are some lovely matches."
+                            elif exact_total > 0:
+                                status_msg = f"Only {exact_total} pet(s) match all your filters in {facets['state'].title()}. Showing similar fur babies~"
+                            else:
+                                status_msg = f"No pets match all your filters in {facets['state'].title()}. Trying close matches for you ~"
+                        else:
+                            if exact_total >= TOPK_CARDS:
+                                status_msg = f"Found {exact_total} pets matching all your filters! Here are some lovely matches."
+                            elif exact_total > 0:
+                                status_msg = f"Only {exact_total} pet(s) match all your filters. Showing similar fur babies~"
+                            else:
+                                status_msg = "No pets match all your filters. Trying close matches for you ~"
+                        st.markdown(status_msg)
+
+                        if df_pool is None or df_pool.empty:
+                            st.info("No pets found. Try adjusting or removing some constraints (e.g. **remove state**).")
+                        else:
+                            res_df, highlight_mask = hybrid_rank_and_highlight(prompt, env, facets, df_pool)
+                            if res_df is None or res_df.empty:
+                                st.info("No pets found. Try adjusting or removing some constraints (e.g. **remove state**).")
+                            else:
+                                render_grid(res_df, highlight_mask, max_cols=GRID_COLS)
+
+                        st.session_state.messages.append({"role": "assistant", "content": status_msg})
+                        st.divider()
+                        if st.button("➕ New search / Clear history", type="primary", use_container_width=True, key="bottom_clear_pet"):
+                            trigger_hard_reset()
+
+                else:
+                    # ----- RAG Q&A PATH -----
+                    assistant_anchor_id = f"assistant_msg_{len(st.session_state.messages)}"
+                    st.markdown(f"<div id='{assistant_anchor_id}'></div>", unsafe_allow_html=True)
+                    st.markdown(reply)
+                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                    st.divider()
+                    if st.button("➕ New search / Clear history", type="primary", use_container_width=True, key="bottom_clear_rag"):
+                        trigger_hard_reset()
+
+    if assistant_anchor_id:
+        st.session_state["__scroll_after_render__"] = assistant_anchor_id
+    _emit_scroll_js(st.session_state.pop("__scroll_after_render__", None))
+
+# =========================================================
+# Ranking & Highlighting
+# =========================================================
+def hybrid_rank_and_highlight(query: str, env: Dict[str, Any], facets: Dict[str, Any], df_pool: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray]:
+    student = env["student"]; doc_ids = env["doc_ids"]; doc_vecs = env["doc_vecs"]
+    faiss_index = env["faiss_index"]; bm25 = env["bm25"]
+
+    facet_bits = []
+    for k in ["animal","breed","gender","color","size","fur_length","state"]:
+        if facets.get(k): facet_bits.append(str(facets[k]))
+    boost_q = (query or "").strip()
+    if facet_bits:
+        boost_q = (boost_q + " " + " ".join(facet_bits)).strip()
+
+    lex_all = bm25.search(only_text(boost_q), topk=LEX_POOL)
+    slex = {int(idx): float(s) for idx, s in lex_all if idx in df_pool.index}
+    emb_all = emb_search(boost_q, student, doc_ids, doc_vecs, pool_topn=EMB_POOL, faiss_index=faiss_index)
+    semb = {int(pid): float(s) for pid, s in emb_all if pid in df_pool.index}
+
+    def _mm(d):
+        if not d: return {}
+        vals = np.fromiter(d.values(), dtype=float)
+        lo, hi = float(vals.min()), float(vals.max())
+        den = (hi - lo) or 1.0
+        return {k: (v - lo) / den for k, v in d.items()}
+    nlex, nemb = _mm(slex), _mm(semb)
+    base_combo = {idx: HYBRID_W["lex"]*nlex.get(idx, 0.0) + HYBRID_W["emb"]*nemb.get(idx, 0.0)
+                  for idx in set(nlex) | set(nemb)}
+    if not base_combo:
+        return pd.DataFrame(), np.array([], dtype=bool)
+
+    combo_with_bonus: Dict[int, float] = {}
+    for i in df_pool.index:
+        combo_with_bonus[int(i)] = base_combo.get(int(i), 0.0) + _feature_bonus(df_pool.loc[i], facets)
+
+    def _full_ok(i: int) -> bool:
+        row = df_pool.loc[i]
+        return match_all_strict(row, facets) and match_all_soft(row, facets)
+
+    exact_ids = [i for i in df_pool.index if _full_ok(int(i))]
+    rest_ids  = [i for i in df_pool.index if i not in exact_ids]
+
+    exact_sorted = sorted(exact_ids, key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
+    rest_sorted  = sorted(rest_ids,  key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
+
+    chosen = (exact_sorted + rest_sorted)[:TOPK_CARDS]
+    if not chosen:
+        return pd.DataFrame(), np.array([], dtype=bool)
+
+    res_df = df_pool.loc[chosen].copy().reset_index(drop=True)
+    mask = np.array([_full_ok(int(i)) for i in chosen], dtype=bool)
+    return res_df, mask
 
 if __name__ == "__main__":
     main()
