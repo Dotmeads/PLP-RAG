@@ -1232,7 +1232,7 @@ def main():
                             chips.append(chip("Fee cap", f"≤ {val}", accent=True))
                         if chips:
                             st.markdown(
-                                "<div style='margin:10px 0 4px;color:#374151;'>Facets used (tip: try <em>remove state</em> if too few results):</div>"
+                                "<div style='margin:10px 0 4px;color:#374151;'>Facets used (tip: try to remove a filter by typing <em>remove state</em> or <em>remove gender</em> if too few results):</div>"
                                 "<div style='margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;'>"
                                 + "".join(chips) + "</div>", unsafe_allow_html=True
                             )
