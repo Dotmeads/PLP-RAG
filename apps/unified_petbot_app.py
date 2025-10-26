@@ -1,56 +1,53 @@
 # -*- coding: utf-8 -*-
 """
-Unified PetBot App — Single Chat Interface with Intent Classification
-➡️ Dialogue flow → Intent classification →
-   • Adoption intent  → NER + hybrid search → card grid
-   • Pet care intent → RAG answer (ProposedRAGManager)
-
-What's NEW
-----------
-- STRONG hard filters: animal/breed/gender/state (state auto-relaxes only if <6)
-- Soft preferences parsed and used for BUCKET-FIRST priority:
-  • Age groups (puppy/kitten, young, adult, senior) — supports "<1", "less than 1 year",
-    ">1 year", "over 3 years", and exact ages ("2 years") → mapped to groups
-  • Vaccinated / dewormed / neutered / spayed / healthy
-  • Low adoption fee / fee cap
-- Cards turn light-green only if they meet ALL requested strict + soft requirements
-- Sidebar removed; top cards fixed to 6; “New search / Clear history” button
-- “Searching…” line built from current facets only (no leakage)
-- Summary banner uses **exact in-state (strict+soft) matches**; adds conversational recap
-- UI update:
-  • Name on top, bigger, blue, with 🔗 for clickable URL
-  • Collapsible Description box at bottom (from description_clean)
-  • Fixed-size photo area; images shrink to fit (no cropping)
+Pawfect Match — Chat + Smart Pet Search
+- Hugging Face NER & Intent routed via ChatbotPipeline (no Azure NER download)
+- STRONG hard filters: animal/breed/gender/state (animal & breed always strict)
+- Auto-relax when <6 results, in order: state -> color -> age -> gender
+- Soft preferences (bucket-first priority):
+    • Age groups: puppy/kitten (0–12), young (12–36), adult (36–84), senior (84+)
+      supports "<1", "less than 1 year", ">1 year", "over 3 years", exact ages ("2 years")
+    • Vaccinated / dewormed / neutered / spayed / healthy
+    • Low adoption fee / fee cap
+- Hybrid ranking: BM25 + Embeddings with soft-feature bonus
+- Exact matches (ALL strict + soft) shown first (green), followed by close matches by similarity
+- Cards highlight light-green ONLY if they satisfy ALL strict + soft requirements
+- Facets persist across turns, but animal/breed changes clear persisted facets
+- Users can remove/clear constraints: "remove state", "remove breed", "clear all", etc.
+- After removal: conversational status lines showing **count of exact matches** (hard+soft)
+- If no facets remain: show random pets + invite user to enter fresh constraints
+- Top "➕ New search / Clear history" button resets everything
 """
-import streamlit as st
-st.set_page_config(page_title="Unified PetBot", layout="wide")
 
-import os, time, ast, re, json, html
-import sys
+import os, re, json, ast, html
 from typing import List, Dict, Any, Tuple, Optional, Set
 
-# Add project root to Python path
+import streamlit as st
+st.set_page_config(page_title="Pawfect Match", page_icon="🐾", layout="wide")
+
+import sys
+import numpy as np
+import pandas as pd
+
+from ui_style import apply_global_ui, render_status_bar, render_loading_box
+
+# --------------------------
+# Project path & imports
+# --------------------------
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-import pandas as pd
-import numpy as np
-
-# ==== RAG & Chatbot (dialogue + intent + NER pipe) ====
+# RAG + Chatbot (HF NER & intent model are inside this pipeline)
 from rag_system.proposed_rag_system import ProposedRAGManager
-from chatbot_flow.chatbot_pipeline import ChatbotPipeline
+from chatbot_flow.chatbot_pipeline import ChatbotPipeline  # exposes intent + HF NER
 
-# ==== Retrieval stack ====
+# Retrieval stack
 from pet_retrieval.config import get_blob_settings, local_mr_dir, local_pets_csv_path
 from pet_retrieval.azure_io import download_prefix_flat, smart_download_single_blob
 from pet_retrieval.models import load_mr_model, load_faiss_index
-from pet_retrieval.retrieval import (
-    only_text, BM25,
-    parse_facets_from_text, entity_spans_to_facets, sanitize_facets_ner_light,
-    make_boosted_query, emb_search
-)
+from pet_retrieval.retrieval import only_text, BM25, emb_search
 
-# Optional fuzzy breed mapping
+# Optional fuzzy (safe import)
 try:
     from rapidfuzz import process, fuzz
     _HAS_FUZZ = True
@@ -58,44 +55,64 @@ except Exception:
     _HAS_FUZZ = False
     process = fuzz = None
 
-# -------------------------------------------
-# STRICT SETTINGS (no sidebar; we set defaults here)
-# -------------------------------------------
-STRICT_DEFAULTS = {
-    "strict_mode": True,
-    "relax_state_if_needed": False,
-    "relax_animal_if_needed": False,
-    "relax_breed_if_needed": False,
-    "relax_colors_if_needed": False,
-    "allow_breed_contains": True,  # allow "poodle" to match "terrier + poodle"
-}
-
-# Fixed UI/config
-EMB_POOL = 200
+# =========================================================
+# CONSTANTS / UI CONFIG
+# =========================================================
+TOPK_CARDS = 6
+GRID_COLS = 3
 LEX_POOL = 2000
+EMB_POOL = 200
 HYBRID_W = {"lex": 0.1, "emb": 0.9}
-AUTO_RELAX_MIN_RESULTS = 6     # if in-state is too few, add cross-state
-TOPK_CARDS = 6                 # fixed
-GRID_COLS = 3                  # visual grid columns
 
-COLOR_MAP = {"golden": "yellow", "gold": "yellow", "cream": "white", "ginger": "orange"}
-
-# ---- Age groups (months) ----
+# Age groups (months)
 AGE_GROUPS = {
-    "puppy/kitten": (0, 12),          # [0, 12)
-    "young": (12, 36),                 # [12, 36)
-    "adult": (36, 84),                 # [36, 84)
-    "senior": (84, None),              # [84, ∞)
+    "puppy/kitten": (0, 12),
+    "young": (12, 36),
+    "adult": (36, 84),
+    "senior": (84, None),
 }
 AGE_GROUP_KEYS = list(AGE_GROUPS.keys())
 
-# -------------------------------------------
-# Helpers
-# -------------------------------------------
+# Malaysia states
+MALAYSIA_STATES = {
+    "johor","kedah","kelantan","malacca","melaka","negeri sembilan","pahang",
+    "penang","pulau pinang","perak","perlis","sabah","sarawak","selangor",
+    "terengganu","kuala lumpur","labuan","putrajaya"
+}
+STATE_ALIASES = {"kl":"kuala lumpur","pulau pinang":"penang","melaka":"malacca","kuala lumpur":"kuala lumpur"}
+
+def _norm_state(s: str) -> str:
+    x = (s or "").strip().lower()
+    return STATE_ALIASES.get(x, x)
+
+# Color normalization / whitelist
+COLOR_WHITELIST = {
+    "white","black","brown","gray","grey","cream","beige","tan","yellow","gold","golden",
+    "orange","ginger","red","chocolate","liver","blue","silver","fawn","apricot",
+    "brindle","merle","sable","seal","champagne","coffee",
+    "tricolor","tri-color","bicolor","bi-color",
+    "calico","tortoiseshell","tortoise","point"
+}
+COLOR_SYNONYMS = {
+    "grey": "gray",
+    "gold": "yellow",
+    "golden": "yellow",
+    "cream": "white",
+    "ginger": "orange",
+    "tri-color": "tricolor",
+    "bi-color": "bicolor",
+    "tortoise": "tortoiseshell",
+}
 def normalize_color(c: str) -> str:
     c = (c or "").strip().lower()
-    return COLOR_MAP.get(c, c)
+    if not c:
+        return ""
+    c = COLOR_SYNONYMS.get(c, c)
+    return c if c in COLOR_WHITELIST else ""
 
+# =========================================================
+# Helpers
+# =========================================================
 def _safe_list_from_cell(x):
     if isinstance(x, list): return x
     if x is None: return []
@@ -115,49 +132,32 @@ def _safe_list_from_cell(x):
     if "," in s: return [t.strip() for t in s.split(",") if t.strip()]
     return [s]
 
-def parse_colors_cell(x) -> List[str]:
-    return [normalize_color(str(t)) for t in _safe_list_from_cell(x) if str(t).strip()]
+def _first_photo_url_from_row(row) -> Optional[str]:
+    photos = row.get("photo_links")
+    if not isinstance(photos, list):
+        photos = _safe_list_from_cell(photos)
+    if photos:
+        url = str(photos[0]).strip().strip('"').strip("'")
+        return url if url else None
+    return None
 
-# --- NER span resolution (keep longest; prefer BREED over COLOR on conflicts) ---
-def resolve_overlaps_longest(spans: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    def lab(z: Dict[str, Any]) -> str:
-        L = str(z.get("entity_group") or z.get("label") or "").upper()
-        L = re.sub(r"^[BI]-", "", L)
-        return L
-    spans = sorted(spans or [], key=lambda s: (int(s.get("start", 0)), -(int(s.get("end", 0)) - int(s.get("start", 0)))))
-    kept: List[Dict[str, Any]] = []
-    for s in spans:
-        s_start, s_end = int(s.get("start", 0)), int(s.get("end", 0))
-        s_lab = lab(s); s_len = s_end - s_start
-        drop = False
-        for t in list(kept):
-            t_start, t_end = int(t.get("start", 0)), int(t.get("end", 0))
-            t_lab = lab(t); t_len = t_end - t_start
-            overlaps = not (s_end <= t_start or s_start >= t_end)
-            if overlaps:
-                if (s_lab == "COLOR" and t_lab == "BREED") or (t_len >= s_len):
-                    drop = True; break
-        if not drop:
-            kept = [t for t in kept if not (int(t.get("start", 0)) >= s_start and int(t.get("end", 0)) <= s_end)]
-            kept.append(s)
-    return kept
-
-def canonicalize_gender(g: str) -> str:
-    g = (g or "").strip().lower()
-    if g in {"m","male","boy"}: return "male"
-    if g in {"f","female","girl"}: return "female"
-    return ""
-
-def _age_text_yr_mo(age_months) -> str:
+def _age_text_from_months(age_months) -> str:
     try:
         m = int(round(float(age_months)))
-        if m < 12: return f"{m} mo (puppy/kitten)"
+        if m < 12:
+            return f"{m} mo"
         y, r = divmod(m, 12)
         return f"{y} yr" if r == 0 else f"{y} yr {r} mo"
     except Exception:
         return "—"
 
-# --- Health flags ---
+def _badge_bool(x, label):
+    v = str(x or "").strip().lower()
+    if v in {"true","yes","y","1"}: return f"✔ {label}"
+    if v in {"false","no","n","0"}: return f"✖ {label}"
+    if v in {"unknown","nan",""}: return f"➖ {label}"
+    return f"ℹ️ {label}: {x}"
+
 TRUE_STR    = {"true","yes","y","1","full","fully","done","complete","completed"}
 FALSE_STR   = {"false","no","n","0","none"}
 UNKNOWN_STR = {"unknown","unsure","not sure","n/a","na","nil","-"}
@@ -174,14 +174,14 @@ def _coerce_bool(x):
     if s in FALSE_STR: return False
     if s in UNKNOWN_STR: return None
     if re.search(r"\b(unvaccinated|not\s+vaccinated|no\s+vaccine)\b", s): return False
-    if re.search(r"\b(vaccinated|fully\s+vaccinated|vaccination\s+done)\b", s): return True
+    if re.search(r"\b(fully\s+)?vaccinated\b", s): return True
     if re.search(r"\b(not\s+dewormed|no\s+deworm)\b", s): return False
-    if re.search(r"\b(dewormed|de-wormed)\b", s): return True
+    if re.search(r"\bde[-\s]?wormed\b", s): return True
     if re.search(r"\b(intact|not\s+neuter(?:ed)?|not\s+spay(?:ed)?)\b", s): return False
     if re.search(r"\b(neuter(?:ed)?|castrat(?:e|ed|ion)|fixed|sterilis(?:e|ed|ation)|spay(?:ed)?)\b", s): return True
     return None
 
-def _pick_bool(row: dict, cols: list[str]) -> Optional[bool]:
+def _pick_bool(row: dict, cols: List[str]) -> Optional[bool]:
     for c in cols:
         if c in row and str(row.get(c, "")).strip() != "":
             v = _coerce_bool(row[c])
@@ -217,209 +217,9 @@ def _resolve_health_flags(row: pd.Series) -> tuple[Optional[bool], Optional[bool
     if n is None and (gender in {"male","m"}) and (s is True): n = True
     return v, d, n, s
 
-def _badge(val: Optional[bool], label: str) -> str:
-    if val is True:  return f"✅ {label}"
-    if val is False: return f"❌ {label}"
-    return f"➖ {label}"
-
-# ---------- Cards UI (FULL highlight via single HTML block) ----------
-def _safe_colors_text(colors_val) -> str:
-    txt = ", ".join(colors_val) if isinstance(colors_val, (list, tuple)) else str(colors_val or "").strip()
-    if txt.lower() in {"unknown","nan","none",""}: return "—"
-    return txt
-
-def _first_photo_url(row) -> Optional[str]:
-    photos = row.get("photo_links")
-    if not isinstance(photos, list):
-        photos = _safe_list_from_cell(photos)
-    if photos:
-        url = str(photos[0]).strip().strip('"').strip("'")
-        return url if url else None
-    return None
-
-def _escape_desc(text: str) -> str:
-    if not text:
-        return ""
-    return html.escape(str(text)).replace("\n", "<br />")
-
-def render_pet_card(row: pd.Series, highlight: bool = False):
-    """Render the entire card (image + text) inside a single HTML block so background covers all."""
-    pid = int(row.get("pet_id")) if "pet_id" in row else int(row.name)
-    name = str(row.get("name") or f"Pet {pid}")
-    url  = str(row.get("url") or "")
-    animal = (row.get("animal") or "").title()
-    breed  = str(row.get("breed") or "—")
-    gender = (row.get("gender") or "—").title()
-    state  = (row.get("state") or "—").title()
-    color  = str(row.get("color") or "—")
-    colors_canon = row.get("colors_canonical")
-    colors_txt = _safe_colors_text(colors_canon if isinstance(colors_canon, list) else color)
-    age_mo = row.get("age_months"); age_yrs_txt = _age_text_yr_mo(age_mo)
-    size = str(row.get("size") or "—").title()
-    fur  = str(row.get("fur_length") or "—").title()
-    cond = str(row.get("condition") or "—").title()
-    desc = str(row.get("description_clean") or "").strip()
-
-    v, d, n, s = _resolve_health_flags(row)
-    img_url = _first_photo_url(row)
-
-    bg = "#E8F7E1" if highlight else "#FFFFFF"
-
-    badges = " | ".join([
-        _badge(v, "vaccinated"),
-        _badge(d, "dewormed"),
-        _badge(n, "neutered"),
-        _badge(s, "spayed"),
-    ])
-
-    # Title (blue, large, with 🔗 if clickable) — placed at the TOP
-    if url:
-        title_html = f'<a href="{url}" target="_blank" style="text-decoration:none;color:#2563EB;"><span style="font-weight:800;">🔗 {html.escape(name)}</span></a>'
-    else:
-        title_html = f'<span style="color:#1F2937;font-weight:800;">{html.escape(name)}</span>'
-
-    # Fixed-size image area: 220px tall, shrink-to-fit (no cropping)
-    if img_url:
-        img_html = f'''
-<div style="height:220px;width:100%;border-radius:10px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;margin-top:8px;margin-bottom:10px;overflow:hidden;border:1px solid #E5E7EB;">
-  <img src="{img_url}" alt="photo" loading="lazy"
-       style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;object-position:center;display:block;" />
-</div>'''
-    else:
-        img_html = '''
-<div style="height:220px;width:100%;border-radius:10px;background:#F9FAFB;display:flex;align-items:center;justify-content:center;margin-top:8px;margin-bottom:10px;overflow:hidden;border:1px dashed #D1D5DB;color:#6B7280;">
-  No photo available
-</div>'''
-
-    # Collapsible description (hidden first)
-    desc_html = _escape_desc(desc)
-    details_html = ""
-    if desc_html:
-        details_html = f"""
-<div style="margin-top:10px;border-top:1px solid #E5E7EB;padding-top:8px;">
-  <details style="cursor:pointer;">
-    <summary style="color:#374151;font-weight:600;list-style:none;display:inline-block;">
-      ▶ Show description
-    </summary>
-    <div style="margin-top:8px;color:#374151;line-height:1.55;">
-      {desc_html}
-    </div>
-  </details>
-</div>
-"""
-
-    # Compose single card HTML so the background applies to everything
-    html_card = f"""
-<div style="
-  background:{bg};
-  border:1px solid #E5E7EB;
-  border-radius:14px;
-  padding:14px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-">
-  <div style="font-size:1.25rem;line-height:1.2;margin-bottom:2px;">{title_html}</div>
-  {img_html}
-  <div style="color:#374151;margin-bottom:6px;">
-    <strong>{animal}</strong> • <strong>Breed:</strong> {html.escape(breed)} • <strong>Gender:</strong> {html.escape(gender)} •
-    <strong>Age:</strong> {html.escape(age_yrs_txt)} • <strong>State:</strong> {html.escape(state)}
-  </div>
-  <div style="color:#374151;margin-bottom:6px;">
-    <strong>Color(s):</strong> {html.escape(colors_txt)} • <strong>Size:</strong> {html.escape(size)} • <strong>Fur:</strong> {html.escape(fur)} • <strong>Condition:</strong> {html.escape(cond)}
-  </div>
-  <div style="color:#111827;">{badges}</div>
-  {details_html}
-</div>
-"""
-    st.markdown(html_card, unsafe_allow_html=True)
-
-def render_results_grid(res_df: pd.DataFrame, meet_all_mask: pd.Series, max_cols: int = GRID_COLS):
-    if res_df is None or res_df.empty:
-        st.warning("No results to show.")
-        return
-    rows = [r for _, r in res_df.iterrows()]
-    flags = [bool(x) for x in meet_all_mask.tolist()]
-    n = len(rows)
-    col_count = max(1, min(max_cols, n))
-    for i in range(0, n, col_count):
-        cols = st.columns(col_count, gap="medium")
-        for j, col in enumerate(cols):
-            idx = i + j
-            if idx >= n: continue
-            with col:
-                render_pet_card(rows[idx], highlight=flags[idx])
-
-# -------------------------------------------
-# State detection
-# -------------------------------------------
-MALAYSIA_STATES = {
-    "johor","kedah","kelantan","malacca","melaka","negeri sembilan","pahang",
-    "penang","pulau pinang","perak","perlis","sabah","sarawak","selangor",
-    "terengganu","kuala lumpur","labuan","putrajaya"
-}
-STATE_ALIASES = {"kl": "kuala lumpur", "pulau pinang": "penang", "melaka": "malacca", "kuala lumpur": "kuala lumpur"}
-
-def detect_state(text: str) -> Optional[str]:
-    t = (text or "").lower()
-    for s in sorted(MALAYSIA_STATES, key=len, reverse=True):
-        if re.search(rf"\b{re.escape(s)}\b", t): return STATE_ALIASES.get(s, s)
-    for k, v in STATE_ALIASES.items():
-        if re.search(rf"\b{re.escape(k)}\b", t): return v
-    return None
-
-# -------------------------------------------
-# Breed mapping
-# -------------------------------------------
-BREED_ALIASES = {
-    "husky": ["siberian husky", "alaskan husky"],
-    "gsd": ["german shepherd", "german shepherd dog"],
-    "gr": ["golden retriever"],
-    "grd": ["golden retriever"],
-}
-
-def map_breed_to_catalog(breed_text: Optional[str], catalog_breeds: List[str], *, strict: bool, min_score: int = 87) -> Optional[str]:
-    if not breed_text: return None
-    b = str(breed_text).strip().lower().rstrip(",.;:")
-    if not b: return None
-    if b in catalog_breeds: return b
-    if b in BREED_ALIASES:
-        for cand in BREED_ALIASES[b]:
-            c = cand.lower()
-            if c in catalog_breeds: return c
-    if not _HAS_FUZZ or not catalog_breeds:
-        return None if strict else b
-    thresh = 95 if strict else min_score
-    cand, score, _ = process.extractOne(b, catalog_breeds, scorer=fuzz.token_sort_ratio)
-    if score >= thresh and cand in catalog_breeds: return cand
-    return None if strict else b
-
-# -------------------------------------------
-# Age group parsing (from free text)
-# -------------------------------------------
-def _val_to_months(val: float, unit: str) -> float:
-    unit = unit.lower()
-    if unit.startswith("y"):   # year
-        return 12.0 * val
-    return val  # months
-
-def _groups_for_threshold(op: str, months: float) -> Set[str]:
-    groups = set()
-    for g, (lo, hi) in AGE_GROUPS.items():
-        lo_m = float(lo if lo is not None else -1e9)
-        hi_m = float(hi if hi is not None else 1e9)
-        if op in ("<", "lt", "less"):
-            if lo_m < months: groups.add(g)
-        elif op in ("<=", "le"):
-            if lo_m <= months: groups.add(g)
-        elif op in (">", "gt", "more"):
-            if hi is None or hi_m > months: groups.add(g)
-        elif op in (">=", "ge", "atleast"):
-            if hi is None or hi_m >= months: groups.add(g)
-    if op in ("<","lt","less") and months <= 12: return {"puppy/kitten"}
-    if op in (">",">=","gt","ge","more","atleast") and 12 <= months < 36: return {"young","adult","senior"}
-    if op in (">",">=","gt","ge","more","atleast") and 36 <= months < 84: return {"adult","senior"}
-    if op in (">",">=","gt","ge","more","atleast") and months >= 84: return {"senior"}
-    if op in ("<","<=","lt","le","less") and months == 84: return {"puppy/kitten","young","adult"}
-    return groups if groups else set(AGE_GROUP_KEYS)
+# ===== Age parsing to groups =====
+def _to_months(val: float, unit: str) -> int:
+    return int(round(val * (12 if unit.startswith("y") else 1)))
 
 def _group_for_exact_months(months: float) -> str:
     for g, (lo, hi) in AGE_GROUPS.items():
@@ -430,7 +230,7 @@ def _group_for_exact_months(months: float) -> str:
     return "adult"
 
 def parse_age_group_prefs(text: str) -> Set[str]:
-    t = only_text(text or "").lower()
+    t = (text or "").lower()
     prefs: Set[str] = set()
     if re.search(r"\b(puppy|kitten|puppies|kittens)\b", t): prefs.add("puppy/kitten")
     if re.search(r"\byoung\b", t): prefs.add("young")
@@ -441,136 +241,417 @@ def parse_age_group_prefs(text: str) -> Set[str]:
         r"\b(less\s+than|under)\s*(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)",
         r"\b(more\s+than|over|at\s+least)\s*(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)",
     ]
+    def add_groups_for_threshold(op: str, months: float):
+        if op in ("<", "lt", "less"):
+            if months <= 12: prefs.add("puppy/kitten")
+            elif months <= 36: prefs.update(["puppy/kitten","young"])
+            else: prefs.update(["puppy/kitten","young","adult"])
+        elif op in (">", "gt", "more", "atleast", ">=", "ge"):
+            if months < 12: prefs.update(["young","adult","senior"])
+            elif months < 36: prefs.update(["adult","senior"])
+            else: prefs.add("senior")
     for pat in comp_patterns:
         for m in re.finditer(pat, t):
             op_raw = m.group(1)
-            val = float(m.group(2))
-            unit = m.group(3)
-            months = _val_to_months(val, unit)
-            op = op_raw.strip()
+            val = float(m.group(2)); unit = m.group(3)
+            months = _to_months(val, unit)
+            op = op_raw.strip().lower()
             if op in {"less than","under"}: op = "less"
-            if op in {"more than","over"}: op = "more"
-            if op in {"at least"}: op = "atleast"
-            prefs |= _groups_for_threshold(op, months)
+            if op in {"more than","over","at least"}: op = "more"
+            add_groups_for_threshold(op, months)
     if not prefs:
-        m_exact = re.search(r"\b(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)\b", t)
-        if m_exact:
-            months = _val_to_months(float(m_exact.group(1)), m_exact.group(2))
+        m = re.search(r"\b(\d+(?:\.\d+)?)\s*(years?|yrs?|y|months?|mos?)\b", t)
+        if m:
+            months = _to_months(float(m.group(1)), m.group(2))
             prefs.add(_group_for_exact_months(months))
     return prefs
 
-# -------------------------------------------
-# Soft prefs parser (non-age + age groups)
-# -------------------------------------------
-def parse_soft_prefs(text: str) -> Dict[str, Any]:
-    t = only_text(text or "").lower()
-    prefer_vaccinated = bool(re.search(r"\b(vaccinated|fully\s+vaccinated)\b", t))
-    prefer_dewormed   = bool(re.search(r"\b(de[-\s]?wormed)\b", t))
+def parse_soft_prefs_from_text(text: str) -> Dict[str, Any]:
+    t = (text or "").lower()
+    prefer_vaccinated = bool(re.search(r"\b(fully\s+)?vaccinated\b", t))
+    prefer_dewormed   = bool(re.search(r"\bde[-\s]?wormed\b", t))
     prefer_neutered   = bool(re.search(r"\b(neuter(?:ed)?|fixed|castrat(?:e|ed|ion))\b", t))
     prefer_spayed     = bool(re.search(r"\bspay(?:ed)?\b", t))
-    prefer_healthy    = bool(re.search(r"\b(healthy|good\s+condition|good\s+health)\b", t))
-    prefer_low_fee    = bool(re.search(r"\b(low|cheap|budget|afford|under\s*\d+|<\s*\d+)\b.*\b(fee|adoption)\b", t)) \
-                        or bool(re.search(r"\b(adoption\s+fee)\b.*\b(low|cheap|budget|under|<)\b", t))
+    prefer_healthy    = bool(re.search(r"\b(healthy|good\s+health|good\s+condition)\b", t))
     fee_cap = None
     m_fee = re.search(r"(?:fee|adoption\s+fee)\s*(?:under|<|<=)?\s*(\d{2,5})", t)
     if m_fee:
         try: fee_cap = float(m_fee.group(1))
         except Exception: fee_cap = None
-    age_groups_pref = parse_age_group_prefs(t)
+    age_groups = sorted(list(parse_age_group_prefs(t)))
     return {
         "prefer_vaccinated": prefer_vaccinated,
         "prefer_dewormed": prefer_dewormed,
         "prefer_neutered": prefer_neutered,
         "prefer_spayed": prefer_spayed,
         "prefer_healthy": prefer_healthy,
-        "prefer_low_fee": prefer_low_fee,
+        "prefer_low_fee": fee_cap is not None,
         "fee_cap": fee_cap,
-        "age_groups_pref": sorted(age_groups_pref) if age_groups_pref else [],
+        "age_groups_pref": age_groups,
     }
 
-# -------------------------------------------
-# BOOTSTRAP
-# -------------------------------------------
-@st.cache_resource(show_spinner=True)
-def bootstrap_all():
-    rag = ProposedRAGManager()
-    documents_dir = os.path.join(project_root, "documents")
-    if os.path.exists(documents_dir): rag.add_directory(documents_dir)
-    bot = ChatbotPipeline(rag)
+# =========================================================
+# Bootstrap RAG & Chatbot (HF NER + Intent)
+# =========================================================
+@st.cache_resource(show_spinner=False)
+def bootstrap_rag_system():
+    try:
+        rag = ProposedRAGManager()
+        docs_dir = os.path.join(project_root, "documents")
+        if os.path.exists(docs_dir):
+            rag.add_directory(docs_dir)
+        bot = ChatbotPipeline(rag)  # contains IntentClassifier + HF NER
+        return rag, bot
+    except Exception as e:
+        st.error(f"Failed to initialize RAG system: {e}")
+        return None, None
 
-    ner_pipe = None
-    for attr in ("ner_extractor", "entity_extractor", "ner"):
-        if hasattr(bot, attr) and hasattr(getattr(bot, attr), "ner_pipe"):
-            ner_pipe = getattr(getattr(bot, attr), "ner_pipe"); break
-    if ner_pipe is None and hasattr(bot, "ner_pipe"):
-        ner_pipe = getattr(bot, "ner_pipe")
-    if ner_pipe is None:
-        raise AttributeError("ChatbotPipeline does not expose a NER pipeline.")
+# =========================================================
+# Bootstrap Search (BM25, Embeddings, FAISS, Pets CSV)
+# =========================================================
+@st.cache_resource(show_spinner=False)
+def bootstrap_search_components():
+    try:
+        cfg = get_blob_settings()
+        conn = cfg["connection_string"]
 
-    cfg = get_blob_settings()
-    conn = cfg["connection_string"]
-    with st.spinner("Downloading Matching/Ranking model (flat folder)..."):
-        download_prefix_flat(conn, cfg["ml_container"], cfg["mr_prefix"], local_mr_dir())
-    with st.spinner("Downloading pet CSV..."):
-        smart_download_single_blob(conn, cfg["pets_container"], cfg["pets_csv_blob"], local_pets_csv_path())
+        with st.spinner("Downloading Matching/Ranking model..."):
+            download_prefix_flat(conn, cfg["ml_container"], cfg["mr_prefix"], local_mr_dir())
+        with st.spinner("Downloading pet CSV..."):
+            smart_download_single_blob(conn, cfg["pets_container"], cfg["pets_csv_blob"], local_pets_csv_path())
 
-    student, doc_ids, doc_vecs = load_mr_model(local_mr_dir())
-    faiss_index = load_faiss_index(local_mr_dir(), dim=doc_vecs.shape[1])
+        student, doc_ids, doc_vecs = load_mr_model(local_mr_dir())
+        faiss_index = load_faiss_index(local_mr_dir(), dim=doc_vecs.shape[1])
 
-    dfp = pd.read_csv(local_pets_csv_path())
+        dfp = pd.read_csv(local_pets_csv_path())
+        # Normalize key columns
+        for c in ("animal","gender","state","breed","size","fur_length","condition","color","adoption_fee"):
+            if c in dfp.columns:
+                dfp[c] = dfp[c].astype(str).fillna("").str.strip().str.lower()
 
-    for c in ("animal", "gender", "state", "breed", "size", "fur_length", "condition"):
-        if c in dfp.columns:
-            dfp[c] = dfp[c].astype(str).fillna("").str.strip().str.lower()
+        # BM25 corpus
+        text_col = "doc" if "doc" in dfp.columns else ("description_clean" if "description_clean" in dfp.columns else "description")
+        docs_raw = {int(i): only_text(str(t)) for i, t in zip(dfp.index, dfp[text_col].fillna("").tolist())}
+        bm25 = BM25().fit(docs_raw)
 
-    if "colors_canonical" in dfp.columns:
-        dfp["colors_canonical"] = dfp["colors_canonical"].apply(parse_colors_cell)
-    for media_col in ["photo_links", "video_links"]:
-        if media_col in dfp.columns:
-            dfp[media_col] = dfp[media_col].apply(_safe_list_from_cell)
+        # Breed catalog (lowercased)
+        breed_catalog = sorted(set([b for b in dfp.get("breed", pd.Series([], dtype=str)).astype(str).str.lower().tolist() if b]))
+        return {
+            "cfg": cfg,
+            "student": student, "doc_ids": doc_ids, "doc_vecs": doc_vecs,
+            "faiss_index": faiss_index,
+            "dfp": dfp,
+            "bm25": bm25,
+            "breed_catalog": breed_catalog
+        }
+    except Exception as e:
+        st.error(f"Failed to initialize search components: {e}")
+        return None
 
-    breed_to_animal = {}
-    if "breed" in dfp.columns and "animal" in dfp.columns:
-        tmp = (dfp[["breed","animal"]]
-               .dropna()
-               .groupby("breed")["animal"].agg(lambda s: s.value_counts().idxmax()))
-        breed_to_animal = tmp.to_dict()
+# =========================================================
+# Entities → Facets (from ChatbotPipeline HF NER)
+# =========================================================
+def _entities_to_facets(ents: Dict[str, str], raw_query: str) -> Dict[str, Any]:
+    facets: Dict[str, Any] = {}
+    def _norm(x): return str(x or "").strip().lower()
 
-    text_col = "doc" if "doc" in dfp.columns else ("description_clean" if "description_clean" in dfp.columns else "description")
-    docs_raw = {int(i): only_text(str(t)) for i, t in zip(dfp.index, dfp[text_col].fillna("").tolist())}
-    bm25 = BM25().fit(docs_raw)
+    pet_type = _norm(ents.get("PET_TYPE")) if ents and ents.get("PET_TYPE") else ""
+    rq = (raw_query or "").lower()
+    if not pet_type:
+        if re.search(r"\b(cat|kitten|kitties)\b", rq): pet_type = "cat"
+        elif re.search(r"\b(dog|puppy|pup)\b", rq): pet_type = "dog"
+    if pet_type in {"dog","cat"}:
+        facets["animal"] = pet_type
 
-    breed_catalog = sorted(set([b for b in dfp.get("breed", pd.Series([], dtype=str)).astype(str).str.lower().tolist() if b]))
+    if ents and ents.get("STATE"):
+        facets["state"] = _norm(ents["STATE"])
+    if ents and ents.get("BREED"):
+        facets["breed"] = _norm(ents["BREED"])
+    if ents and ents.get("GENDER"):
+        g = _norm(ents["GENDER"])
+        if g.startswith("m"): facets["gender"] = "male"
+        elif g.startswith("f"): facets["gender"] = "female"
 
-    return {
-        "rag": rag, "bot": bot, "ner": ner_pipe,
-        "student": student, "doc_ids": doc_ids, "doc_vecs": doc_vecs, "faiss_index": faiss_index,
-        "dfp": dfp, "bm25": bm25, "breed_catalog": breed_catalog, "breed_to_animal": breed_to_animal, "cfg": cfg,
-    }
+    if ents and ents.get("COLOR"):
+        cc = normalize_color(_norm(ents["COLOR"]))
+        if cc:
+            facets["color"] = cc
+    if ents and ents.get("SIZE"):
+        facets["size"] = _norm(ents["SIZE"])
+    if ents and ents.get("FURLENGTH"):
+        facets["fur_length"] = _norm(ents["FURLENGTH"])
 
-ENV = bootstrap_all()
-rag = ENV["rag"]; bot = ENV["bot"]; ner = ENV["ner"]
-student = ENV["student"]; doc_ids = ENV["doc_ids"]; doc_vecs = ENV["doc_vecs"]
-faiss_index = ENV["faiss_index"]; dfp = ENV["dfp"]; bm25 = ENV["bm25"]
-breed_catalog = ENV["breed_catalog"]; breed_to_animal = ENV["breed_to_animal"]
+    facets["soft"] = parse_soft_prefs_from_text(raw_query)
+    return facets
 
-# -------------------------------------------
-# PET SEARCH PIPELINE
-# -------------------------------------------
-def expand_kid_friendly(q: str) -> str:
-    t = q.lower()
-    if "kid" in t or "child" in t or "family" in t:
-        extras = " kid-friendly child-friendly family-friendly gentle with kids good with children good with kids family dog"
-        return q + " " + extras
-    return q
+# =========================================================
+# Constraint Removal Parsing + Helper
+# =========================================================
+def is_constraint_removal_query(query: str) -> bool:
+    t = (query or "").lower()
+    return bool(re.search(r"\b(remove|clear|reset)\b", t))
 
-def _minmax(d: Dict[int, float]) -> Dict[int, float]:
-    if not d: return {}
-    vals = np.fromiter(d.values(), dtype=float)
-    lo, hi = float(vals.min()), float(vals.max())
-    den = (hi - lo) or 1.0
-    return {k: (v - lo) / den for k, v in d.items()}
+def apply_constraint_removals(prev_facets: Dict[str, Any], query: str) -> Tuple[Dict[str, Any], List[str], bool, Set[str]]:
+    """
+    Returns: (updated_facets, removed_labels, cleared_all, removed_keys)
+    """
+    t = (query or "").strip().lower()
+    facets = dict(prev_facets) if prev_facets else {}
+    removed = []
+    removed_keys: Set[str] = set()
+    cleared_all = False
 
+    if re.search(r"\b(clear|remove)\s+(all|everything|constraints|filters|facets)\b", t) or re.search(r"\breset\b", t):
+        return {}, ["all constraints"], True, {"animal","breed","gender","state","color","size","fur_length","soft"}
+
+    # Remove state by keyword
+    if re.search(r"\b(remove|clear)\s+state\b", t):
+        if "state" in facets:
+            removed.append(f"state: {facets['state']}")
+            facets.pop("state", None)
+            removed_keys.add("state")
+
+    # Remove state by value mention
+    for s in MALAYSIA_STATES:
+        if re.search(rf"\bremove\s+{re.escape(s)}\b", t):
+            if facets.get("state") and _norm_state(facets["state"]) == _norm_state(s):
+                removed.append(f"state: {facets['state']}")
+                facets.pop("state", None)
+                removed_keys.add("state")
+
+    # Hard facets
+    if re.search(r"\b(remove|clear)\s+animal\b", t):
+        if "animal" in facets: removed.append(f"animal: {facets['animal']}"); facets.pop("animal", None); removed_keys.add("animal")
+    if re.search(r"\b(remove|clear)\s+breed\b", t):
+        if "breed" in facets: removed.append(f"breed: {facets['breed']}"); facets.pop("breed", None); removed_keys.add("breed")
+    m_rb = re.search(r"\bremove\s+breed\s+([a-z ]+)\b", t)
+    if m_rb and facets.get("breed") and facets["breed"] == m_rb.group(1).strip():
+        removed.append(f"breed: {facets['breed']}"); facets.pop("breed", None); removed_keys.add("breed")
+
+    if re.search(r"\b(remove|clear)\s+gender\b", t):
+        if "gender" in facets: removed.append(f"gender: {facets['gender']}"); facets.pop("gender", None); removed_keys.add("gender")
+    m_rg = re.search(r"\bremove\s+gender\s+(male|female)\b", t)
+    if m_rg and facets.get("gender") and facets["gender"] == m_rg.group(1):
+        removed.append(f"gender: {facets['gender']}"); facets.pop("gender", None); removed_keys.add("gender")
+
+    if re.search(r"\b(remove|clear)\s+color\b", t):
+        if "color" in facets: removed.append(f"color: {facets['color']}"); facets.pop("color", None); removed_keys.add("color")
+    m_rc = re.search(r"\bremove\s+color\s+([a-z ]+)\b", t)
+    if m_rc and facets.get("color"):
+        col = normalize_color(m_rc.group(1))
+        if col and facets["color"] == col:
+            removed.append(f"color: {facets['color']}"); facets.pop("color", None); removed_keys.add("color")
+
+    if re.search(r"\b(remove|clear)\s+size\b", t):
+        if "size" in facets: removed.append(f"size: {facets['size']}"); facets.pop("size", None); removed_keys.add("size")
+    if re.search(r"\b(remove|clear)\s+(fur|fur\s*length|furlength)\b", t):
+        if "fur_length" in facets: removed.append(f"fur_length: {facets['fur_length']}"); facets.pop("fur_length", None); removed_keys.add("fur_length")
+
+    # Soft prefs
+    soft = dict(facets.get("soft", {}) or {})
+    soft_removed = []
+
+    if re.search(r"\b(remove|clear)\s+age\b", t):
+        if soft.get("age_groups_pref"):
+            soft_removed.append("age groups")
+            soft["age_groups_pref"] = []
+            removed_keys.add("soft")
+
+    if re.search(r"\b(remove|clear)\s+fee\b", t):
+        if soft.get("fee_cap") is not None or soft.get("prefer_low_fee"):
+            soft_removed.append("fee cap/low-fee")
+            soft["fee_cap"] = None
+            soft["prefer_low_fee"] = False
+            removed_keys.add("soft")
+
+    for key, label in [
+        ("prefer_vaccinated","vaccinated"),
+        ("prefer_dewormed","dewormed"),
+        ("prefer_neutered","neutered"),
+        ("prefer_spayed","spayed"),
+        ("prefer_healthy","healthy"),
+    ]:
+        if re.search(rf"\bremove\s+{label}\b", t):
+            if soft.get(key):
+                soft_removed.append(label)
+                soft[key] = False
+                removed_keys.add("soft")
+
+    if soft_removed or "age_groups_pref" in soft or "fee_cap" in soft:
+        facets["soft"] = soft
+        removed.extend(soft_removed)
+    elif "soft" in facets and soft == {}:
+        facets.pop("soft", None)
+
+    return facets, removed, cleared_all, removed_keys
+
+# =========================================================
+# Facet persistence helpers (clear when animal/breed changes)
+# + Blocked facets persistence
+# =========================================================
+def get_persisted_facets() -> Dict[str, Any]:
+    return st.session_state.get("last_facets", {}) or {}
+
+def set_persisted_facets(facets: Dict[str, Any]):
+    st.session_state["last_facets"] = {k: v for k, v in facets.items() if v not in (None, "", [], {}, False)}
+
+def get_blocked_facets() -> Set[str]:
+    return set(st.session_state.get("blocked_facets", set()))
+
+def set_blocked_facets(blocked: Set[str]):
+    st.session_state["blocked_facets"] = set(blocked)
+
+def maybe_reset_persistence(new_facets: Dict[str, Any]) -> bool:
+    prev = get_persisted_facets()
+    new_animal = new_facets.get("animal")
+    new_breed  = new_facets.get("breed")
+    changed = False
+    if prev.get("animal") and new_animal and prev["animal"] != new_animal:
+        changed = True
+    if prev.get("breed") and new_breed and prev["breed"] != new_breed:
+        changed = True
+    if changed:
+        st.session_state["last_facets"] = {}
+        st.session_state["blocked_facets"] = set()
+    return changed
+
+# ===== Unblock only if prompt explicitly mentions a facet =====
+def explicit_add_keys_from_prompt(prompt: str) -> Set[str]:
+    t = (prompt or "").lower()
+    keys: Set[str] = set()
+    # animal
+    if re.search(r"\b(dog|puppy|pup)\b", t) or re.search(r"\b(cat|kitten|kitties)\b", t):
+        keys.add("animal")
+    # gender
+    if re.search(r"\bmale\b", t) or re.search(r"\bfemale\b", t):
+        keys.add("gender")
+    # state names / "in <state>"
+    for s in MALAYSIA_STATES:
+        if re.search(rf"\b{s}\b", t):
+            keys.add("state")
+            break
+    if re.search(r"\bin\s+(johor|kedah|kelantan|malacca|melaka|negeri sembilan|pahang|penang|pulau pinang|perak|perlis|sabah|sarawak|selangor|terengganu|kuala lumpur|labuan|putrajaya)\b", t):
+        keys.add("state")
+    # color
+    for word in re.findall(r"[a-z]+", t):
+        if normalize_color(word):
+            keys.add("color")
+            break
+    # size / fur
+    if re.search(r"\b(small|medium|large|xl)\b", t):
+        keys.add("size")
+    if re.search(r"\b(short|long)\s*fur\b", t) or re.search(r"\bfurlength|fur length\b", t):
+        keys.add("fur_length")
+    # breed heuristic
+    if re.search(r"\bbreed\b", t) or re.search(r"\bpoodle|ragdoll|retriever|husky|persian|siamese|chihuahua|beagle|pug|bulldog|gsd\b", t):
+        keys.add("breed")
+    return keys
+
+# =========================================================
+# Strict filtering with stepwise relaxation
+# =========================================================
+def _apply_filters_once(dfp: pd.DataFrame,
+                        facets: Dict[str, Any],
+                        use_state: bool,
+                        relax_state_to_cross: bool,
+                        use_color: bool,
+                        use_age: bool,
+                        use_gender: bool) -> Tuple[pd.DataFrame, int]:
+    """Return candidate pool and 'strict_in_state_count' (meaningful only when use_state is True)."""
+    df = dfp.copy()
+
+    # Always strict on animal/breed if provided
+    if facets.get("animal"):
+        df = df[df["animal"] == facets["animal"]]
+        if df.empty: return df, 0
+    if facets.get("breed"):
+        pattern = rf"\b{re.escape(facets['breed'])}\b"
+        df = df[df["breed"].str.contains(pattern, case=False, na=False)]
+        if df.empty: return df, 0
+
+    # Optional strict filters
+    if use_gender and facets.get("gender"):
+        df = df[df["gender"] == facets["gender"]]
+        if df.empty: return df, 0
+
+    strict_in_state = 0
+    if use_state and facets.get("state"):
+        strict_df = df[df["state"] == facets["state"]]
+        strict_in_state = len(strict_df)
+        if strict_df.empty:
+            return strict_df, strict_in_state
+        if relax_state_to_cross:
+            cross_df = df[df["state"] != facets["state"]]
+            df = pd.concat([strict_df, cross_df]).drop_duplicates()
+        else:
+            df = strict_df
+
+    if use_color and facets.get("color"):
+        # strict color contains
+        df = df[df["color"].str.contains(rf"\b{re.escape(facets['color'])}\b", case=False, na=False)]
+        if df.empty: return df, strict_in_state
+
+    if use_age and facets.get("soft", {}).get("age_groups_pref"):
+        groups = facets["soft"]["age_groups_pref"]
+        def _in_age_group_local(age_months: Optional[float], group: str) -> bool:
+            if age_months is None: return False
+            try: m = float(age_months)
+            except Exception: return False
+            lo, hi = AGE_GROUPS[group]
+            lo_m = lo if lo is not None else -1e9
+            hi_m = hi if hi is not None else 1e9
+            return (m >= lo_m) and (m < hi_m)
+        def _age_ok(row):
+            return any(_in_age_group_local(row.get("age_months"), g) for g in groups)
+        df = df[df.apply(_age_ok, axis=1)]
+        if df.empty: return df, strict_in_state
+
+    return df, strict_in_state
+
+def build_relaxed_pool(dfp: pd.DataFrame, facets: Dict[str, Any]) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+    """
+    Try progressively relaxing filters to reach TOPK_CARDS:
+    state -> color -> age -> gender   (animal & breed always strict)
+    Returns: (df_pool, relax_meta)
+    """
+    steps = [
+        dict(use_state=True,  relax_state_to_cross=False, use_color=True,  use_age=True,  use_gender=True,  tag="strict_all"),
+        dict(use_state=True,  relax_state_to_cross=True,  use_color=True,  use_age=True,  use_gender=True,  tag="relax_state"),
+        dict(use_state=True,  relax_state_to_cross=True,  use_color=False, use_age=True,  use_gender=True,  tag="relax_color"),
+        dict(use_state=True,  relax_state_to_cross=True,  use_color=False, use_age=False, use_gender=True,  tag="relax_age"),
+        dict(use_state=True,  relax_state_to_cross=True,  use_color=False, use_age=False, use_gender=False, tag="relax_gender"),
+        dict(use_state=False, relax_state_to_cross=False, use_color=True,  use_age=True,  use_gender=True,  tag="no_state_strict"),
+        dict(use_state=False, relax_state_to_cross=False, use_color=False, use_age=True,  use_gender=True,  tag="no_state_relax_color"),
+        dict(use_state=False, relax_state_to_cross=False, use_color=False, use_age=False, use_gender=True,  tag="no_state_relax_age"),
+        dict(use_state=False, relax_state_to_cross=False, use_color=False, use_age=False, use_gender=False, tag="no_state_relax_gender"),
+    ]
+    if not facets.get("state"):
+        steps = [s for s in steps if not s["use_state"]]
+
+    chosen_df = pd.DataFrame()
+    chosen_meta = {}
+    for cfg in steps:
+        df_try, strict_in_state = _apply_filters_once(
+            dfp, facets,
+            use_state=cfg["use_state"],
+            relax_state_to_cross=cfg["relax_state_to_cross"],
+            use_color=cfg["use_color"],
+            use_age=cfg["use_age"],
+            use_gender=cfg["use_gender"],
+        )
+        size_try = len(df_try)
+        chosen_meta = dict(cfg)
+        chosen_meta["strict_in_state_count"] = strict_in_state
+        chosen_meta["pool_size"] = size_try
+        if size_try >= TOPK_CARDS:
+            chosen_df = df_try
+            break
+        chosen_df = df_try  # keep best-so-far
+    return chosen_df, chosen_meta
+
+# =========================================================
+# Soft preferences + ranking & highlight mask
+# =========================================================
 def _in_age_group(age_months: Optional[float], group: str) -> bool:
     if age_months is None: return False
     try: m = float(age_months)
@@ -585,18 +666,18 @@ def _age_groups_match(row: pd.Series, groups: List[str]) -> bool:
     age_mo = row.get("age_months")
     return any(_in_age_group(age_mo, g) for g in groups)
 
-def _health_fee_priority(row: pd.Series, soft_prefs: Dict[str, Any]) -> Dict[str, int]:
-    flags = {"vaccinated": 0, "dewormed": 0, "neutered": 0, "spayed": 0, "healthy": 0, "fee_ok": 0}
+def _health_fee_flags(row: pd.Series, soft: Dict[str, Any]) -> Dict[str, int]:
+    flags = {"vaccinated":0,"dewormed":0,"neutered":0,"spayed":0,"healthy":0,"fee_ok":0}
     v, d, n, s = _resolve_health_flags(row)
-    if soft_prefs.get("prefer_vaccinated") and v is True: flags["vaccinated"] = 1
-    if soft_prefs.get("prefer_dewormed")   and d is True: flags["dewormed"]   = 1
-    if soft_prefs.get("prefer_neutered")   and n is True: flags["neutered"]   = 1
-    if soft_prefs.get("prefer_spayed")     and s is True: flags["spayed"]     = 1
-    if soft_prefs.get("prefer_healthy"):
+    if soft.get("prefer_vaccinated") and v is True: flags["vaccinated"] = 1
+    if soft.get("prefer_dewormed")   and d is True: flags["dewormed"]   = 1
+    if soft.get("prefer_neutered")   and n is True: flags["neutered"]   = 1
+    if soft.get("prefer_spayed")     and s is True: flags["spayed"]     = 1
+    if soft.get("prefer_healthy"):
         cond = str(row.get("condition","")).strip().lower()
         if cond in {"healthy","good"}: flags["healthy"] = 1
-    if soft_prefs.get("prefer_low_fee") or (soft_prefs.get("fee_cap") is not None):
-        cap = soft_prefs.get("fee_cap") or 300.0
+    if soft.get("prefer_low_fee") or (soft.get("fee_cap") is not None):
+        cap = soft.get("fee_cap") or 300.0
         try:
             fee = float(row.get("adoption_fee"))
             if fee <= cap: flags["fee_ok"] = 1
@@ -604,509 +685,635 @@ def _health_fee_priority(row: pd.Series, soft_prefs: Dict[str, Any]) -> Dict[str
             pass
     return flags
 
-def _feature_score(row: pd.Series, facets: Dict[str, Any], soft_prefs: Dict[str, Any]) -> float:
+def _feature_bonus(row: pd.Series, facets: Dict[str, Any]) -> float:
+    soft = facets.get("soft", {}) or {}
     bonus = 0.0
     v, d, n, s = _resolve_health_flags(row)
     w_base, w_strong = 0.05, 0.08
-
-    if v is True: bonus += w_strong if soft_prefs.get("prefer_vaccinated") else w_base
-    if d is True: bonus += w_strong if soft_prefs.get("prefer_dewormed") else w_base
-    if n is True: bonus += w_strong if soft_prefs.get("prefer_neutered") else w_base
-    if s is True: bonus += w_strong if soft_prefs.get("prefer_spayed") else w_base
-
-    fee = row.get("adoption_fee")
-    try:
-        fee = float(fee)
-        cap = soft_prefs.get("fee_cap") or (300.0 if soft_prefs.get("prefer_low_fee") else 400.0)
-        if fee <= cap:
-            w_fee = 0.08 if soft_prefs.get("prefer_low_fee") else 0.05
-            bonus += w_fee * (1.0 - max(0.0, min(1.0, fee / cap)))
-    except Exception:
-        pass
-
-    groups = soft_prefs.get("age_groups_pref") or []
-    if groups and _age_groups_match(row, groups):
-        bonus += 0.05
-
-    want_size = str(facets.get("size") or "").lower().strip()
-    want_fur  = str(facets.get("fur_length") or "").lower().strip()
-    if want_size and str(row.get("size","")).lower().strip() == want_size: bonus += 0.03
-    if want_fur  and str(row.get("fur_length","")).lower().strip() == want_fur: bonus += 0.03
-
-    if str(row.get("condition","")).strip().lower() in {"healthy","good"}:
-        bonus += 0.05 if soft_prefs.get("prefer_healthy") else 0.03
-
+    if soft.get("prefer_vaccinated") and v is True: bonus += w_strong
+    elif v is True: bonus += w_base
+    if soft.get("prefer_dewormed") and d is True: bonus += w_strong
+    elif d is True: bonus += w_base
+    if soft.get("prefer_neutered") and n is True: bonus += w_strong
+    elif n is True: bonus += w_base
+    if soft.get("prefer_spayed") and s is True: bonus += w_strong
+    elif s is True: bonus += w_base
+    if soft.get("prefer_healthy"):
+        cond = str(row.get("condition","")).strip().lower()
+        if cond in {"healthy","good"}:
+            bonus += 0.05
+    if soft.get("fee_cap") is not None:
+        cap = soft["fee_cap"]
+        try:
+            fee = float(row.get("adoption_fee"))
+            if fee <= cap:
+                bonus += 0.08 * (1.0 - max(0.0, min(1.0, fee / cap)))
+        except Exception:
+            pass
+    groups = soft.get("age_groups_pref") or []
+    if groups and _age_groups_match(row, groups): bonus += 0.05
     return max(0.0, min(0.35, bonus))
 
-def adoption_search(query: str, ui: Dict[str, Any]) -> Tuple[pd.DataFrame, Dict[str, Any], List[Tuple[int, float]], pd.Series]:
-    q = query or ""
-    prev = st.session_state.get("last_facets", {}) or {}
-
-    raw_spans = ner([q[:300]])[0] if q else []
-    spans = resolve_overlaps_longest(raw_spans)
-    mf = entity_spans_to_facets(spans)
-    rf = parse_facets_from_text(q)
-
-    def safe_merge_val(mv, rv):
-        if mv is None or (isinstance(mv, (list, tuple)) and len(mv) == 0):
-            return rv
-        return mv
-
-    facets = {
-        "animal":     safe_merge_val(mf.get("animal"),     rf.get("animal")),
-        "breed":      safe_merge_val(mf.get("breed"),      rf.get("breed")),
-        "gender":     safe_merge_val(mf.get("gender"),     rf.get("gender")),
-        "colors_any": safe_merge_val(mf.get("colors_any"), rf.get("colors_any")),
-        "state":      safe_merge_val(mf.get("state"),      rf.get("state")),
-    }
-
-    if facets.get("colors_any"):
-        facets["colors_any"] = sorted({normalize_color(c) for c in facets["colors_any"] if c})
-
-    mapped_breed = None
+def match_all_strict(row: pd.Series, facets: Dict[str, Any]) -> bool:
+    ok = True
+    if facets.get("animal"):
+        ok &= str(row.get("animal","")).strip().lower() == facets["animal"]
     if facets.get("breed"):
-        mapped_breed = map_breed_to_catalog(facets["breed"], breed_catalog, strict=True)
-        facets["breed"] = mapped_breed
+        btxt = str(row.get("breed","")).strip().lower()
+        ok &= bool(re.search(rf"\b{re.escape(facets['breed'])}\b", btxt))
+    if facets.get("gender"):
+        ok &= str(row.get("gender","")).strip().lower() == facets["gender"]
+    if facets.get("state"):
+        ok &= str(row.get("state","")).strip().lower() == facets["state"]
+    if facets.get("color"):
+        ok &= bool(re.search(rf"\b{re.escape(facets['color'])}\b", str(row.get("color","")), flags=re.I))
+    # age is soft, handled separately
+    return bool(ok)
 
-    if not facets.get("animal") and mapped_breed:
-        inferred = breed_to_animal.get(mapped_breed)
-        if inferred: facets["animal"] = inferred
+def match_all_soft(row: pd.Series, facets: Dict[str, Any]) -> bool:
+    soft = facets.get("soft", {}) or {}
+    soft_flags = _health_fee_flags(row, soft)
+    if soft.get("age_groups_pref") and not _age_groups_match(row, soft["age_groups_pref"]):
+        return False
+    if soft.get("prefer_vaccinated") and soft_flags["vaccinated"] != 1: return False
+    if soft.get("prefer_dewormed")   and soft_flags["dewormed"]   != 1: return False
+    if soft.get("prefer_neutered")   and soft_flags["neutered"]   != 1: return False
+    if soft.get("prefer_spayed")     and soft_flags["spayed"]     != 1: return False
+    if soft.get("prefer_healthy")    and soft_flags["healthy"]    != 1: return False
+    if (soft.get("prefer_low_fee") or soft.get("fee_cap") is not None) and soft_flags["fee_ok"] != 1: return False
+    return True
 
-    if not facets.get("state"):
-        guessed_state = detect_state(q)
-        if guessed_state: facets["state"] = guessed_state
+# --------- exact match count (ALL hard + soft) ----------
+def count_exact_matches(dfp: pd.DataFrame, facets: Dict[str, Any]) -> int:
+    """Count pets that satisfy ALL hard facets (animal/breed/gender/state/color) AND ALL soft prefs."""
+    if dfp is None or dfp.empty:
+        return 0
+    df = dfp.copy()
+    # strict hard filters
+    if facets.get("animal"):
+        df = df[df["animal"] == facets["animal"]]
+    if facets.get("breed"):
+        df = df[df["breed"].str.contains(rf"\b{re.escape(facets['breed'])}\b", case=False, na=False)]
+    if facets.get("gender"):
+        df = df[df["gender"] == facets["gender"]]
+    if facets.get("state"):
+        df = df[df["state"] == facets["state"]]
+    if facets.get("color"):
+        df = df[df["color"].str.contains(rf"\b{re.escape(facets['color'])}\b", case=False, na=False)]
+    if df.empty:
+        return 0
+    # soft check row-wise
+    return int(df.apply(lambda r: match_all_soft(r, facets), axis=1).sum())
 
-    facets = sanitize_facets_ner_light(facets)
+# =========================================================
+# Ranking & Highlighting
+# =========================================================
+def hybrid_rank_and_highlight(query: str,
+                              env: Dict[str, Any],
+                              facets: Dict[str, Any],
+                              df_pool: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray]:
+    """
+    Ranks candidates with hybrid (BM25 + embeddings) + soft bonus.
+    Results that satisfy ALL strict + soft facets appear FIRST (green), then remaining by similarity/bonus.
+    """
+    student = env["student"]; doc_ids = env["doc_ids"]; doc_vecs = env["doc_vecs"]
+    faiss_index = env["faiss_index"]; bm25 = env["bm25"]
 
-    soft_prefs = parse_soft_prefs(q)
+    # boosted query with facet bits
+    facet_bits = []
+    for k in ["animal","breed","gender","color","size","fur_length","state"]:
+        if facets.get(k): facet_bits.append(str(facets[k]))
+    boost_q = (query or "").strip()
+    if facet_bits:
+        boost_q = (boost_q + " " + " ".join(facet_bits)).strip()
 
-    animal_changed = bool(facets.get("animal") and prev.get("animal") and facets["animal"] != prev["animal"])
-    breed_changed  = bool(facets.get("breed")  and prev.get("breed")  and facets["breed"]  != prev["breed"])
-    if not (animal_changed or breed_changed):
-        for key in ["animal", "breed", "state", "gender", "colors_any"]:
-            if not facets.get(key) and prev.get(key):
-                facets[key] = prev[key]
-
-    used = dict(facets)
-    if soft_prefs.get("age_groups_pref"):
-        used["age_groups_pref"] = list(soft_prefs["age_groups_pref"])
-    used["soft_preferences"] = {
-        k: v for k, v in soft_prefs.items()
-        if k in {"prefer_vaccinated","prefer_dewormed","prefer_neutered","prefer_spayed","prefer_healthy","prefer_low_fee","fee_cap"}
-        and v not in (False, None)
-    }
-    st.session_state["last_facets"] = {k: v for k, v in facets.items() if v}
-
-    # -------- HARD PREFILTERS --------
-    df_to_filter = dfp.copy()
-
-    # ANIMAL hard filter
-    if facets.get("animal") and "animal" in df_to_filter.columns:
-        animal_val = str(facets["animal"]).strip().lower()
-        df_to_filter["animal_clean"] = df_to_filter["animal"].astype(str).str.strip().str.lower()
-        df_to_filter = df_to_filter[df_to_filter["animal_clean"] == animal_val]
-        if len(df_to_filter) == 0:
-            used["animal_no_hits"] = True
-            return pd.DataFrame(), used, [], pd.Series(dtype=bool)
-
-    # BREED hard (contains or equality)
-    if facets.get("breed") and "breed" in df_to_filter.columns:
-        breed_val = str(facets["breed"]).strip().lower()
-        df_to_filter["breed_clean"] = df_to_filter["breed"].astype(str).str.strip().str.lower()
-        if ui.get("allow_breed_contains", True):
-            pattern = rf"\b{re.escape(breed_val)}\b"
-            df_to_filter = df_to_filter[df_to_filter["breed_clean"].str.contains(pattern, case=False, na=False)]
-        else:
-            df_to_filter = df_to_filter[df_to_filter["breed_clean"] == breed_val]
-        if len(df_to_filter) == 0:
-            used["breed_no_hits"] = True
-            return pd.DataFrame(), used, [], pd.Series(dtype=bool)
-
-    # GENDER hard filter
-    if facets.get("gender") and "gender" in df_to_filter.columns:
-        wanted_gender = canonicalize_gender(facets.get("gender") or "")
-        if wanted_gender:
-            df_to_filter["gender_clean"] = df_to_filter["gender"].astype(str).str.strip().str.lower()
-            df_to_filter = df_to_filter[df_to_filter["gender_clean"] == wanted_gender]
-            if len(df_to_filter) == 0:
-                used["gender_no_hits"] = True
-                return pd.DataFrame(), used, [], pd.Series(dtype=bool)
-
-    # STATE strict then optional relax
-    df_strict = df_to_filter
-    relaxed_df = pd.DataFrame()
-    if facets.get("state") and "state" in df_to_filter.columns:
-        user_state = str(facets["state"]).strip().lower()
-        df_to_filter["state_clean"] = df_to_filter["state"].astype(str).str.strip().str.lower()
-        df_strict = df_to_filter[df_to_filter["state_clean"] == user_state]
-        if len(df_strict) == 0:
-            used["state_no_hits"] = True
-            return pd.DataFrame(), used, [], pd.Series(dtype=bool)
-        if len(df_strict) < AUTO_RELAX_MIN_RESULTS:
-            st.info(
-                f"Only {len[df_strict]} pet(s) found in {user_state.title()}. "
-                f"Showing similar pets from other states as well."
-            )
-            # Build relaxed set but keep animal/breed/gender hard constraints
-            df_relaxed = dfp.copy()
-            df_relaxed["animal_clean"] = df_relaxed["animal"].astype(str).str.strip().str.lower()
-            df_relaxed["breed_clean"]  = df_relaxed["breed"].astype(str).str.strip().str.lower()
-            df_relaxed["gender_clean"] = df_relaxed["gender"].astype(str).str.strip().str.lower()
-            if facets.get("animal"):
-                a = str(facets["animal"]).lower()
-                df_relaxed = df_relaxed[df_relaxed["animal_clean"] == a]
-            if facets.get("breed"):
-                b = str(facets["breed"]).lower()
-                if ui.get("allow_breed_contains", True):
-                    pattern = rf"\b{re.escape(b)}\b"
-                    df_relaxed = df_relaxed[df_relaxed["breed_clean"].str.contains(pattern, case=False, na=False)]
-                else:
-                    df_relaxed = df_relaxed[df_relaxed["breed_clean"] == b]
-            if facets.get("gender"):
-                g = canonicalize_gender(facets.get("gender") or "")
-                if g:
-                    df_relaxed = df_relaxed[df_relaxed["gender_clean"] == g]
-
-            relaxed_df = df_relaxed[~df_relaxed.index.isin(df_strict.index)]
-            used["state_relaxed_auto"] = True
-
-    # Combine strict + relaxed
-    df_to_filter = pd.concat([df_strict, relaxed_df]).drop_duplicates(
-        subset=["pet_id"] if "pet_id" in dfp.columns else None
-    )
-
-    if "breed" in df_to_filter.columns and "breed_clean" not in df_to_filter.columns:
-        df_to_filter["breed_clean"] = df_to_filter["breed"].astype(str).str.strip().str.lower()
-
-    # ---- Breed summary (optional text) ----
-    total_candidates = len(df_to_filter)
-    summary_text = None
-    if facets.get("breed") and "breed_clean" in df_to_filter.columns:
-        breed_val = str(facets["breed"]).lower()
-        pattern = rf"\b{re.escape(breed_val)}\b"
-        mask_has   = df_to_filter["breed_clean"].str.contains(pattern, case=False, na=False)
-        mask_exact = df_to_filter["breed_clean"].str.fullmatch(breed_val, case=False)
-        mask_mix   = (df_to_filter["breed_clean"].str.contains(r"\+", na=False) |
-                      df_to_filter["breed_clean"].str.contains(r"\bmix\b", case=False, na=False))
-        breed_exact_count = (mask_has & mask_exact).sum()
-        breed_mix_count   = (mask_has & mask_mix & ~mask_exact).sum()
-    elif total_candidates > 0:
-        summary_text = f"I found {total_candidates} pets that might interest you."
-    used["breed_summary"] = {"total_candidates": int(total_candidates), "summary_text": summary_text}
-
-    # ---- Colors strict (optional) ----
-    if facets.get("colors_any"):
-        want_colors = sorted(set(facets["colors_any"]))
-        if "colors_canonical" not in df_to_filter.columns and "color" in df_to_filter.columns:
-            df_to_filter = df_to_filter.copy()
-            df_to_filter["colors_canonical"] = df_to_filter["color"].apply(
-                lambda s: [normalize_color(t) for t in str(s or "").split(",") if t.strip()]
-            )
-        def _color_ok(lst):
-            return isinstance(lst, list) and any(c in lst for c in want_colors)
-        df_color = df_to_filter[df_to_filter["colors_canonical"].apply(_color_ok)]
-        if len(df_color) == 0:
-            used["colors_any_no_hits"] = True
-        else:
-            df_to_filter = df_color
-
-    # === Hybrid retrieval & scoring ===
-    boost_q = expand_kid_friendly(make_boosted_query(q, facets))
-    lex_all = bm25.search(boost_q, topk=LEX_POOL)
-    s_lex = {int(idx): float(s) for idx, s in lex_all if idx in df_to_filter.index}
+    # scores
+    lex_all = bm25.search(only_text(boost_q), topk=LEX_POOL)
+    slex = {int(idx): float(s) for idx, s in lex_all if idx in df_pool.index}
     emb_all = emb_search(boost_q, student, doc_ids, doc_vecs, pool_topn=EMB_POOL, faiss_index=faiss_index)
-    emb_idx = {int(pid): float(s) for pid, s in emb_all if pid in df_to_filter.index}
-    nlex, nemb = _minmax(s_lex), _minmax(emb_idx)
-    wl, we = HYBRID_W["lex"], HYBRID_W["emb"]
-    combo = {idx: wl * nlex.get(idx, 0.0) + we * nemb.get(idx, 0.0) for idx in set(nlex) | set(nemb)}
+    semb = {int(pid): float(s) for pid, s in emb_all if pid in df_pool.index}
 
-    # --- Soft feature rerank + bucket flags ---
-    feat_scores: Dict[int, float] = {}
-    age_priority: Dict[int, int] = {}
-    vacc_priority: Dict[int, int] = {}
-    deworm_priority: Dict[int, int] = {}
-    neuter_priority: Dict[int, int] = {}
-    spay_priority: Dict[int, int] = {}
-    healthy_priority: Dict[int, int] = {}
-    fee_priority: Dict[int, int] = {}
-    meets_all_soft: Dict[int, int] = {}
-
-    req_groups = soft_prefs.get("age_groups_pref") or []
-
-    for idx in df_to_filter.index:
-        row = dfp.loc[idx]
-        feat_scores[int(idx)] = _feature_score(row, facets, soft_prefs)
-
-        age_ok = 1 if (req_groups and _age_groups_match(row, req_groups)) else (0 if req_groups else 0)
-        age_priority[int(idx)] = age_ok
-
-        flags = _health_fee_priority(row, soft_prefs)
-        vacc_priority[int(idx)]   = flags["vaccinated"]
-        deworm_priority[int(idx)] = flags["dewormed"]
-        neuter_priority[int(idx)] = flags["neutered"]
-        spay_priority[int(idx)]   = flags["spayed"]
-        healthy_priority[int(idx)] = flags["healthy"]
-        fee_priority[int(idx)]     = flags["fee_ok"]
-
-        ok = True
-        if req_groups: ok = ok and (age_ok == 1)
-        if soft_prefs.get("prefer_vaccinated"): ok = ok and (flags["vaccinated"] == 1)
-        if soft_prefs.get("prefer_dewormed"):   ok = ok and (flags["dewormed"] == 1)
-        if soft_prefs.get("prefer_neutered"):   ok = ok and (flags["neutered"] == 1)
-        if soft_prefs.get("prefer_spayed"):     ok = ok and (flags["spayed"] == 1)
-        if soft_prefs.get("prefer_healthy"):    ok = ok and (flags["healthy"] == 1)
-        if soft_prefs.get("prefer_low_fee") or (soft_prefs.get("fee_cap") is not None):
-            ok = ok and (flags["fee_ok"] == 1)
-        meets_all_soft[int(idx)] = 1 if ok else 0
-
-    if feat_scores:
-        vals = np.array(list(feat_scores.values()), dtype=float)
+    def _mm(d):
+        if not d: return {}
+        vals = np.fromiter(d.values(), dtype=float)
         lo, hi = float(vals.min()), float(vals.max())
-        denom = (hi - lo) or 1.0
-        feat_norm = {k: (v - lo) / denom for k, v in feat_scores.items()}
-    else:
-        feat_norm = {}
+        den = (hi - lo) or 1.0
+        return {k: (v - lo) / den for k, v in d.items()}
+    nlex, nemb = _mm(slex), _mm(semb)
+    base_combo = {idx: HYBRID_W["lex"]*nlex.get(idx, 0.0) + HYBRID_W["emb"]*nemb.get(idx, 0.0)
+                  for idx in set(nlex) | set(nemb)}
+    if not base_combo:
+        return pd.DataFrame(), np.array([], dtype=bool)
 
-    alpha, beta = 0.85, 0.15
-    combo = {idx: alpha*combo.get(idx, 0.0) + beta*feat_norm.get(idx, 0.0) for idx in combo}
+    # Add soft-feature bonus
+    combo_with_bonus: Dict[int, float] = {}
+    for i in df_pool.index:
+        combo_with_bonus[int(i)] = base_combo.get(int(i), 0.0) + _feature_bonus(df_pool.loc[i], facets)
 
-    def _prio_tuple(i: int):
-        return (
-            meets_all_soft.get(i, 0),
-            age_priority.get(i, 0),
-            vacc_priority.get(i, 0),
-            deworm_priority.get(i, 0),
-            neuter_priority.get(i, 0),
-            spay_priority.get(i, 0),
-            healthy_priority.get(i, 0),
-            fee_priority.get(i, 0),
-            combo.get(i, 0.0),
-        )
+    # exact matches first
+    def _full_ok(i: int) -> bool:
+        row = df_pool.loc[i]
+        return match_all_strict(row, facets) and match_all_soft(row, facets)
 
-    pool = max(EMB_POOL, TOPK_CARDS)
-    hits = sorted([(i, combo[i]) for i in combo.keys()], key=lambda x: _prio_tuple(int(x[0])), reverse=True)[:pool]
+    exact_ids = [i for i in df_pool.index if _full_ok(int(i))]
+    rest_ids  = [i for i in df_pool.index if i not in exact_ids]
 
-    if not hits:
-        return pd.DataFrame(), used, [], pd.Series(dtype=bool)
+    exact_sorted = sorted(exact_ids, key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
+    rest_sorted  = sorted(rest_ids,  key=lambda i: combo_with_bonus.get(int(i), 0.0), reverse=True)
 
-    chosen_idx = [int(i) for i, _ in hits[:TOPK_CARDS] if i in df_to_filter.index]
-    if not chosen_idx:
-        return pd.DataFrame(), used, hits, pd.Series(dtype=bool)
+    chosen = (exact_sorted + rest_sorted)[:TOPK_CARDS]
+    if not chosen:
+        return pd.DataFrame(), np.array([], dtype=bool)
 
-    display_cols = [
-        "name", "animal", "breed", "gender", "state", "color", "colors_canonical",
-        "size", "fur_length", "condition", "age_months", "description_clean",
-        "url", "photo_links", "video_links"
-    ]
-    display_cols = [c for c in display_cols if c in dfp.columns]
-    res_df = df_to_filter.loc[chosen_idx, display_cols].copy().reset_index(names=["df_index"])
-    res_df["score"] = [float(s) for _, s in hits[:len(res_df)]]
+    res_df = df_pool.loc[chosen].copy().reset_index(drop=True)
 
-    if "state_relaxed_auto" in used and facets.get("state"):
-        res_df["source"] = res_df["state"].apply(
-            lambda s: "Strict" if s.strip().lower() == str(facets["state"]).strip().lower() else "Relaxed"
-        )
-        res_df.sort_values(
-            by=["source", "score"],
-            ascending=[True, False],
-            inplace=True,
-            key=lambda col: col.map({"Strict": 0, "Relaxed": 1}).fillna(1),
-        )
+    # highlight mask: True only for exact matches (strict + soft)
+    mask = np.array([_full_ok(int(i)) for i in chosen], dtype=bool)
 
-    # --- Highlight mask: MUST meet ALL soft prefs AND ALL strict requirements ---
-    requested_state   = (facets.get("state") or "").strip().lower()
-    requested_animal  = (facets.get("animal") or "").strip().lower()
-    requested_breed   = (facets.get("breed") or "").strip().lower()
-    requested_gender  = canonicalize_gender(facets.get("gender") or "")
-    requested_colors  = set(facets.get("colors_any") or [])
+    return res_df, mask
 
-    def _strict_ok(row: pd.Series) -> bool:
-        ok = True
-        if requested_state:
-            ok = ok and (str(row.get("state","")).strip().lower() == requested_state)
-        if requested_animal:
-            ok = ok and (str(row.get("animal","")).strip().lower() == requested_animal)
-        if requested_breed:
-            btxt = str(row.get("breed","")).strip().lower()
-            pattern = rf"\b{re.escape(requested_breed)}\b"
-            ok = ok and bool(re.search(pattern, btxt))
-        if requested_gender:
-            ok = ok and (canonicalize_gender(str(row.get("gender",""))) == requested_gender)
-        if requested_colors:
-            lst = row.get("colors_canonical")
-            ok = ok and isinstance(lst, list) and any(c in lst for c in requested_colors)
-        return ok
+# =========================================================
+# Cards / Grid rendering
+# =========================================================
+def render_pet_card(row: pd.Series, highlight: bool = False):
+    name = str(row.get("name") or "Pet")
+    url = str(row.get("url") or "")
+    animal = (row.get("animal") or "").title()
+    breed = str(row.get("breed") or "—").title()
+    gender = (row.get("gender") or "—").title()
+    state = (row.get("state") or "—").title()
+    color = str(row.get("color") or "—").title()
+    age_mo = row.get("age_months")
+    age_txt = _age_text_from_months(age_mo)
+    size = str(row.get("size") or "—").title()
+    fur = str(row.get("fur_length") or "—").title()
+    cond = str(row.get("condition") or "—").title()
 
-    # Highlight only if strict+soft are satisfied for the SHOWN rows
-    meet_all_mask = res_df.apply(
-        lambda r: bool(meets_all_soft.get(int(r["df_index"]), 0)) and _strict_ok(r),
-        axis=1
+    v_b, d_b, n_b, s_b = (
+        _badge_bool(row.get("vaccinated"), "vaccinated"),
+        _badge_bool(row.get("dewormed"), "dewormed"),
+        _badge_bool(row.get("neutered"), "neutered"),
+        _badge_bool(row.get("spayed"), "spayed"),
     )
 
-    # --- NEW exact-match totals on STRICT IN-STATE pool (not just shown rows)
-    strict_idx_set = set(df_strict.index)
-    strict_exact_total = sum(1 for i in strict_idx_set if meets_all_soft.get(int(i), 0) == 1)
+    img_url = _first_photo_url_from_row(row)
+    desc_raw = str(row.get("description_clean") or "").strip()
+    desc_safe = html.escape(desc_raw).replace("\n", "<br />") if desc_raw else ""
 
-    used["counts"] = {
-        "strict_in_state": int(len(df_strict) if 'df_strict' in locals() else len(df_to_filter)),
-        "relaxed_extra": int(len(relaxed_df)) if 'relaxed_df' in locals() else 0,
-        "meets_all_strict_and_soft_shown": int(meet_all_mask.sum()),  # shown rows only
-        "strict_exact_total": int(strict_exact_total),                 # in-state exact matches
-        "age_group_pref": used.get("age_groups_pref", []),
-    }
+    # --- Visual theme ---
+    bg = "#FFFFFF"
+    border_left = "5px solid #ffc6bb"
+    title_color = "#e85c7d"
+    text_color = "#444"
 
-    return res_df, used, hits, meet_all_mask
+    # --- Scrollable description style ---
+    st.markdown("""
+        <style>
+        .desc-box {
+            background: #fff9f8;
+            border: 1px solid #ffe0d6;
+            border-radius: 8px;
+            padding: 8px 10px;
+            max-height: 120px;          
+            overflow-y: auto;         
+            line-height: 1.55;
+            color: #444;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
-# -------------------------------------------
-# INTENT GATE
-# -------------------------------------------
-INTENT_ADOPTION = {"adoption", "find_pet", "pet_search", "pet_adoption"}
-INTENT_PETCARE  = {"pet_care", "care", "rag", "qa"}
+    if img_url:
+        img_html = (
+            "<img src='" + html.escape(img_url) + "' alt='photo' loading='lazy' "
+            "style='max-width:100%;max-height:100%;object-fit:contain;"
+            "object-position:center;display:block;' />"
+        )
+    else:
+        img_html = "<div style='color:#b3b3b3;'>No photo available</div>"
 
-def classify_intent_safe(text: str) -> str:
-    try:
-        if hasattr(bot, "classify_intent"): return str(bot.classify_intent(text)).lower()
-        if hasattr(bot, "intent_classifier") and hasattr(bot.intent_classifier, "predict"):
-            return str(bot.intent_classifier.predict(text)).lower()
-    except Exception:
-        pass
-    t = (text or "").lower()
-    if any(k in t for k in ["adopt", "adoption", "puppy", "kitten", "breed", "in selangor", "in penang", "near "]):
-        return "adoption"
-    if any(k in t for k in ["feed", "groom", "vaccin", "train", "care", "health", "why is my"]):
-        return "pet_care"
-    return "adoption"
+    # --- Card HTML ---
+    st.markdown(
+        "<div style='background:" + bg + "; border-radius:15px; padding:14px; margin:8px 0; "
+        "border-left:" + border_left + "; box-shadow:0 4px 15px rgba(0,0,0,0.05);'>"
 
-# -------------------------------------------
-# MAIN APP (no sidebar; top 6 cards + Clear button)
-# -------------------------------------------
-st.title("🐾 Unified PetBot — Chat + Smart Search")
+        "<div style='font-size:1.1rem; font-weight:800; color:" + title_color + "; margin-bottom:6px;'>"
+        + (
+            "<a href='" + html.escape(url) + "' target='_blank' "
+            "style='text-decoration:none; color:" + title_color + ";'>• " + html.escape(name) + "</a>"
+            if url else "• " + html.escape(name)
+        )
+        + "</div>"
 
-# Clear history / new search button
-if st.button("➕ New search / Clear history", type="primary"):
-    st.session_state["messages"] = []
-    st.session_state["last_facets"] = {}
-    st.experimental_rerun()
+        "<div style='height:220px;width:100%;border-radius:10px;background:#fff9f8;"
+        "display:flex;align-items:center;justify-content:center;margin:8px 0 10px;"
+        "overflow:hidden;border:1px solid #ffe0d6;'>"
+        + img_html +
+        "</div>"
 
-st.caption("Try: ‘white female **puppy** poodle in Selangor good with kids’, or ‘fee under 300 vaccinated young dog in KL’")
+        "<div style='color:" + text_color + ";margin-bottom:6px;'>"
+        "<strong>" + animal + "</strong> • <strong>Breed:</strong> " + breed +
+        " • <strong>Gender:</strong> " + gender + " • <strong>Age:</strong> " + age_txt +
+        " • <strong>State:</strong> " + state + "</div>"
 
-ui = dict(STRICT_DEFAULTS)
-ui["method"] = "hybrid"
-ui["use_mmr"] = False
-ui["mmr_lambda"] = 0.35
-ui["topk"] = TOPK_CARDS
-ui["grid_cols"] = GRID_COLS
+        "<div style='color:" + text_color + ";margin-bottom:8px;'>"
+        "<strong>Color:</strong> " + color + " • <strong>Size:</strong> " + size +
+        " • <strong>Fur:</strong> " + fur + " • <strong>Condition:</strong> " + cond +
+        "</div>"
 
-# Chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-for m in st.session_state.messages:
-    with st.chat_message(m["role"]):
-        st.markdown(m["content"])
+        "<div style='color:#222; margin-bottom:8px;'>" + " | ".join([v_b, d_b, n_b, s_b]) + "</div>"
 
-user_text = st.chat_input("Ask about pet care, or describe your ideal pet…")
-if user_text:
-    st.session_state.messages.append({"role": "user", "content": user_text})
+        + (f"<div class='desc-box'>{desc_safe}</div>" if desc_safe else "")
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+def render_grid(df: pd.DataFrame, mask: np.ndarray, max_cols: int = GRID_COLS):
+    if df is None or df.empty:
+        st.warning("No results to show.")
+        return
+    rows = [r for _, r in df.iterrows()]
+    flags = mask.tolist()
+    n = len(rows)
+    cols = max(1, min(max_cols, n))
+    for i in range(0, n, cols):
+        cset = st.columns(cols, gap="medium")
+        for j, col in enumerate(cset):
+            idx = i + j
+            if idx >= n: break
+            with col:
+                render_pet_card(rows[idx])
+
+
+     # ---------------- Footer Section (Suggestions + New Search) ----------------
+def render_footer():
+    st.markdown("""
+    <style>
+        .footer-section {
+            margin-top: 1.2rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #ffe0d6;
+        }
+
+        /* Arrange columns evenly and center-align */
+        div[data-testid="stHorizontalBlock"] {
+            align-items: center !important;
+        }
+
+        /* Label alignment */
+        .footer-label {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #3b3b3b;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            white-space: nowrap;
+            margin-right: 0.1rem;
+            margin-bottom: 15px;
+        }
+
+        /* Suggestion buttons (general style) */
+        .stButton > button {
+            font-size: 0.95rem !important;
+            padding: 0.45rem 0.8rem !important;
+            border-radius: 10px !important;
+            border: 1px solid #ffd6bf !important;
+            background: #fff !important;
+            color: #3b3b3b !important;
+            height: 42px !important;
+            width: 100% !important; /* Make buttons fill their container */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            white-space: nowrap !important;
+            transition: all 0.15s ease;
+        }
+        .stButton > button:hover {
+            background: #fff3ef !important;
+            transform: translateY(-1px);
+        }
+
+        /* New search button styling */
+        div[data-testid="stVerticalBlock"] > div.new-search-button-container .stButton > button {
+            width: 200px !important;   
+            height: 40px !important;
+            font-size: 0.9rem !important;
+            background-color: red !important; /* Debugging: to confirm selector is working */
+        }
+
+        /* tighter gaps */
+        div[data-testid="column"] {
+            padding-left: 0.2rem !important;
+            padding-right: 0.2rem !important;
+            margin: 0 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='footer-section'>", unsafe_allow_html=True)
+
+    # --- Single functional row layout ---
+    col_new, col_label, col1, col2, col3 = st.columns([0.8, 0.8, 1, 1, 1], gap="small")
+
+    with col_new:
+        st.markdown("<div class='footer-newsearch'>", unsafe_allow_html=True)
+        if st.button("➕ New search / Clear history", key="new_search_clear"):
+            st.session_state["__clear_all__"] = True
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col_label:
+        st.markdown("<div class='footer-label'>💡 Try asking me:</div>", unsafe_allow_html=True)
+
+    with col1:
+        if st.button("🐕 What should I feed my puppy?", key="ex1"):
+            st.session_state.example_prompt = "What should I feed my puppy?"
+            st.rerun()
+
+    with col2:
+        if st.button("🏠 Find a poodle in Selangor", key="ex2"):
+            st.session_state.example_prompt = "Find a poodle in Selangor"
+            st.rerun()
+
+    with col3:
+        if st.button("🏥 My cat is sick, what should I do?", key="ex3"):
+            st.session_state.example_prompt = "My cat is sick, what should I do?"
+            st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# =========================================================
+# Main App
+# =========================================================
+def main():
+    apply_global_ui()
+
+    # Initialize systems with auto-clearing loader ---
+    loading_area = st.empty()
+    render_loading_box(loading_area, "Initializing systems...", "🚀")
+
+    rag, bot = bootstrap_rag_system()
+    env = bootstrap_search_components()
+    loading_area.empty()
+
+    # If user requested a full clear, safely reset without breaking bot pipeline
+    if st.session_state.pop("__clear_all__", False):
+        st.session_state["messages"] = []
+        st.session_state["last_facets"] = {}
+        st.session_state["blocked_facets"] = set()
+        if hasattr(st.session_state, "example_prompt"):
+            delattr(st.session_state, "example_prompt")
+
+        try:
+            if bot is not None and hasattr(bot, "session"):
+                bot.session.clear()
+                bot.session["state"] = "greeted"
+                bot.session["intent"] = None
+                bot.session["entities"] = {}
+        except Exception as e:
+            st.warning(f"Bot reset warning: {e}")
+
+        st.rerun()
+
+
+    # --- Status bar ---
+    rag_ok = rag is not None and bot is not None
+    env_ok = env is not None and env.get("dfp") is not None
+
+    pets_detail = f"{len(env['dfp'])} pets available" if env_ok else "Unavailable"
+    app_status_ok = rag_ok and env_ok
+    app_status_text = "All Systems Ready" if app_status_ok else "Issues Detected"
+    
+    render_status_bar(rag_ok, env_ok, app_status_ok, app_status_text, pets_detail)
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    if "last_prompt" not in st.session_state:
+        st.session_state.last_prompt = None
+
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    user_input = st.chat_input("Ask me anything about pets", key="chat_input_main")
+    
+    if hasattr(st.session_state, "example_prompt") and st.session_state.example_prompt:
+        user_input = st.session_state.example_prompt
+        delattr(st.session_state, "example_prompt")
+        st.session_state.last_prompt = None
+    
+    if not user_input or not user_input.strip():
+            render_footer()
+            return
+    
+    if user_input == st.session_state.last_prompt:
+        render_footer()
+        return
+
+    st.session_state.last_prompt = user_input
+    prompt = user_input
+
+    # Display user message
+    st.markdown('<span style="display:none">.</span>', unsafe_allow_html=True)
     with st.chat_message("user"):
-        st.markdown(user_text)
+        st.markdown(prompt)
 
-    # Decide intent before any reply text
-    intent = classify_intent_safe(user_text)
-
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    # ------------------------
+    # Pet/RAG routing & logic
+    # ------------------------
     with st.chat_message("assistant"):
-        with st.spinner("Thinking…"):
+        with st.spinner("Thinking..."):
+            # PRE-PARSE REMOVALS before calling the bot
+            removal_intent = is_constraint_removal_query(prompt)
+            prev_facets_for_removal = get_persisted_facets()
+            prev_after_removal = None
+            removed_labels = []
+            cleared_all = False
+            removed_keys = set()
 
-            if intent in INTENT_ADOPTION:
-                # Run adoption search first to get fresh facets for THIS turn
-                res_df, used_facets, hits, meet_all_mask = adoption_search(user_text, ui)
+            if removal_intent:
+                prev_after_removal, removed_labels, cleared_all, removed_keys = apply_constraint_removals(
+                    prev_facets_for_removal, prompt
+                )
+                # Force route to pet search when removing constraints
+                if hasattr(bot, "session"):
+                    bot.session["intent"] = "find_pet"
 
-                # Compose a clean “Searching…” line using ONLY current facets/soft prefs
-                h = {k: v for k, v in used_facets.items() if k in {"animal","breed","state","gender","colors_any"} and v}
-                age_groups = used_facets.get("age_groups_pref", [])
-                parts = []
-                if h.get("animal"): parts.append(h["animal"])
-                if h.get("breed"): parts.append(h["breed"])
-                if h.get("gender"): parts.append(h["gender"])
-                if age_groups: parts.append("/".join(age_groups))
-                if h.get("state"): parts.append(f"in {str(h['state']).title()}")
-                search_line = "Got it! Searching" + (" for " + " ".join([p for p in parts if p]) if parts else "...")
+                # Persist blocked facets across turns
+                blocked = get_blocked_facets()
+                if cleared_all:
+                    blocked = {"animal","breed","gender","state","color","size","fur_length","soft"}
+                blocked |= set(removed_keys)
+                set_blocked_facets(blocked)
 
-                st.markdown(search_line)
+            # Get the bot's text (for Q&A etc.)
+            try:
+                reply = bot.handle_message(prompt)
+            except Exception as e:
+                reply = f"(Chat pipeline error: {e})"
 
-                # Banner based on exact in-state strict+soft matches vs cards shown
-                counts = used_facets.get("counts", {}) or {}
-                exact_x = int(counts.get("strict_exact_total", 0))          # exact in-state matches
-                res_n = int(res_df.shape[0]) if res_df is not None else 0   # cards actually shown
+            # Routing
+            intent_now = (getattr(bot, "session", None) or {}).get("intent")
+            if removal_intent:
+                intent_now = "find_pet"
 
-                if exact_x >= TOPK_CARDS:
-                    st.success(
-                        f"🥳 Found {exact_x} pets matching your description! "
-                        f"Here are {TOPK_CARDS} fur babies waiting for a home~"
-                    )
-                elif res_n > exact_x:
-                    st.success(
-                        f"🥳 Found {exact_x} pets matching your description! "
-                        f"Adding a few more similar pets waiting for a forever home 🥹"
-                    )
-                else:
-                    st.success(f"🥳 Found {exact_x} pets matching your description!")
-
-                # Conversational recap of the user’s facets/preferences
-                soft = used_facets.get("soft_preferences", {}) or {}
-                bits = []
-                if h.get("gender"):
-                    bits.append(str(h["gender"]))
-                if h.get("breed"):
-                    bits.append(str(h["breed"]))
-                if h.get("animal") and not h.get("breed"):
-                    bits.append(str(h["animal"]))
-                where_bit = f"in {str(h['state']).title()}" if h.get("state") else None
-                if where_bit:
-                    bits.append(where_bit)
-                extras = []
-                if age_groups:
-                    extras.append("/".join(age_groups) + " age group")
-                if h.get("colors_any"):
-                    extras.append("color(s): " + ", ".join(h["colors_any"]))
-                if soft.get("fee_cap"):
-                    try:
-                        extras.append(f"budget under {int(float(soft['fee_cap']))}")
-                    except Exception:
-                        extras.append(f"budget under {soft['fee_cap']}")
-                if soft.get("prefer_vaccinated"):
-                    extras.append("vaccinated")
-                if soft.get("prefer_dewormed"):
-                    extras.append("dewormed")
-                if soft.get("prefer_neutered"):
-                    extras.append("neutered")
-                if soft.get("prefer_spayed"):
-                    extras.append("spayed")
-                if soft.get("prefer_healthy"):
-                    extras.append("healthy condition")
-
-                lead = "You asked for " + " ".join(bits) if bits else "You asked for a pet"
-                tail = (", " + ", ".join(extras)) if extras else ""
-                st.caption(lead + tail + ".")
-
-                # Optional conversational breed summary
-                bs = used_facets.get("breed_summary", {}) or {}
-                if bs.get("summary_text"):
-                    st.markdown(f"🦴 {bs['summary_text']}")
-
-                # Results
-                if res_df is None or res_df.empty:
-                    st.info("No results. Try relaxing filters or removing constraints.")
-                else:
-                    render_results_grid(res_df, meet_all_mask, max_cols=ui.get("grid_cols", GRID_COLS))
-
-                # Store a neutral acknowledgement (not the bot pipeline text) in chat history
-                st.session_state.messages.append({"role": "assistant", "content": search_line})
-
-            else:
-                # Pet-care: keep ChatbotPipeline reply behavior
-                try:
-                    reply = bot.handle_message(user_text)
-                except Exception as e:
-                    reply = f"(Chat response unavailable: {e})"
+            if not env_ok:
                 st.markdown(reply)
                 st.session_state.messages.append({"role": "assistant", "content": reply})
+
+            # ----- PET SEARCH PATH -----
+            if intent_now == "find_pet":
+                ents = (bot.session or {}).get("entities", {}) or {}
+                new_facets = _entities_to_facets(ents, raw_query=prompt)
+
+                # persistence: clear if animal/breed changed
+                reset_done = maybe_reset_persistence(new_facets)
+                prev = {} if reset_done else get_persisted_facets()
+
+                # If we already computed removals above, reuse them. Otherwise compute now.
+                if removal_intent:
+                    base_after_removal = prev_after_removal
+                    removal_keys = removed_keys
+                else:
+                    base_after_removal, _, _, removal_keys = apply_constraint_removals(prev, prompt)
+
+                # --- Blocked facets persist across turns
+                blocked = get_blocked_facets()
+
+                # Unblock only if the USER TEXT explicitly mentions the facet
+                explicit_add_keys = explicit_add_keys_from_prompt(prompt)
+                if explicit_add_keys:
+                    blocked = blocked - explicit_add_keys
+                    set_blocked_facets(blocked)
+
+                # Do not reintroduce removed/blocked keys from current entities
+                for k in (removal_keys | blocked):
+                    new_facets.pop(k, None)
+
+                # HARD GUARD: drop COLOR from new_facets unless explicitly present in THIS prompt
+                if "color" in new_facets and "color" not in explicit_add_keys:
+                    new_facets.pop("color", None)
+
+                # ---- IMPORTANT FIX: do not carry forward COLOR unless explicitly present this turn ----
+                base = {} if (removal_intent and cleared_all) else dict(base_after_removal)
+                if "color" not in explicit_add_keys:
+                    base.pop("color", None)
+
+                # Merge base + new
+                merged = dict(base)
+                for k in ["animal","breed","gender","state","color","size","fur_length"]:
+                    if new_facets.get(k):
+                        merged[k] = new_facets[k]
+
+                # merge soft prefs
+                soft_prev = dict(base.get("soft", {}) or {})
+                soft_new  = dict(new_facets.get("soft", {}) or {})
+                for k, v in soft_new.items():
+                    if v not in (None, [], {}, False, ""):
+                        soft_prev[k] = v
+                if any(bool(v) for v in soft_prev.values()):
+                    merged["soft"] = soft_prev
+                else:
+                    merged.pop("soft", None)
+
+                # Persist final facets
+                set_persisted_facets(merged)
+                facets = merged
+
+                # If no facets at all → show random suggestions + prompt user again
+                non_soft_keys = [k for k in facets.keys() if k != "soft"]
+                if len(non_soft_keys) == 0 and not (facets.get("soft") and any(facets["soft"].values())):
+                    st.info("No active filters right now. Consider taking these fur babies home 🥹 — here are some random sweethearts!")
+                    df_all = env["dfp"]
+                    if len(df_all) > 0:
+                        random_df = df_all.sample(min(TOPK_CARDS, len(df_all)), random_state=None).reset_index(drop=True)
+                        render_grid(random_df, np.array([False]*len(random_df)))
+                    st.caption("Tell me what you’re looking for — species/breed, gender, age group, color, and state (e.g., **female young poodle in Selangor**).")
+                    st.session_state.messages.append({"role":"assistant","content":"(random suggestions shown)"})
+                    render_footer()
+
+                # Facets banner
+                def chip(label, value, accent=False):
+                    color = "#eaffea" if accent else "#fff"
+                    border = "#a3e6a3" if accent else "#eee"
+                    return (
+                        "<span style='background:"+color+";border:1px solid "+border+
+                        ";border-radius:8px;padding:4px 8px;margin:2px;display:inline-block;'><strong>"+
+                        html.escape(label)+":</strong> "+html.escape(str(value))+"</span>"
+                    )
+
+                chips = []
+                labels = {"animal":"Animal","breed":"Breed","gender":"Gender","state":"State","color":"Color","size":"Size","fur_length":"Fur"}
+                for k, lab in labels.items():
+                    if facets.get(k): chips.append(chip(lab, facets[k]))
+
+                soft = facets.get("soft", {}) or {}
+                if soft.get("age_groups_pref"):
+                    chips.append(chip("Age group", "/".join(soft["age_groups_pref"]), accent=True))
+                if soft.get("prefer_vaccinated"): chips.append(chip("Pref", "vaccinated", accent=True))
+                if soft.get("prefer_dewormed"):   chips.append(chip("Pref", "dewormed",   accent=True))
+                if soft.get("prefer_neutered"):   chips.append(chip("Pref", "neutered",   accent=True))
+                if soft.get("prefer_spayed"):     chips.append(chip("Pref", "spayed",     accent=True))
+                if soft.get("prefer_healthy"):    chips.append(chip("Pref", "healthy",    accent=True))
+                if soft.get("fee_cap") is not None:
+                    val = soft["fee_cap"]
+                    try: val = int(float(val))
+                    except Exception: pass
+                    chips.append(chip("Fee cap", f"≤ {val}", accent=True))
+
+                if chips:
+                    st.markdown(
+                        "<div style='margin:10px 0 4px;color:#374151;'>Facets used (tip: if too few pets, try <em>remove state</em>):</div>"
+                        "<div style='margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;'>"
+                        + "".join(chips) + "</div>",
+                        unsafe_allow_html=True
+                    )
+
+                # ------- Build pool with stepwise relaxation -------
+                df_pool, relax_meta = build_relaxed_pool(env["dfp"], facets)
+
+                # ------- Compute exact-match count (ALL hard + soft) over strict hard filters -------
+                exact_total = count_exact_matches(env["dfp"], facets)
+
+                # Conversational status line using EXACT count
+                status_msg = None
+                if facets.get("state"):
+                    if exact_total >= TOPK_CARDS:
+                        status_msg = f"Found {exact_total} pets matching all your filters in {facets['state'].title()}! Here are some lovely matches."
+                    elif exact_total > 0:
+                        status_msg = f"Only {exact_total} pet(s) match all your filters in {facets['state'].title()}. Showing similar fur babies needing a forever home~"
+                    else:
+                        status_msg = f"No pets match all your filters in {facets['state'].title()}. Trying close matches for you ~"
+                else:
+                    if exact_total >= TOPK_CARDS:
+                        status_msg = f"Found {exact_total} pets matching all your filters! Here are some lovely matches."
+                    elif exact_total > 0:
+                        status_msg = f"Only {exact_total} pet(s) match all your filters. Showing similar fur babies needing a forever home~"
+                    else:
+                        status_msg = "No pets match all your filters. Trying close matches for you ~"
+
+                st.markdown(status_msg)
+
+                # ------- Rank & highlight (EXACT first, then remainder by similarity) -------
+                if df_pool is None or df_pool.empty:
+                    st.info("No pets found. Try adjusting or removing some constraints (e.g. **remove state**).")
+                else:
+                    res_df, highlight_mask = hybrid_rank_and_highlight(prompt, env, facets, df_pool)
+                    if res_df is None or res_df.empty:
+                        st.info("No pets found. Try adjusting or removing some constraints (e.g. **remove state**).")
+                    else:
+                        render_grid(res_df, highlight_mask, max_cols=GRID_COLS)
+
+                st.session_state.messages.append({"role": "assistant", "content": status_msg})
+
+            else:
+                # ----- RAG Q&A PATH -----
+                st.markdown(reply)
+                st.session_state.messages.append({"role": "assistant", "content": reply})
+
+    render_footer()
+
+if __name__ == "__main__":
+    main()
