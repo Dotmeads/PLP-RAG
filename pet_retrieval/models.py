@@ -1,4 +1,4 @@
-# src/models.py
+# pet_retrieval/models.py
 import os
 import numpy as np
 from typing import Optional, Tuple, Any
@@ -82,3 +82,16 @@ def load_faiss_index(local_mr_dir: str, dim: int) -> Optional[Any]:
                 continue
             return idx
     return None
+
+# --- Optional: load NER directly from the HF Hub (bypasses Azure/local) ---
+def load_ner_pipeline_hf(repo_id: str, device: int = -1):
+    from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+    tok = AutoTokenizer.from_pretrained(repo_id)
+    mdl = AutoModelForTokenClassification.from_pretrained(repo_id)
+    return pipeline(
+        "token-classification",
+        model=mdl,
+        tokenizer=tok,
+        aggregation_strategy="simple",
+        device=device
+    )

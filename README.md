@@ -167,10 +167,10 @@ Sidebar Status:
 python tests/test_unified_integration.py
 
 # Test multi-turn conversations
-python tests/multi_turn_demo.py
+python multi_turn/multi_turn_demo.py
 
 # Interactive chat mode
-python tests/multi_turn_chat.py
+python multi_turn/multi_turn_chat.py
 
 # Test Azure connection
 python tests/test_azure_connection.py
@@ -287,10 +287,10 @@ print(f"Entities: {entities}")
 ### **🚀 Testing Multi-Turn Features**
 ```bash
 # Automated demo scenarios
-python tests/multi_turn_demo.py
+python multi_turn/multi_turn_demo.py
 
 # Interactive chat mode
-python tests/multi_turn_chat.py
+python multi_turn/multi_turn_chat.py
 
 # Test specific conversation flows
 python -c "

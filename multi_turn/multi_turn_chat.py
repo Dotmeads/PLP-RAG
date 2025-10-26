@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 # Add project root to path
-project_root = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 from chatbot_flow.chatbot_pipeline import ChatbotPipeline
